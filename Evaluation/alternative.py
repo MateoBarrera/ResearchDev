@@ -99,7 +99,7 @@ class Alternatives:
             scenario = list(map(lambda x: "{} %".format(x * 100), scenario))
             scenario_matrix.add_row(scenario)
 
-        return f"{info}\n{percentage_info}\n{scenario_matrix}"
+        return f"\n{info}\n{percentage_info}\n{scenario_matrix}"
 
 
 if __name__ == "__main__":

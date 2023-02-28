@@ -5,7 +5,7 @@ Returns:
 """
 from statistics import geometric_mean
 import numpy as np
-from criteria import Criteria  # pylint: disable=import-error
+from .criteria import Criteria  # pylint: disable=import-error
 
 from prettytable import PrettyTable  # pylint: disable=import-error
 
@@ -96,8 +96,59 @@ def criteria_aggregation(df_citeria, method=0):
     return criteria_agg
 
 
-if __name__ == "__main__":
+def load_criteria_weight(show_criteria_matrix, show_expert_matrix):
     test_obj = Criteria()
+    test_obj.show_all = show_expert_matrix
+    test_obj.from_excel(path="../Repo/Articulo1/Encuesta/Resultados-9-02-2023.xlsx")
+
+    result = criteria_aggregation(test_obj.weight_criteria, method=1)
+
+    if show_criteria_matrix:
+        table = PrettyTable()
+        table.title = "Resultado pesos agregados - ponderación por criterios"
+        table.field_names = ["Criterio(s)", "Vector de pesos"]
+        for key in result.items():
+            table.add_row([key[0], key[1]])
+        print(table)
+
+    result = criteria_aggregation(test_obj.weight_criteria, method=0)
+
+    if show_criteria_matrix:
+        table = PrettyTable()
+        table.title = "Resultado pesos agregados - media geométrica"
+        table.field_names = ["Criterio(s)", "Vector de pesos"]
+        for key in result.items():
+            table.add_row([key[0], key[1]])
+        print(table)
+
+    return result
+
+
+def normalice_alternatives(alternative_matrix):
+    type_indicator = [0, 1, 1, 1, 1, 1, 0, 0, 0]
+    for column in alternative_matrix:
+        if type_indicator[0] == 0:
+
+            def norm(x):
+                return ()
+
+        print(column)
+        print(type_indicator[0])
+        type_indicator.pop(0)
+    pass
+
+
+def ahp(alternative_matrix, show_criteria_matrix=False, show_expert_matrix=False):
+    criteria_aggregation = load_criteria_weight(
+        show_criteria_matrix, show_expert_matrix
+    )
+    # alternative_matrix_norm = normalice_alternatives(alternative_matrix)
+
+    # test_obj.show_info()
+
+
+if __name__ == "__main__":
+    """test_obj = Criteria()
     test_obj.show_all = False
     test_obj.from_excel(path="../Repo/Articulo1/Encuesta/Resultados-9-02-2023.xlsx")
     result = criteria_aggregation(test_obj.weight_criteria, method=0)
@@ -114,5 +165,6 @@ if __name__ == "__main__":
     table.field_names = ["Criterio(s)", "Vector de pesos"]
     for key in result.items():
         table.add_row([key[0], key[1]])
-    print(table)
+    print(table)"""
     # test_obj.show_info()
+    ahp()
