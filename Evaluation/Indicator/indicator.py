@@ -106,21 +106,52 @@ class Indicator:
 
 
 class Indicators:
+    """_summary_
+
+    Raises:
+        KeyError: _description_
+
+    Returns:
+        _type_: _description_
+    """
+
     __ambiental_indicators: list
     __economic_indicators: list
     __tecnical_indicators: list
 
     def __init__(self) -> None:
+        """_summary_"""
         self.__ambiental_indicators = list()
 
     def __str__(self) -> str:
+        """_summary_
+
+        Returns:
+            str: _description_
+        """
         return str(self.__ambiental_indicators)
 
     @property
     def ambiental(self):
+        """_summary_
+
+        Returns:
+            _type_: _description_
+        """
         return self.__ambiental_indicators
 
     def __validate_json(self, file):
+        """_summary_
+
+        Args:
+            file (_type_): _description_
+
+        Raises:
+            KeyError: _description_
+
+        Returns:
+            _type_: _description_
+        """
         keys_expected = [
             "id",
             "name",
@@ -151,6 +182,7 @@ class Indicators:
                 self.__ambiental_indicators.append(file_data[item])
 
     def add_formula(self):
+        """_summary_"""
         __funtions_indicators = {
             "101": {
                 "formula": lambda solar, wind: solar + wind,
@@ -168,6 +200,14 @@ class Indicators:
                 continue
 
     def evaluate_alternative(self, alternatives):
+        """_summary_
+
+        Args:
+            alternatives (_type_): _description_
+
+        Returns:
+            _type_: _description_
+        """
         funtions_indicators = {
             "101": {
                 "id": "C1.1",
