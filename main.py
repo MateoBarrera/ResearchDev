@@ -60,6 +60,6 @@ indicators.load("Evaluation/Indicator/indicators.json")
 alternative_matrix = indicators.evaluate_alternative(alternatives_kw)
 AHP(
     alternative_matrix=alternative_matrix,
-    show_criteria_matrix=True,
+    show_criteria_matrix=False,
     show_expert_matrix=False,
 )
