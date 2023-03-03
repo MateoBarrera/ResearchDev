@@ -133,14 +133,14 @@ def load_criteria_weight(
 
 
 def normalize_alternatives(alternative_matrix):
-    type_indicator = [0, 1, 1, 1, 1, 1, 0, 0, 0]
+    type_indicator = [1, 0, 0, 0, 0, 0, 1, 1, 1]
     for column in alternative_matrix:
         alternative_matrix[column] = normalize_criteria(
             alternative_matrix[column], normalize_type=type_indicator[0]
         )
         type_indicator.pop(0)
     print("\n:: Criteria Normalized  ::")
-    print(alternative_matrix.to_markdown(floatfmt=".2f"))
+    print(alternative_matrix.to_markdown(floatfmt=".4f"))
     return alternative_matrix
 
 
@@ -154,15 +154,23 @@ def weighting_subcriteria(criteria: dict):
 
 
 def ahp(alternative_matrix, show_criteria_matrix=False, show_expert_matrix=False):
+    """_summary_
+
+    Args:
+        alternative_matrix (_type_): _description_
+        show_criteria_matrix (bool, optional): _description_. Defaults to False.
+        show_expert_matrix (bool, optional): _description_. Defaults to False.
+    """
     criteria_aggregation = load_criteria_weight(
-        show_criteria_matrix, show_expert_matrix
+        show_criteria_matrix, show_expert_matrix, method_aggregation=1
     )
+
     alternative_matrix_norm = normalize_alternatives(alternative_matrix)
     criteria_aggregation = weighting_subcriteria(criteria_aggregation)
     alternative_array = alternative_matrix_norm.to_numpy()
     result = np.matmul(alternative_array, np.transpose(criteria_aggregation))
     result_df = pd.DataFrame({"Evaluation": result})
-    print(result)
+    # print(result)
     print("\n::Ranking of alternatives ::")
     print(
         result_df.sort_values(by="Evaluation", ascending=False).to_markdown(
@@ -172,6 +180,10 @@ def ahp(alternative_matrix, show_criteria_matrix=False, show_expert_matrix=False
     # alternative_matrix_norm = normalize_alternatives(alternative_matrix)
 
     # test_obj.show_info()
+
+
+def topsis():
+    pass
 
 
 if __name__ == "__main__":

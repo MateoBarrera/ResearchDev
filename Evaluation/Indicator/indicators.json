@@ -12,7 +12,7 @@
 			"biomass": ""
 		},
 		"year": "",
-		"unit": "%",
+		"unit": "tC02",
 		"type_indicator": "benefit"
 	},
 	"102": {
@@ -28,7 +28,7 @@
 			"biomass": "12.65"
 		},
 		"year": "2013",
-		"unit": "m2/MWh",
+		"unit": "m2/MW",
 		"type_indicator": "cost"
 	},
 	"103": {
@@ -44,7 +44,7 @@
 			"biomass": "L"
 		},
 		"year": "2013",
-		"unit": "cualitative",
+		"unit": "qualitative",
 		"type_indicator": "cost"
 	},
 	"104": {
@@ -140,7 +140,7 @@
 			"biomass": "Si, lento"
 		},
 		"year": "2020",
-		"unit": "cualitative",
+		"unit": "qualitative",
 		"type_indicator": "benefit"
 	},
 	"303": {

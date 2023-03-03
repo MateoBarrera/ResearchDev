@@ -2,6 +2,7 @@
 
 
 """
+from operator import length_hint
 import numpy as np
 import pandas as pd
 from itertools import product
@@ -79,9 +80,9 @@ class Alternatives:
             seed (_type_): _description_
         """
         info = PrettyTable()
-        info.title = "Scenarios summary"
-        info.field_names = ["Total scenarios", "{}".format(len(self.scenarios))]
-        info.add_row(["Resources", "Included"])
+        info.title = "ALTERNATIVES SUMMARY"
+        info.field_names = ["TOTAL ALTERNATIVES", "{}".format(len(self.scenarios))]
+        info.add_row(["RESOURCES", "INCLUDED"])
         for resource in zip(
             ["solar", "wind", "hydro", "biomass"], self.resources_included
         ):
@@ -89,17 +90,21 @@ class Alternatives:
                 info.add_row([resource[0], "\N{check mark}"])
             else:
                 info.add_row([resource[0], "\N{Ballot X}"])
-        percentage_info = PrettyTable()
-        percentage_info.title = "% Penetration for demand coverage"
-        percentage_info.field_names = ["{} %".format(x * 100) for x in self.seed]
+        info.add_row(["-------------------", "---------"])
+        text = ["% VARIATIONS FOR", "INSTALLED CAPACITY", "TARGET"] + [
+            " " for _ in range(len(self.seed) - 3)
+        ]
+        for index, x in enumerate(self.seed):
+            info.add_row([text[index], f"{x*100} %"])
+        # info.add_row(["{} %".format(x * 100) for x in self.seed])
         scenario_matrix = PrettyTable()
         scenario_matrix.field_names = ["solar", "wind", "hydro", "biomass"]
-        scenario_matrix.title = "Scenarios"
+        scenario_matrix.title = "ALTERNATIVES"
         for scenario in self.scenarios:
             scenario = list(map(lambda x: "{} %".format(x * 100), scenario))
             scenario_matrix.add_row(scenario)
 
-        return f"\n{info}\n{percentage_info}\n{scenario_matrix}"
+        return f"\n{info}\n{scenario_matrix}"
 
 
 if __name__ == "__main__":

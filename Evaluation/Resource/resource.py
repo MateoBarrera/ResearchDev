@@ -112,20 +112,21 @@ class Hydro:
         df.set_index = df.index.month
 
         def power_gen(x):
-            return (9.81 * (x["Qd"]) * H * e * n * 24 * x["days"]) if x["Qd"] > 0 else 0
+            return (9.81 * (x["Qd"]) * H * e * n * 8 * x["days"]) if x["Qd"] > 0 else 0
 
         df["monthly energy"] = df.apply(power_gen, axis=1)
 
         def correction(x):
             return (
-                installed_capacity * e * n * 24 * x["days"]
+                installed_capacity * e * n * 8 * x["days"]
                 if (x["monthly energy"] > installed_capacity * e * 24 * x["days"])
                 else x["monthly energy"]
             )
 
         df["monthly energy"] = df.apply(correction, axis=1)
-        power_generation = np.sum(df["monthly energy"].tolist())
-
+        power_generation = np.sum(df["monthly energy"].tolist()) / 365
+        df = df.rename(index=lambda x: x.strftime("%B"))
+        df = df.drop(columns=["days"])
         if show:
             capacity_factor = power_generation / (9.81 * 7 * H * e * n * 8760)
             print("\n:: Hydro ::")
@@ -391,8 +392,9 @@ class Pv:
 
         df["monthly energy"] = df.apply(nt_calc, axis=1)
 
-        power_generation = np.mean(df["PSH"].tolist()) * installed_capacity * n * 365
-
+        power_generation = np.mean(df["PSH"].tolist()) * installed_capacity * n
+        df = df.rename(index=lambda x: x.strftime("%B"))
+        df = df.drop(columns=["days"])
         if show:
             capacity_factor = power_generation / (installed_capacity * 8760)
             print("\n:: Solar ::")
@@ -569,8 +571,9 @@ class Wind:
         df["monthly energy"] = df.apply(powe_gen_a, axis=1)
         df["monthly energy"] = df.apply(powe_gen_b, axis=1)
 
-        power_generation = np.sum(df["monthly energy"].tolist())
-
+        power_generation = np.sum(df["monthly energy"].tolist()) / 365
+        df = df.rename(index=lambda x: x.strftime("%B"))
+        df = df.drop(columns=["days"])
         if show:
             capacity_factor = power_generation / (installed_capacity * 8760)
             print("\n:: Wind ::")
@@ -728,4 +731,6 @@ class Biomass:
         return ":: Autonomy Resource: {:.2f}% ::".format(self.__autonomy * 100)
 
     def calculate_autonomy(self):
+        # df = df.rename(index=lambda x: x.strftime("%B"))
+        df = df.drop(columns=["days"])
         pass

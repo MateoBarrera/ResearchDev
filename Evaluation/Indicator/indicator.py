@@ -199,15 +199,22 @@ class Indicators:
             except:
                 continue
 
-    def evaluate_alternative(self, alternatives):
+    def evaluate_alternative(self, alternatives, freq_analysis="d"):
         """_summary_
 
         Args:
             alternatives (_type_): _description_
+            freq_analysis (str, optional): _description_. Defaults to "m".
 
         Returns:
             _type_: _description_
         """
+        if freq_analysis == "d":
+            freq_factor = 24
+        elif freq_analysis == "m":
+            freq_factor = 720
+        else:
+            freq_factor = 8760
         funtions_indicators = {
             "101": {
                 "id": "C1.1",
@@ -222,44 +229,52 @@ class Indicators:
             "102": {
                 "id": "C1.2",
                 "formula": lambda x: (
-                    (x["solar_generation"] / (8760 * 1000)) * 0.33
-                    + (x["wind_generation"] / (8760 * 1000)) * 1.57
-                    + (x["hydro_generation"] / (8760 * 1000)) * 0.02
-                    # + (x["biomass_generation"] / (8760 * 1000)) * 12.65
+                    (x["solar"] / (1000)) * 0.33
+                    + (x["wind"] / (1000)) * 1.57
+                    + (x["hydro"] / (1000)) * 0.02
+                    # + (x["biomass_generation"] / (1000)) * 12.65
                 ),
             },
-            "102": {
+            "104": {
                 "id": "C1.2",
                 "formula": lambda x: (
-                    (x["solar_generation"] / (8760 * 1000)) * 0.33
-                    + (x["wind_generation"] / (8760 * 1000)) * 1.57
-                    + (x["hydro_generation"] / (8760 * 1000)) * 0.02
-                    # + (x["biomass_generation"] / (8760 * 1000)) * 12.65
+                    (x["solar_generation"] / (freq_factor * 1000)) * 0.33
+                    + (x["wind_generation"] / (freq_factor * 1000)) * 1.57
+                    + (x["hydro_generation"] / (freq_factor * 1000)) * 0.02
+                    # + (x["biomass_generation"] / (freq_factor * 1000)) * 12.65
                 ),
             },
             "104": {
                 "id": "C1.4",
                 "formula": lambda x: (
-                    (x["solar_generation"] / (8760 * 1000)) * 0.001
-                    + (x["wind_generation"] / (8760 * 1000)) * 5.4e-5
-                    + (x["hydro_generation"] / (8760 * 1000)) * 8.9e-6
-                    # + (x["biomass_generation"] / (8760 * 1000)) * 1.55
+                    (
+                        (x["solar_generation"] / (freq_factor * 1000)) * 0.001
+                        + (x["wind_generation"] / (freq_factor * 1000)) * 5.4e-5
+                        + (x["hydro_generation"] / (freq_factor * 1000)) * 8.9e-6
+                        # + (x["biomass_generation"] / (freq_factor * 1000)) * 1.55
+                    )
+                    / (
+                        (x["solar_generation"] / (freq_factor * 1000))
+                        + (x["wind_generation"] / (freq_factor * 1000))
+                        + (x["hydro_generation"] / (freq_factor * 1000))
+                        # + (x["biomass_generation"] / (freq_factor * 1000)) * 1.55
+                    )
                 ),
             },
             "201": {
                 "id": "C2.1",
                 "formula": lambda x: (
                     (
-                        (x["solar_generation"] / (8760 * 1000)) * 202.94
-                        + (x["wind_generation"] / (8760 * 1000)) * 76.28
-                        + (x["hydro_generation"] / (8760 * 1000)) * 124.97
-                        # + (x["biomass_generation"] / (8760 * 1000)) * 72
+                        (x["solar_generation"] / (freq_factor * 1000)) * 202.94
+                        + (x["wind_generation"] / (freq_factor * 1000)) * 76.28
+                        + (x["hydro_generation"] / (freq_factor * 1000)) * 124.97
+                        # + (x["biomass_generation"] / (freq_factor * 1000)) * 72
                     )
                     / (
-                        x["solar_generation"] / (8760 * 1000)
-                        + x["wind_generation"] / (8760 * 1000)
-                        + x["hydro_generation"] / (8760 * 1000)
-                        # + (x["biomass_generation"]/(8760 * 1000)
+                        x["solar_generation"] / (freq_factor * 1000)
+                        + x["wind_generation"] / (freq_factor * 1000)
+                        + x["hydro_generation"] / (freq_factor * 1000)
+                        # + (x["biomass_generation"]/(freq_factor * 1000)
                     )
                 ),
             },
@@ -354,7 +369,7 @@ class Indicators:
                 indicator["formula"], axis=1
             )
         print(":: Alternatives  ::")
-        print(alternatives.iloc[:, :6].to_markdown(floatfmt=".2f"))
+        print(alternatives.iloc[:, :7].to_markdown(floatfmt=".2f"))
         print(":: Installed Capacity [kW]; Generation [kW year]  ::")
         print("\n:: Criteria  ::")
         print(alternatives.iloc[:, 7:].to_markdown(floatfmt=".4f"))
