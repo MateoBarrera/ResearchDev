@@ -2,6 +2,7 @@ from Evaluation.Resource.load import *
 from Evaluation.alternative import *
 from Evaluation.Indicator.indicator import *
 from Evaluation.MCDA.model import ahp as AHP
+from Evaluation.MCDA.model import topsis as TOPSIS
 
 
 hydro_data = PrimaryResource(
@@ -29,14 +30,15 @@ power = solar.potential(installed_capacity=1000, show=True)
 power = wind.potential(installed_capacity=1000, show=True)
 
 
+total_installed_capacity = 4000  # kW
+
 alternatives = Alternatives(
-    resources_included=[1, 1, 1, 0], seed=[1, 0.75, 0.5, 0.25, 0]
+    resources_included=[1, 1, 1, 0],
+    seed=[1, 0.75, 0.5, 0.25, 0],
+    installed_capacity=total_installed_capacity,
 )
 df_alternatives = alternatives.get()
 print(alternatives)
-
-total_installed_capacity = 4000  # kW
-
 alternatives_kw = df_alternatives.mul(total_installed_capacity)
 print("\n")
 # print(alternatives_kw)
@@ -61,6 +63,11 @@ indicators = Indicators()
 indicators.load("Evaluation/Indicator/indicators.json")
 alternative_matrix = indicators.evaluate_alternative(alternatives_kw)
 AHP(
+    alternative_matrix=alternative_matrix,
+    show_criteria_matrix=False,
+    show_expert_matrix=False,
+)
+TOPSIS(
     alternative_matrix=alternative_matrix,
     show_criteria_matrix=False,
     show_expert_matrix=False,

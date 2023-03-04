@@ -11,19 +11,21 @@ from prettytable import PrettyTable
 
 class Alternatives:
     def __init__(
-        self, resources_included=[1, 1, 1, 1], seed=[1.0, 0.5, 0.25, 0]
+        self,
+        resources_included=[1, 1, 1, 1],
+        seed=[1.0, 0.5, 0.25, 0],
+        installed_capacity=100,
     ) -> None:
         """_summary_
 
         Args:
             resources_included (list, optional): _description_. Defaults to [1, 1, 1, 1].
             seed (list, optional): _description_. Defaults to [1.0, 0.5, 0.25, 0].
-
-        Returns:
-            object: _description_
+            installed_capacity (int, optional): _description_. Defaults to 100.
         """
         self.resources_included = resources_included
         self.seed = seed
+        self.installed_capacity = installed_capacity
         self.alternatives, self.scenarios = self.__generate_scenarios()
         # return self.alternatives
 
@@ -81,7 +83,10 @@ class Alternatives:
         """
         info = PrettyTable()
         info.title = "ALTERNATIVES SUMMARY"
-        info.field_names = ["TOTAL ALTERNATIVES", "{}".format(len(self.scenarios))]
+        info.field_names = ["TARGET CAPACITY ", f"{self.installed_capacity} kW"]
+        info.add_row(["---------------------", "-----------"])
+        info.add_row(["TOTAL ALTERNATIVES", "{}".format(len(self.scenarios))])
+        info.add_row(["---------------------", "-----------"])
         info.add_row(["RESOURCES", "INCLUDED"])
         for resource in zip(
             ["solar", "wind", "hydro", "biomass"], self.resources_included
@@ -90,7 +95,7 @@ class Alternatives:
                 info.add_row([resource[0], "\N{check mark}"])
             else:
                 info.add_row([resource[0], "\N{Ballot X}"])
-        info.add_row(["-------------------", "---------"])
+        info.add_row(["---------------------", "-----------"])
         text = ["% VARIATIONS FOR", "INSTALLED CAPACITY", "TARGET"] + [
             " " for _ in range(len(self.seed) - 3)
         ]
