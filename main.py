@@ -30,11 +30,11 @@ power = solar.potential(installed_capacity=1000, show=True)
 power = wind.potential(installed_capacity=1000, show=True)
 
 
-total_installed_capacity = 4000  # kW
+total_installed_capacity = 5000  # kW
 
 alternatives = Alternatives(
     resources_included=[1, 1, 1, 0],
-    seed=[1, 0.75, 0.5, 0.25, 0],
+    seed=[1, 0.8, 0.6, 0.4, 0.2, 0],
     installed_capacity=total_installed_capacity,
 )
 df_alternatives = alternatives.get()
