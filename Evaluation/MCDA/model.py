@@ -7,6 +7,7 @@ from locale import normalize
 import re
 from statistics import geometric_mean
 from typing import ItemsView
+from unittest import result
 import numpy as np
 import pandas as pd  # pylint: disable=import-error
 from .criteria import Criteria  # pylint: disable=import-error
@@ -154,6 +155,7 @@ def weighting_subcriteria(criteria: dict):
 
 
 def ahp(alternative_matrix, show_criteria_matrix=False, show_expert_matrix=False):
+    print("\n:: AHP ::")
     """_summary_
 
     Args:
@@ -170,20 +172,84 @@ def ahp(alternative_matrix, show_criteria_matrix=False, show_expert_matrix=False
     alternative_array = alternative_matrix_norm.to_numpy()
     result = np.matmul(alternative_array, np.transpose(criteria_aggregation))
     result_df = pd.DataFrame({"Evaluation": result})
-    # print(result)
-    print("\n::Ranking of alternatives ::")
+    show_evaluation(result_df)
+
+
+def __topsis_normalize(alternatives):
+    alternatives_norm = np.zeros(alternatives.shape)
+    mean_array = np.sqrt(np.sum(alternatives**2, 1))
+    np.seterr(all="ignore")
+    alternatives_norm = alternatives / np.transpose([mean_array])
+    np.seterr()
+    return alternatives_norm
+
+
+def __topsis_print_norm(alternatives, info):
+    alternatives = pd.DataFrame(
+        data=np.transpose(alternatives), columns=list(info.columns)
+    )
+    print("\n:: Criteria Normalized  ::")
+    print(alternatives.to_markdown(floatfmt=".4f"))
+    pass
+
+
+def __topsis_ideal_solution(
+    alternatives_array, type_indicator=[1, 0, 0, 0, 0, 0, 1, 1, 1]
+):
+    ideal_positive = np.zeros(len(type_indicator))
+    ideal_negative = np.zeros(len(type_indicator))
+
+    for i in range(len(type_indicator)):
+        if type_indicator[i] == 0:  # Criterio de costo
+            ideal_positive[i] = np.min(alternatives_array[i, :])
+            ideal_negative[i] = np.max(alternatives_array[i, :])
+        elif type_indicator[i] == 1:  # Criterio de beneficio
+            ideal_positive[i] = np.max(alternatives_array[i, :])
+            ideal_negative[i] = np.min(alternatives_array[i, :])
+
+    return ideal_positive, ideal_negative
+
+
+def __topsis_distance(alternatives_array, ideal_positive, ideal_negative):
+    positive_distance = np.sqrt(
+        np.sum((alternatives_array - np.transpose([ideal_positive])) ** 2, 0)
+    )
+    negative_distance = np.sqrt(
+        np.sum((alternatives_array - np.transpose([ideal_negative])) ** 2, 0)
+    )
+
+    similarity_index = negative_distance / (positive_distance + negative_distance)
+
+    return positive_distance, negative_distance, similarity_index
+
+
+def topsis(alternative_matrix, show_criteria_matrix=False, show_expert_matrix=False):
+    print("\n:: TOPSIS ::")
+    criteria_aggregation = load_criteria_weight(
+        show_criteria_matrix, show_expert_matrix, method_aggregation=1
+    )
+    criteria_aggregation = weighting_subcriteria(criteria_aggregation)
+
+    alternatives_array = __topsis_normalize(np.transpose(alternative_matrix.to_numpy()))
+    alternatives_array = np.where(np.isnan(alternatives_array), 0, alternatives_array)
+    __topsis_print_norm(alternatives_array, alternative_matrix)
+
+    weighted_alternatives = alternatives_array * np.transpose([criteria_aggregation])
+    ideal_positive, ideal_negative = __topsis_ideal_solution(weighted_alternatives)
+    positive_distance, negative_distance, similarity_index = __topsis_distance(
+        weighted_alternatives, ideal_positive, ideal_negative
+    )
+    result_df = pd.DataFrame({"Evaluation": similarity_index})
+    show_evaluation(result_df)
+
+
+def show_evaluation(result_df):
+    print("\n:: Ranking of alternatives ::")
     print(
         result_df.sort_values(by="Evaluation", ascending=False).to_markdown(
             floatfmt=".3f"
         )
     )
-    # alternative_matrix_norm = normalize_alternatives(alternative_matrix)
-
-    # test_obj.show_info()
-
-
-def topsis():
-    pass
 
 
 if __name__ == "__main__":
