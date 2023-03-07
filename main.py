@@ -34,7 +34,7 @@ total_installed_capacity = 5000  # kW
 
 alternatives = Alternatives(
     resources_included=[1, 1, 1, 0],
-    seed=[1, 0.8, 0.6, 0.4, 0.2, 0],
+    seed=[1, 0.75, 0.5, 0.25, 0],
     installed_capacity=total_installed_capacity,
 )
 df_alternatives = alternatives.get()
@@ -62,13 +62,30 @@ alternatives_kw["wind_generation"] = wind_array
 indicators = Indicators()
 indicators.load("Evaluation/Indicator/indicators.json")
 alternative_matrix = indicators.evaluate_alternative(alternatives_kw)
+
+
+# Media geométrica 0; Ponderados por consistencia 1
+method_aggregation = 1
+# Escoge datos de evaluación de prueba
+## 0 - expertos
+## 1 - Igual importancia
+## 2 - Enfoque Ambiental
+## 3 - Enfoque Económico
+## 4 - Enfoque Técnico
+test_criteria = 0
+
+
 AHP(
     alternative_matrix=alternative_matrix,
     show_criteria_matrix=False,
     show_expert_matrix=False,
+    method_aggregation=method_aggregation,
+    test=test_criteria,
 )
 TOPSIS(
     alternative_matrix=alternative_matrix,
     show_criteria_matrix=False,
     show_expert_matrix=False,
+    method_aggregation=method_aggregation,
+    test=test_criteria,
 )

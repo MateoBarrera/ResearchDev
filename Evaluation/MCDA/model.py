@@ -74,6 +74,7 @@ def criteria_aggregation(df_criteria, method):
     columns.pop()
     columns.pop()
     if method in geo_mean:
+        method_str = "Resultado pesos agregados - media geométrica"
         for column in columns:
             aux_0, aux_1, aux_2 = list(), list(), list()
             values = df_criteria[column].tolist()
@@ -87,6 +88,7 @@ def criteria_aggregation(df_criteria, method):
                 geometric_mean(aux_2),
             ]
     else:
+        method_str = "Resultado pesos agregados - ponderación por criterios"
         for column in columns:
             aux_0, aux_1, aux_2 = list(), list(), list()
             values = df_criteria[column].tolist()
@@ -100,36 +102,35 @@ def criteria_aggregation(df_criteria, method):
                 aux_2.append(value[2] * ci_norm[i])
                 i += 1
             criteria_agg[column] = [sum(aux_0), sum(aux_1), sum(aux_2)]
-    return criteria_agg
+    return criteria_agg, method_str
 
 
 def load_criteria_weight(
-    show_criteria_matrix, show_expert_matrix, method_aggregation=0
+    show_criteria_matrix, show_expert_matrix, method_aggregation=0, test=0
 ):
     test_obj = Criteria()
     test_obj.show_all = show_expert_matrix
-    test_obj.from_excel(path="../Repo/Articulo1/Encuesta/Resultados-9-02-2023.xlsx")
-
-    result = criteria_aggregation(test_obj.weight_criteria, method=1)
+    if test == 1:
+        test_obj.from_excel(path="../Repo/Articulo1/Test/test1.xlsx")
+    elif test == 2:
+        test_obj.from_excel(path="../Repo/Articulo1/Test/test2.xlsx")
+    elif test == 3:
+        test_obj.from_excel(path="../Repo/Articulo1/Test/test3.xlsx")
+    elif test == 4:
+        test_obj.from_excel(path="../Repo/Articulo1/Test/test4.xlsx")
+    else:
+        test_obj.from_excel(path="../Repo/Articulo1/Encuesta/Resultados-9-02-2023.xlsx")
+    result, method_str = criteria_aggregation(
+        test_obj.weight_criteria, method=method_aggregation
+    )
 
     if show_criteria_matrix:
         table = PrettyTable()
-        table.title = "Resultado pesos agregados - ponderación por criterios"
+        table.title = method_str
         table.field_names = ["Criterio(s)", "Vector de pesos"]
         for key in result.items():
             table.add_row([key[0], key[1]])
         print(table)
-
-    result = criteria_aggregation(test_obj.weight_criteria, method=method_aggregation)
-
-    if show_criteria_matrix:
-        table = PrettyTable()
-        table.title = "Resultado pesos agregados - media geométrica"
-        table.field_names = ["Criterio(s)", "Vector de pesos"]
-        for key in result.items():
-            table.add_row([key[0], key[1]])
-        print(table)
-
     return result
 
 
@@ -154,8 +155,13 @@ def weighting_subcriteria(criteria: dict):
     return np.array(array_criteria)
 
 
-def ahp(alternative_matrix, show_criteria_matrix=False, show_expert_matrix=False):
-    print("\n:: AHP ::")
+def ahp(
+    alternative_matrix,
+    show_criteria_matrix=False,
+    show_expert_matrix=False,
+    method_aggregation=0,
+    test=False,
+):
     """_summary_
 
     Args:
@@ -163,12 +169,15 @@ def ahp(alternative_matrix, show_criteria_matrix=False, show_expert_matrix=False
         show_criteria_matrix (bool, optional): _description_. Defaults to False.
         show_expert_matrix (bool, optional): _description_. Defaults to False.
     """
+    print("\n:: AHP ::")
     criteria_aggregation = load_criteria_weight(
-        show_criteria_matrix, show_expert_matrix, method_aggregation=1
+        show_criteria_matrix,
+        show_expert_matrix,
+        method_aggregation=method_aggregation,
+        test=test,
     )
-
-    alternative_matrix_norm = normalize_alternatives(alternative_matrix)
     criteria_aggregation = weighting_subcriteria(criteria_aggregation)
+    alternative_matrix_norm = normalize_alternatives(alternative_matrix)
     alternative_array = alternative_matrix_norm.to_numpy()
     result = np.matmul(alternative_array, np.transpose(criteria_aggregation))
     result_df = pd.DataFrame({"Evaluation": result})
@@ -223,10 +232,27 @@ def __topsis_distance(alternatives_array, ideal_positive, ideal_negative):
     return positive_distance, negative_distance, similarity_index
 
 
-def topsis(alternative_matrix, show_criteria_matrix=False, show_expert_matrix=False):
+def topsis(
+    alternative_matrix,
+    show_criteria_matrix=False,
+    show_expert_matrix=False,
+    method_aggregation=0,
+    test=False,
+):
+    """_summary_
+
+    Args:
+        alternative_matrix (_type_): _description_
+        show_criteria_matrix (bool, optional): _description_. Defaults to False.
+        show_expert_matrix (bool, optional): _description_. Defaults to False.
+        test (bool, optional): _description_. Defaults to False.
+    """
     print("\n:: TOPSIS ::")
     criteria_aggregation = load_criteria_weight(
-        show_criteria_matrix, show_expert_matrix, method_aggregation=1
+        show_criteria_matrix,
+        show_expert_matrix,
+        method_aggregation=method_aggregation,
+        test=test,
     )
     criteria_aggregation = weighting_subcriteria(criteria_aggregation)
 
@@ -235,6 +261,7 @@ def topsis(alternative_matrix, show_criteria_matrix=False, show_expert_matrix=Fa
     __topsis_print_norm(alternatives_array, alternative_matrix)
 
     weighted_alternatives = alternatives_array * np.transpose([criteria_aggregation])
+
     ideal_positive, ideal_negative = __topsis_ideal_solution(weighted_alternatives)
     positive_distance, negative_distance, similarity_index = __topsis_distance(
         weighted_alternatives, ideal_positive, ideal_negative
