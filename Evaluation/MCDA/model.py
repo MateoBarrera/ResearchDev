@@ -3,11 +3,9 @@
 Returns:
     _type_: _description_
 """
+from datetime import datetime
 from locale import normalize
-import re
 from statistics import geometric_mean
-from typing import ItemsView
-from unittest import result
 import numpy as np
 import pandas as pd  # pylint: disable=import-error
 from .criteria import Criteria  # pylint: disable=import-error
@@ -176,11 +174,16 @@ def ahp(
         method_aggregation=method_aggregation,
         test=test,
     )
+    #save_xls("Criteria", pd.DataFrame(criteria_aggregation))
     criteria_aggregation = weighting_subcriteria(criteria_aggregation)
+    #save_xls("Criteria N", pd.DataFrame(criteria_aggregation))
+    #save_xls("Alternatives", alternative_matrix)
     alternative_matrix_norm = normalize_alternatives(alternative_matrix)
+    #save_xls("AHP-Criteria N", alternative_matrix_norm)
     alternative_array = alternative_matrix_norm.to_numpy()
     result = np.matmul(alternative_array, np.transpose(criteria_aggregation))
     result_df = pd.DataFrame({"Evaluation": result})
+    #save_xls("AHP-Ranking", result_df.sort_values(by="Evaluation", ascending=False))
     show_evaluation(result_df)
 
 
@@ -199,7 +202,7 @@ def __topsis_print_norm(alternatives, info):
     )
     print("\n:: Criteria Normalized  ::")
     print(alternatives.to_markdown(floatfmt=".4f"))
-    pass
+    #save_xls("TOP-Criteria N", alternatives)
 
 
 def __topsis_ideal_solution(
@@ -267,6 +270,7 @@ def topsis(
         weighted_alternatives, ideal_positive, ideal_negative
     )
     result_df = pd.DataFrame({"Evaluation": similarity_index})
+    #save_xls("TOP-Ranking", result_df.sort_values(by="Evaluation", ascending=False))
     show_evaluation(result_df)
 
 
@@ -277,6 +281,13 @@ def show_evaluation(result_df):
             floatfmt=".3f"
         )
     )
+
+
+def save_xls(df_name, dframe: pd.DataFrame):
+    pass
+    time = datetime.now().strftime("%H.%M")
+    with pd.ExcelWriter("../Repo/Articulo1/output/result.xlsx", mode="a") as writer:
+        dframe.to_excel(writer, sheet_name=df_name +"-"+ str(time))
 
 
 if __name__ == "__main__":

@@ -4,6 +4,7 @@ import numpy as np
 import pandas as pd  # pylint: disable=import-error
 from prettytable import PrettyTable  # pylint: disable=import-error
 import json
+from datetime import datetime
 
 
 class Indicator:
@@ -373,8 +374,13 @@ class Indicators:
         print(":: Installed Capacity [kW]; Generation [kW year]  ::")
         print("\n:: Criteria  ::")
         print(alternatives.iloc[:, 7:].to_markdown(floatfmt=".4f"))
+        #save_xls("Alternativas resumen", alternatives)
         return alternatives.iloc[:, 7:]
-
+    
+def save_xls(df_name, dframe: pd.DataFrame):
+    time = datetime.now().strftime("%H.%M")
+    with pd.ExcelWriter("../Repo/Articulo1/output/result.xlsx", mode="a") as writer:
+        dframe.to_excel(writer, sheet_name=df_name +"-"+ str(time))
 
 if __name__ == "__main__":
     ind = Indicators()
