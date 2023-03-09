@@ -703,10 +703,10 @@ class Wind:
 
 
 class Biomass:
-    """Analysis of the solar resource through the Peak Sun Hours, resource variability and calculation of autonomy from historical monthly average flow data.
+    """Analysis of the biomass resource through the biogas, resource variability and calculation of autonomy from historical monthly average flow data.
 
     Returns:
-        Object: PV object
+        Object: Biomass object
     """
 
     __is_viability: bool = False

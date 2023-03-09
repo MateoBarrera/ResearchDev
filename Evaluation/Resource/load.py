@@ -26,11 +26,27 @@ def __open_csv(path, header="infer"):
 
 
 def __split_date(file):
+    """_summary_
+
+    Args:
+        file (_type_): _description_
+
+    Returns:
+        _type_: _description_
+    """    
     file["Fecha"] = pd.to_datetime(file["Fecha"])
     return file
 
 
 def __filter_csv(file):
+    """_summary_
+
+    Args:
+        file (_type_): _description_
+
+    Returns:
+        _type_: _description_
+    """    
     return __split_date(
         file.filter(
             items=[
@@ -46,6 +62,15 @@ def __filter_csv(file):
 
 
 def __filter_csv_pw_nasa(file, _type=None):
+    """_summary_
+
+    Args:
+        file (_type_): _description_
+        _type (_type_, optional): _description_. Defaults to None.
+
+    Returns:
+        _type_: _description_
+    """    
     if _type == "pv":
         parameter = "ALLSKY_SFC_SW_DWN"
     elif _type == "wind":
@@ -62,10 +87,27 @@ def __filter_csv_pw_nasa(file, _type=None):
 
 
 def __get_stations(file):
+    """_summary_
+
+    Args:
+        file (_type_): _description_
+
+    Returns:
+        _type_: _description_
+    """    
     return file.drop_duplicates(subset=["CodigoEstacion"])["CodigoEstacion"].to_list()
 
 
 def __extract_info(file, _type):
+    """_summary_
+
+    Args:
+        file (_type_): _description_
+        _type (_type_): _description_
+
+    Returns:
+        _type_: _description_
+    """    
     info = {}
 
     if _type == "pv":
@@ -87,16 +129,43 @@ def __extract_info(file, _type):
 
 
 def __load_data(file, station):
+    """_summary_
+
+    Args:
+        file (_type_): _description_
+        station (_type_): _description_
+
+    Returns:
+        _type_: _description_
+    """    
     return file.loc[file["CodigoEstacion"] == station].filter(
         items=["Fecha", "Valor"]
     )  # .to_dict('records')
 
 
 def __load_data_pw_nasa(file):
+    """_summary_
+
+    Args:
+        file (_type_): _description_
+
+    Returns:
+        _type_: _description_
+    """    
     return file.filter(items=["Fecha", "Valor"])  # .to_dict('records')
 
 
 def read_ideam_data(path, _type, station):
+    """_summary_
+
+    Args:
+        path (_type_): _description_
+        _type (_type_): _description_
+        station (_type_): _description_
+
+    Returns:
+        _type_: _description_
+    """    
     dictionary = {}
 
     file = __open_csv(path=path)
@@ -108,10 +177,37 @@ def read_ideam_data(path, _type, station):
 
 
 def read_pw_nasa_data(path, _type):
+    """_summary_
+
+    Args:
+        path (_type_): _description_
+        _type (_type_): _description_
+
+    Returns:
+        _type_: _description_
+    """    
     dictionary = {}
 
     file = __open_csv(path=path)
     file = __filter_csv_pw_nasa(file, _type)
+    dictionary["data"] = __load_data_pw_nasa(file)
+    dictionary["info"] = __extract_info(file, _type)
+
+    return dictionary
+
+def read_other_data(path, _type):
+    """_summary_
+
+    Args:
+        path (_type_): _description_
+        _type (_type_): _description_
+
+    Returns:
+        _type_: _description_
+    """    
+    dictionary = {}
+
+    file = pd.read_excel(path=path)
     dictionary["data"] = __load_data_pw_nasa(file)
     dictionary["info"] = __extract_info(file, _type)
 
@@ -137,11 +233,13 @@ class PrimaryResource:
     def __init__(
         self, name=None, type_resource=None, source=None, station=None
     ) -> None:
-        """Constructor for PrimaryResource
+        """Constructor for PrimaryResource.
+
         Args:
             name (str, optional): Name resource. Defaults to None.
             type_resource (str, optional): Type of resource (pv, hydro, wind, biomass, etc). Defaults to None.
-            source (str, optional): Information source. Defaults to None.
+            source (str, optional): Information source. Options: 'IDEAM', 'PW_NASA' and 'other'.
+            station (str, optional): Station id for IDEAM data source. Defaults to None.
         """
         self.name = name
         self.__type_resource = type_resource.lower()
@@ -194,7 +292,7 @@ class PrimaryResource:
                 path=path, _type=self.__type_resource, station=self.station
             )
 
-        if self.source.lower() == "pw_nasa":
+        elif self.source.lower() == "pw_nasa":
             __file_obj = read_pw_nasa_data(path=path, _type=self.__type_resource)
 
         self.__date_start = __file_obj["info"]["date_start"]
@@ -203,6 +301,29 @@ class PrimaryResource:
         self.__unit = __file_obj["info"]["unit"]
         self.__data_df = __file_obj["data"]
         return True
+
+    def from_excel(self,path=None)->bool:
+        """Set info PrimaryResource from a .xlsx file.
+
+        Args:
+            path (srt, optional): Path .xlss file with info primary resource. Defaults to None.
+
+        Returns:
+            bool: True for successfully information extraction.
+        """        
+        if path is None:
+            return False
+
+        if self.source.lower() == "ideam":
+            __file_obj = read_ideam_data(
+                path=path, _type=self.__type_resource, station=self.station
+            )
+
+        elif self.source.lower() == "pw_nasa":
+            __file_obj = read_pw_nasa_data(path=path, _type=self.__type_resource)
+
+        elif self.source.lower() == "other"_
+            __file_obj = read_other_data(path=path, _type=self.__type_resource)
 
     def from_json(self, json=None):
         """Set info PrimaryResource from a JSON object.

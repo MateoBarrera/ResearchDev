@@ -153,7 +153,7 @@
 			"solar": "100",
 			"wind": "66.67",
 			"hydro": "83.33",
-			"biomass": "NaN"
+			"biomass": "100"
 		},
 		"year": "2020",
 		"unit": "%",
