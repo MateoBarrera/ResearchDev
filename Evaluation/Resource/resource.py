@@ -1,3 +1,4 @@
+import math
 import pandas as pd
 import matplotlib.pyplot as plt  # pylint: disable=import-error
 import numpy as np
@@ -128,7 +129,7 @@ class Hydro:
         df = df.rename(index=lambda x: x.strftime("%B"))
         df = df.drop(columns=["days"])
         if show:
-            capacity_factor = power_generation / (9.81 * 7 * H * e * n * 8760)
+            capacity_factor = power_generation / (9.81 * 7 * H * e * n * 24)
             print("\n:: Hydro ::")
             print(df.to_markdown(floatfmt=".1f"))
             print(
@@ -396,7 +397,7 @@ class Pv:
         df = df.rename(index=lambda x: x.strftime("%B"))
         df = df.drop(columns=["days"])
         if show:
-            capacity_factor = power_generation / (installed_capacity * 8760)
+            capacity_factor = power_generation / (installed_capacity * 24)
             print("\n:: Solar ::")
             print(df.to_markdown(floatfmt=".1f"))
             print(
@@ -575,7 +576,7 @@ class Wind:
         df = df.rename(index=lambda x: x.strftime("%B"))
         df = df.drop(columns=["days"])
         if show:
-            capacity_factor = power_generation / (installed_capacity * 8760)
+            capacity_factor = power_generation / (installed_capacity * 24)
             print("\n:: Wind ::")
             print(df.to_markdown(floatfmt=".1f"))
             print(
@@ -709,13 +710,12 @@ class Biomass:
         Object: Biomass object
     """
 
-    __is_viability: bool = False
-    __variability: float = None
+    __is_viability: bool = True
+    __variability: float = 0.0
     __autonomy: float = None
 
-    def __init__(self, data) -> None:
-        self.data = data
-        self.q_data = pd.DataFrame(data)["Valor"].to_list()
+    def __init__(self, data, collection_regime) -> None:
+        self.data = self.transform_data(data, collection_regime)
         self.calculate_autonomy()
 
     @property
@@ -730,7 +730,49 @@ class Biomass:
     def autonomy(self):
         return ":: Autonomy Resource: {:.2f}% ::".format(self.__autonomy * 100)
 
+    def transform_data(self, data, collection_regime):
+        factor = list(data["Factor"])
+        if collection_regime == 1:
+            result = np.array(list(data[0.1])) * np.array(factor)
+        elif collection_regime == 2:
+            result = np.array(list(data[0.2])) * np.array(factor)
+        elif collection_regime == 3:
+            result = np.array(list(data[0.3])) * np.array(factor)
+        else:
+            result = np.array(list(data["Recomendado"])) * np.array(factor)
+        return np.sum(result)
+
     def calculate_autonomy(self):
-        # df = df.rename(index=lambda x: x.strftime("%B"))
-        df = df.drop(columns=["days"])
-        pass
+        self.__autonomy = 1
+
+    def potential(self, show, installed_capacity=1000):
+        pci = 4.77  # Lower caloric potential[kW/h/m^3]
+        n = 0.32  # Typical condition
+        n_turbine = math.ceil(installed_capacity/100)
+        operation_regime = 8
+        q_turbine = 85
+
+        if n_turbine*q_turbine > self.data/24:
+            q_design = self.data/24
+        else:
+            q_design = n_turbine*q_turbine
+
+        power_generation = pci * n * q_design * operation_regime 
+        """ Llevas a dataframe y al cálculo por meses
+        df["days"] = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
+
+        def nt_calc(x):
+            return x["PSH"] * installed_capacity * n * x["days"]
+
+        df["monthly energy"] = df.apply(nt_calc, axis=1) 
+
+        df = df.rename(index=lambda x: x.strftime("%B"))
+        df = df.drop(columns=["days"])"""
+        if show:
+            capacity_factor = power_generation / (pci * n * q_design * 24)
+            print("\n:: Biomass - Biogas ::")
+            #print(df.to_markdown(floatfmt=".1f"))
+            print(
+                f"Generation {round(power_generation, 2)}[kW month]; Capacity Factor {round(capacity_factor*100,2)}%"
+            )
+        return power_generation

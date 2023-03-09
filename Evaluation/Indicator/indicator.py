@@ -224,7 +224,7 @@ class Indicators:
                     x["solar_generation"] * 0.20
                     + x["wind_generation"] * 0.25
                     + x["hydro_generation"] * 0.35
-                    # + x["biomass_generation"] * 0.70
+                    + x["biomass_generation"] * 0.70
                 ),
             },
             "102": {
@@ -233,7 +233,7 @@ class Indicators:
                     (x["solar"] / (1000)) * 0.33
                     + (x["wind"] / (1000)) * 1.57
                     + (x["hydro"] / (1000)) * 0.02
-                    # + (x["biomass_generation"] / (1000)) * 12.65
+                    + (x["biomass_generation"] / (1000)) * 12.65
                 ),
             },
             "104": {
@@ -242,7 +242,7 @@ class Indicators:
                     (x["solar_generation"] / (freq_factor * 1000)) * 0.33
                     + (x["wind_generation"] / (freq_factor * 1000)) * 1.57
                     + (x["hydro_generation"] / (freq_factor * 1000)) * 0.02
-                    # + (x["biomass_generation"] / (freq_factor * 1000)) * 12.65
+                    + (x["biomass_generation"] / (freq_factor * 1000)) * 12.65
                 ),
             },
             "104": {
@@ -252,13 +252,13 @@ class Indicators:
                         (x["solar_generation"] / (freq_factor * 1000)) * 0.001
                         + (x["wind_generation"] / (freq_factor * 1000)) * 5.4e-5
                         + (x["hydro_generation"] / (freq_factor * 1000)) * 8.9e-6
-                        # + (x["biomass_generation"] / (freq_factor * 1000)) * 1.55
+                        + (x["biomass_generation"] / (freq_factor * 1000)) * 1.55
                     )
                     / (
                         (x["solar_generation"] / (freq_factor * 1000))
                         + (x["wind_generation"] / (freq_factor * 1000))
                         + (x["hydro_generation"] / (freq_factor * 1000))
-                        # + (x["biomass_generation"] / (freq_factor * 1000)) * 1.55
+                        + (x["biomass_generation"] / (freq_factor * 1000)) * 1.55
                     )
                 ),
             },
@@ -269,13 +269,13 @@ class Indicators:
                         (x["solar_generation"] / (freq_factor * 1000)) * 202.94
                         + (x["wind_generation"] / (freq_factor * 1000)) * 76.28
                         + (x["hydro_generation"] / (freq_factor * 1000)) * 124.97
-                        # + (x["biomass_generation"] / (freq_factor * 1000)) * 72
+                        + (x["biomass_generation"] / (freq_factor * 1000)) * 72
                     )
                     / (
                         x["solar_generation"] / (freq_factor * 1000)
                         + x["wind_generation"] / (freq_factor * 1000)
                         + x["hydro_generation"] / (freq_factor * 1000)
-                        # + (x["biomass_generation"]/(freq_factor * 1000)
+                        + x["biomass_generation"]/(freq_factor * 1000)
                     )
                 ),
             },
@@ -286,13 +286,13 @@ class Indicators:
                         x["solar"] * 1100
                         + x["wind"] * 1350
                         + x["hydro"] * 29900
-                        # + x["biomass"] * 2000
+                         + x["biomass"] * 2000
                     )
                     / (
                         x["solar"]
                         + x["wind"]
                         + x["hydro"]
-                        # + x["biomass"]
+                        + x["biomass"]
                     )
                 ),
             },
@@ -303,13 +303,13 @@ class Indicators:
                         x["solar"] * 6.5
                         + x["wind"] * 40
                         + x["hydro"] * 37
-                        # + (x["biomass"] * 21
+                        + x["biomass"] * 21
                     )
                     / (
                         x["solar"]
                         + x["wind"]
                         + x["hydro"]
-                        # + x["biomass"]
+                        + x["biomass"]
                     )
                 ),
             },
@@ -320,13 +320,13 @@ class Indicators:
                         x["solar"] * 0.25
                         + x["wind"] * 0.40
                         + x["hydro"] * 0.89
-                        # + (x["biomass"] * .35
+                        + x["biomass"] * .35
                     )
                     / (
                         x["solar"]
                         + x["wind"]
                         + x["hydro"]
-                        # + x["biomass"]
+                        + x["biomass"]
                     )
                 ),
             },
@@ -337,13 +337,13 @@ class Indicators:
                         x["solar"] * 0
                         + x["wind"] * 0
                         + x["hydro"] * 0
-                        # + (x["biomass"] * 0.5
+                        + x["biomass"] * 0.5
                     )
                     / (
                         x["solar"]
                         + x["wind"]
                         + x["hydro"]
-                        # + x["biomass"]
+                        + x["biomass"]
                     )
                 ),
             },
@@ -356,13 +356,13 @@ class Indicators:
                         + x["hydro"] * 0.8333
                         # + (x["biomass"] * 0.057 #LTP
                         # + (x["biomass"] * 1 #PRP/COP
-                        # + (x["biomass"] * 0.35 
+                        + x["biomass"] * 0.35 
                     )
                     / (
                         x["solar"]
                         + x["wind"]
                         + x["hydro"]
-                        # + x["biomass"]
+                        + x["biomass"]
                     )
                 ),
             },
@@ -372,12 +372,12 @@ class Indicators:
                 indicator["formula"], axis=1
             )
         print(":: Alternatives  ::")
-        print(alternatives.iloc[:, :7].to_markdown(floatfmt=".2f"))
+        print(alternatives.iloc[:, :8].to_markdown(floatfmt=".2f"))
         print(":: Installed Capacity [kW]; Generation [kW year]  ::")
         print("\n:: Criteria  ::")
-        print(alternatives.iloc[:, 7:].to_markdown(floatfmt=".4f"))
+        print(alternatives.iloc[:, 8:].to_markdown(floatfmt=".4f"))
         #save_xls("Alternativas resumen", alternatives)
-        return alternatives.iloc[:, 7:]
+        return alternatives.iloc[:, 8:]
     
 def save_xls(df_name, dframe: pd.DataFrame):
     time = datetime.now().strftime("%H.%M")

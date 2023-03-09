@@ -1,7 +1,7 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
-from .resource import Hydro, Pv, Wind, get_data_month
+from .resource import Hydro, Pv, Wind, Biomass, get_data_month
 
 
 font = {
@@ -33,7 +33,7 @@ def __split_date(file):
 
     Returns:
         _type_: _description_
-    """    
+    """
     file["Fecha"] = pd.to_datetime(file["Fecha"])
     return file
 
@@ -46,7 +46,7 @@ def __filter_csv(file):
 
     Returns:
         _type_: _description_
-    """    
+    """
     return __split_date(
         file.filter(
             items=[
@@ -70,7 +70,7 @@ def __filter_csv_pw_nasa(file, _type=None):
 
     Returns:
         _type_: _description_
-    """    
+    """
     if _type == "pv":
         parameter = "ALLSKY_SFC_SW_DWN"
     elif _type == "wind":
@@ -94,7 +94,7 @@ def __get_stations(file):
 
     Returns:
         _type_: _description_
-    """    
+    """
     return file.drop_duplicates(subset=["CodigoEstacion"])["CodigoEstacion"].to_list()
 
 
@@ -107,7 +107,7 @@ def __extract_info(file, _type):
 
     Returns:
         _type_: _description_
-    """    
+    """
     info = {}
 
     if _type == "pv":
@@ -137,7 +137,7 @@ def __load_data(file, station):
 
     Returns:
         _type_: _description_
-    """    
+    """
     return file.loc[file["CodigoEstacion"] == station].filter(
         items=["Fecha", "Valor"]
     )  # .to_dict('records')
@@ -151,7 +151,7 @@ def __load_data_pw_nasa(file):
 
     Returns:
         _type_: _description_
-    """    
+    """
     return file.filter(items=["Fecha", "Valor"])  # .to_dict('records')
 
 
@@ -165,7 +165,7 @@ def read_ideam_data(path, _type, station):
 
     Returns:
         _type_: _description_
-    """    
+    """
     dictionary = {}
 
     file = __open_csv(path=path)
@@ -185,7 +185,7 @@ def read_pw_nasa_data(path, _type):
 
     Returns:
         _type_: _description_
-    """    
+    """
     dictionary = {}
 
     file = __open_csv(path=path)
@@ -194,6 +194,7 @@ def read_pw_nasa_data(path, _type):
     dictionary["info"] = __extract_info(file, _type)
 
     return dictionary
+
 
 def read_other_data(path, _type):
     """_summary_
@@ -204,12 +205,15 @@ def read_other_data(path, _type):
 
     Returns:
         _type_: _description_
-    """    
+    """
     dictionary = {}
 
-    file = pd.read_excel(path=path)
-    dictionary["data"] = __load_data_pw_nasa(file)
-    dictionary["info"] = __extract_info(file, _type)
+    if _type == "biomass":
+        file = pd.read_excel(path, sheet_name="Recursos")
+        dictionary["data"] = file
+        dictionary["info"] = dict(
+            {"date_start": "2021", "date_end": "2022", "frequency": "NA", "unit": "m^3"}
+        )
 
     return dictionary
 
@@ -302,7 +306,7 @@ class PrimaryResource:
         self.__data_df = __file_obj["data"]
         return True
 
-    def from_excel(self,path=None)->bool:
+    def from_excel(self, path=None) -> bool:
         """Set info PrimaryResource from a .xlsx file.
 
         Args:
@@ -310,7 +314,7 @@ class PrimaryResource:
 
         Returns:
             bool: True for successfully information extraction.
-        """        
+        """
         if path is None:
             return False
 
@@ -322,8 +326,15 @@ class PrimaryResource:
         elif self.source.lower() == "pw_nasa":
             __file_obj = read_pw_nasa_data(path=path, _type=self.__type_resource)
 
-        elif self.source.lower() == "other"_
+        elif self.source.lower() == "other":
             __file_obj = read_other_data(path=path, _type=self.__type_resource)
+
+        self.__date_start = __file_obj["info"]["date_start"]
+        self.__date_end = __file_obj["info"]["date_end"]
+        self.__frequency = __file_obj["info"]["frequency"]
+        self.__unit = __file_obj["info"]["unit"]
+        self.__data_df = __file_obj["data"]
+        return True
 
     def from_json(self, json=None):
         """Set info PrimaryResource from a JSON object.
@@ -348,7 +359,7 @@ class ResourceViability:
     __viability: object = None
     y_hline: str = None
 
-    def __init__(self, min_hydro=20, min_pv=3.8, min_wind=2.0, min_biomass=20) -> None:
+    def __init__(self, min_hydro=20, min_pv=3.8, min_wind=2.0, min_biomass=0) -> None:
         self.__min_hydro = min_hydro
         self.__min_pv = min_pv
         self.__min_wind = min_wind
@@ -379,7 +390,7 @@ class ResourceViability:
             self.__viability = Wind(resource.data, self.__min_wind)
         else:
             self.y_hline = self.__min_biomass
-            self.__viability = Pv(resource.data, self.__min_pv)
+            self.__viability = Biomass(resource.data, self.__min_biomass)
         return True
 
     def graph_resource(self):
