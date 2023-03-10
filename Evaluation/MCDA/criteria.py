@@ -6,7 +6,7 @@ Returns:
 import numpy as np
 import pandas as pd  # pylint: disable=import-error
 from prettytable import PrettyTable  # pylint: disable=import-error
-
+from statistics import geometric_mean
 
 def open_excel(path, sheet_name="Form Responses 1"):
     """_summary_
@@ -39,7 +39,7 @@ def print_table(title, series):
     print(table)
 
 
-def print_evaluation(name_matrix, matrix, wj_array):
+def print_evaluation(name_matrix, matrix, wj_array, fuzzy=False):
     """_summary_
 
     Args:
@@ -49,12 +49,13 @@ def print_evaluation(name_matrix, matrix, wj_array):
     """
     table = PrettyTable()
     table.title = name_matrix
-    matrix = np.round_(matrix, decimals=2)
-    if wj_array.any() == None:
-        consistency = "NO"
-    else:
-        wj_array = np.round_(wj_array, decimals=2)
-        consistency = "OK"
+    consistency = "OK"
+    if not fuzzy:
+        matrix = np.round_(matrix, decimals=2)
+        if wj_array.any() == None:
+            consistency = "NO"
+        else:
+            wj_array = np.round_(wj_array, decimals=2)
     table.field_names = ["Matriz", "Consistencia", "Vector de pesos"]
     table.add_row([matrix, consistency, wj_array])
     print(table)
@@ -65,9 +66,12 @@ class Criteria:
     constructing the matrix of weights per criterion used in the MCDA method.
     """
 
-    def __init__(self) -> None:
+    def __init__(self, fuzzy=False) -> None:
         self.__show = False
+        self.matrix_criteria = None
         self.weight_criteria = None
+        self.fuzzy_weight_criteria = dict()
+        self.fuzzy_treatment = fuzzy
 
     @property
     def show_all(self):
@@ -87,6 +91,25 @@ class Criteria:
         """
         if isinstance(value, bool):
             self.__show = value
+
+    @property
+    def fuzzy(self):
+        """_summary_
+
+        Returns:
+            _type_: _description_
+        """
+        return self.fuzzy_treatment
+
+    @fuzzy.setter
+    def fuzzy(self, value):
+        """_summary_
+
+        Args:
+            value (_type_): _description_
+        """        
+        if isinstance(value, bool):
+            self.fuzzy_treatment = value
 
     def __consistency_index(self, n_criteria, lmax):
         """_summary_
@@ -139,9 +162,10 @@ class Criteria:
         ci_index, cr_index = self.__consistency_index(len(matrix), lmax)
         if cr_index > 0.10:
             wj_array = None
+            matrix = None
         if self.__show:
             print_evaluation(name_matrix, matrix, wj_array)
-        return wj_array, ci_index
+        return wj_array, ci_index, matrix
 
     def __criteria_matriz_by_expert(self, df_file, name_matrix):
         """_summary_
@@ -195,18 +219,27 @@ class Criteria:
         """
         df_file = df_file[df_file.columns[1:7]]
         list_wc = list()
+        list_matrix = list()
         list_ci = list()
 
         for evaluation in range(len(df_file)):
             name_matrix = f"Criterios experto {evaluation + 1}"
-            weights, ci_index = self.__criteria_matriz_by_expert(
+            weights, ci_index, matrix = self.__criteria_matriz_by_expert(
                 df_file.iloc[evaluation], name_matrix=name_matrix
             )
             list_wc.append(weights)
             list_ci.append(ci_index)
+            list_matrix.append(matrix)
         self.weight_criteria = self.weight_criteria.assign(
             weights=list_wc, CI_weights=list_ci
         )
+        print(list_wc)
+        if self.fuzzy_treatment:
+            result = self.__fuzzy_conversion(list_matrix)
+            print(result)
+            self.fuzzy_weight_criteria['weights'] = result
+            
+
 
     def __subcriteria(self, df_file):
         """_summary_
@@ -216,6 +249,7 @@ class Criteria:
         """
         df_file = df_file[df_file.columns[7:25]]
         list_wsubs = list()
+        list_matrix_sub = list()
 
         wsubs_keys = [
             "Ambiental",
@@ -234,20 +268,109 @@ class Criteria:
                 "CI_Económico": None,
                 "CI_Técnico": None,
             }
+            matrix_subs = {
+                "Ambiental": None,
+                "Económico": None,
+                "Técnico": None,
+            }
 
             df_subs = df_file.iloc[evaluation]
             i = 0
             for batch in range(0, len(df_subs), 6):
                 name_matrix = f"Subcriterios {wsubs_keys[i]} - experto {evaluation + 1}"
-                weights, ci_index = self.__criteria_matriz_by_expert(
+                weights, ci_index, matrix = self.__criteria_matriz_by_expert(
                     df_subs.iloc[batch : batch + 6], name_matrix=name_matrix
                 )
                 wsubs[wsubs_keys[i]] = weights
                 wsubs[wsubs_keys[i + 3]] = ci_index
+                matrix_subs[wsubs_keys[i]] = matrix
                 i += 1
             list_wsubs.append(wsubs)
+            list_matrix_sub.append(matrix_subs)
+
         df_wsubs = pd.DataFrame.from_dict(list_wsubs)
         self.weight_criteria = pd.concat([self.weight_criteria, df_wsubs], axis=1)
+        if self.fuzzy_treatment:
+            df_matrix_subs = pd.DataFrame.from_dict(list_matrix_sub)
+            for column in df_matrix_subs:
+                result = self.__fuzzy_conversion(df_matrix_subs[column].to_list())
+                self.fuzzy_weight_criteria[column] = result
+
+    def __fuzzy_conversion(self, df_file):
+        fuzzy_scale = {
+            1: [1,1,1],
+            3: [2,3,4],
+            5: [4,5,6],
+            7: [6,7,8],
+            9: [8,9,10],
+            1/3:[1/4,1/3,1/2],
+            1/5:[1/6,1/5,1/4],
+            1/7:[1/8,1/7,1/6],
+            1/9:[1/10,1/9,1/8],
+            }
+        fuzzification = lambda x: fuzzy_scale[x]
+        matrix_fuzzy = list()
+        for index, item in enumerate(df_file):
+            data_frame = pd.DataFrame(item)
+            data_frame = data_frame.applymap(fuzzification)
+            
+            if False:
+                print_evaluation(f"Evaluación (fuzzy) {index}", data_frame.to_numpy(), ["NA"], fuzzy=True)
+            matrix_fuzzy.append(data_frame.to_numpy())
+        defuzzy_weights = self.__fuzzy_aggregation(matrix_fuzzy)
+        return defuzzy_weights
+
+
+    def __fuzzy_aggregation(self, df_file):
+        df_file = np.array(df_file)
+        if len(df_file)==1:
+            return df_file
+        rows, columns = df_file[0].shape
+        agg_df_file = list()
+        #agg_defuzzy_df_file = list()
+        for row in range(rows):
+            new_row = list()
+            # new_row_defuzzy = list()
+            for column in range(columns):
+                result = self.__fuzzy_mean_geometric([ x  for x in df_file[:, row, column]])
+                #defuzzy_result = self.__defuzzification(result)
+                new_row.append(result)
+                #new_row_defuzzy.append(defuzzy_result)
+            agg_df_file.append(new_row)
+            #agg_defuzzy_df_file.append(new_row_defuzzy)
+        return self.__fuzzy_weight(agg_df_file)
+         
+
+    def __fuzzy_mean_geometric(self, items):
+        items = np.array(items)
+        agg_items = np.ones(3)
+        for index in range(3):
+            agg_items[index] = geometric_mean(items[:,index])
+        return agg_items
+
+    def __fuzzy_weight(self,matrix_fuzzy):
+        geo_mean_fuzzy = list()
+        for row in matrix_fuzzy:
+            geo_mean_fuzzy.append(self.__fuzzy_mean_geometric(row))
+        fuzzy_weights = [ element/sum(geo_mean_fuzzy) for element in geo_mean_fuzzy]
+        return self.__defuzzification(fuzzy_weights)
+
+    def __defuzzification(self, fuzzy_weights):
+        """
+        Methods
+
+        Center of Sums (COS)
+        Center of Gravity (COG)
+        Centroid of Area (COA)
+        Bisector of Area (BOA)
+        Weighted Average
+        Maxima
+
+        """
+        defuzzy_weights = fuzzy_weights
+        for index, number_fuzzy in enumerate(fuzzy_weights):
+            defuzzy_weights[index] = (number_fuzzy[0]+4*number_fuzzy[1]+number_fuzzy[2])/6
+        return defuzzy_weights
 
     def __expert_mail(self, df_experts):
         """_summary_
@@ -321,6 +444,8 @@ class Criteria:
 
 if __name__ == "__main__":
     test_obj = Criteria()
-    test_obj.show_all = True
+    test_obj.show_all = False
+    test_obj.fuzzy = True
     test_obj.from_excel(path="../Repo/Articulo1/Encuesta/Resultados-9-02-2023.xlsx")
-    test_obj.show_info()
+    #test_obj.from_excel(path="../Repo/Articulo1/Test/test2.xlsx")
+    #test_obj.show_info()
