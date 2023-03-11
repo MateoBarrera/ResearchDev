@@ -376,18 +376,27 @@ class Indicators:
             alternatives[indicator["id"]] = alternatives.apply(
                 indicator["formula"], axis=1
             )
-        print(":: Alternatives  ::")
-        print(alternatives.iloc[:, :8].to_markdown(floatfmt=".2f"))
-        print(":: Installed Capacity [kW]; Generation [kW year]  ::")
+        print(":: Alternatives [kW] ::")
+        print(">> Instaled capicity")
+        print(alternatives.iloc[:, :4].to_markdown(floatfmt=".1f"))
+        print("\n>> Daily power generator [kWh/day]")
+        print(alternatives.iloc[:, 4:8].to_markdown(floatfmt=".2f"))
         print("\n:: Criteria  ::")
         print(alternatives.iloc[:, 8:].to_markdown(floatfmt=".4f"))
         #save_xls("Alternativas resumen", alternatives)
         return alternatives.iloc[:, 8:]
     
 def save_xls(df_name, dframe: pd.DataFrame):
+    """_summary_
+
+    Args:
+        df_name (_type_): _description_
+        dframe (pd.DataFrame): _description_
+    """    
     time = datetime.now().strftime("%H.%M")
     with pd.ExcelWriter("./Repo/Articulo1/output/result.xlsx", mode="a") as writer:
         dframe.to_excel(writer, sheet_name=df_name +"-"+ str(time))
+
 
 if __name__ == "__main__":
     ind = Indicators()

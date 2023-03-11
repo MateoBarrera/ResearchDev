@@ -34,7 +34,7 @@ power = solar.potential(installed_capacity=1000, show=True)
 power = wind.potential(installed_capacity=1000, show=True)
 power = biomass.potential(installed_capacity=1000, show=True)
 
-total_installed_capacity = 5000  # kW
+total_installed_capacity = 430  # kW
 
 alternatives = Alternatives(
     resources_included=[1, 1, 1, 1],

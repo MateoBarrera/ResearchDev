@@ -22,7 +22,6 @@ def open_excel(path, sheet_name="Form Responses 1"):
     """
     result = pd.read_excel(path, sheet_name=sheet_name)
     result = result.dropna(axis=1, how="all")
-    # print(result.head())
     return result
 
 
@@ -89,7 +88,9 @@ class Criteria:
         """        
         self.__show = False
         self.matrix_criteria = None
+        self.info_evaluation = None
         self.weight_criteria = None
+        self.weight_criteria_final = dict()
         self.fuzzy_weight_criteria = dict()
         self.fuzzy_treatment = fuzzy
 
@@ -131,15 +132,97 @@ class Criteria:
         if isinstance(value, bool):
             self.fuzzy_treatment = value
  
-    #*TODO 
+    #*To Check
     @property
-    def get_weighting_criteria(self):
+    def get_weighting_array(self):
         """Returns an array with the weights for weighting each alternative
 
         Returns:
             np.array: 1xn array with weighting values
         """        
-        pass
+        if self.fuzzy_treatment:
+            criteria = self.fuzzy_weight_criteria
+        else:
+            criteria = self.weight_criteria_final
+        weights = criteria["weights"]
+        array_criteria = list()
+        del criteria["weights"]
+        for index, item in enumerate(criteria):
+            array_criteria += list(weights[index] * np.array(criteria[item]))
+        return np.array(array_criteria)        
+
+
+    def from_excel(self, path):
+        """Extracts the pairwise comparison information contained in an Excel workbook
+        in Google Forms results format.
+
+        Args:
+            path (str): relative path of the Excel file.
+        """
+        __file = open_excel(path=path)
+        self.__expert_mail(__file)
+        self.__criteria(__file)
+        self.__subcriteria(__file)
+
+        # self.show_info()
+
+    #TODO: Reemplazar wight_criteria -> info_evaluation (ALL)
+    def show_info(self):
+        """_summary_"""
+        print("#####Resultados de encuestas#####")
+        series = {
+            "Experto": self.weight_criteria.index,
+            "[C1:Ambiental  C2:Económico C3:Técnico]": self.weight_criteria[
+                "weights"
+            ].tolist(),
+        }
+
+        df_2print = pd.DataFrame(series)
+        print_table("Criterios", df_2print)
+        series = {
+            "Experto": self.weight_criteria.index,
+            "[C1.1:Emisión  C1.2:Suelo C1.3:Impacto]": self.weight_criteria[
+                "Ambiental"
+            ].tolist(),
+        }
+
+        df_2print = pd.DataFrame(series)
+        print_table("Subcriterios Ambientales", df_2print)
+        series = {
+            "Experto": self.weight_criteria.index,
+            "[C2.1:LCOE     C2.2:CAPEX    C2.3:OPEX]": self.weight_criteria[
+                "Económico"
+            ].tolist(),
+        }
+
+        df_2print = pd.DataFrame(series)
+        print_table("Subcriterios Económicos", df_2print)
+        series = {
+            "Experto": self.weight_criteria.index,
+            "[C3.1:Eficiencia C3.2:Despachabilidad C3.3:Autonomía]": self.weight_criteria[
+                "Técnico"
+            ].tolist(),
+        }
+
+        df_2print = pd.DataFrame(series)
+        print_table("Subcriterios Técnicos", df_2print)
+        series = {
+            "Experto": self.weight_criteria.index,
+            "[CI Criterios]": self.weight_criteria["CI_weights"].tolist(),
+        }
+
+        df_2print = pd.DataFrame(series)
+        print_table("Consistencia", df_2print)
+
+    #TODO: Remover wight_criteria
+    def __expert_mail(self, df_experts):
+        """_summary_
+
+        Args:
+            df_experts (_type_): _description_
+        """
+        self.weight_criteria = df_experts[df_experts.columns[-1:]]
+        self.info_evaluation = df_experts[df_experts.columns[-1:]]
 
     def __consistency_index(self, n_criteria, lmax):
         """_summary_
@@ -241,6 +324,7 @@ class Criteria:
                         matrix[column_index, row_index] = float(value[aux])
         return self.__consistency_check(matrix, name_matrix)
 
+    #TODO: weight_criteria solo queda como list_wc eliminar CI
     def __criteria(self, df_file):
         """_summary_
 
@@ -263,10 +347,12 @@ class Criteria:
         self.weight_criteria = self.weight_criteria.assign(
             weights=list_wc, CI_weights=list_ci
         )
-        print(list_wc)
+        self.info_evaluation = self.info_evaluation.assign(
+            weights=list_wc, CI_weights=list_ci
+        )
+        self.weight_criteria_final['weights'] = self.__aggregation(list_matrix)
         if self.fuzzy_treatment:
             result = self.__fuzzy_conversion(list_matrix)
-            print(result)
             self.fuzzy_weight_criteria['weights'] = result
             
     def __subcriteria(self, df_file):
@@ -318,11 +404,34 @@ class Criteria:
 
         df_wsubs = pd.DataFrame.from_dict(list_wsubs)
         self.weight_criteria = pd.concat([self.weight_criteria, df_wsubs], axis=1)
+        self.info_evaluation = pd.concat([self.info_evaluation, df_wsubs], axis=1)
         if self.fuzzy_treatment:
             df_matrix_subs = pd.DataFrame.from_dict(list_matrix_sub)
             for column in df_matrix_subs:
                 result = self.__fuzzy_conversion(df_matrix_subs[column].to_list())
                 self.fuzzy_weight_criteria[column] = result
+
+    def __aggregation(self, df_file, method=0):
+        df_file = np.array(df_file)
+        if len(df_file)==1:
+            return df_file
+        rows, columns = df_file[0].shape
+        agg_df_file = list()
+        #agg_defuzzy_df_file = list()
+        for row in range(rows):
+            new_row = list()
+            # new_row_defuzzy = list()
+            for column in range(columns):
+                print("CICLO")
+                print(df_file[:, row, column])
+                #result = self.__fuzzy_mean_geometric([ x  for x in df_file[:, row, column]])
+                #defuzzy_result = self.__defuzzification(result)
+                #new_row.append(result)
+                #new_row_defuzzy.append(defuzzy_result)
+            #agg_df_file.append(new_row)
+            #agg_defuzzy_df_file.append(new_row_defuzzy)
+        return agg_df_file
+        pass
 
     def __fuzzy_conversion(self, df_file):
         fuzzy_scale = {
@@ -398,80 +507,12 @@ class Criteria:
             defuzzy_weights[index] = (number_fuzzy[0]+4*number_fuzzy[1]+number_fuzzy[2])/6
         return defuzzy_weights
 
-    def __expert_mail(self, df_experts):
-        """_summary_
-
-        Args:
-            df_experts (_type_): _description_
-        """
-        self.weight_criteria = df_experts[df_experts.columns[-1:]]
-
-    def from_excel(self, path):
-        """Extracts the pairwise comparison information contained in an Excel workbook
-        in Google Forms results format.
-
-        Args:
-            path (str): relative path of the Excel file.
-        """
-        __file = open_excel(path=path)
-        self.__expert_mail(__file)
-        self.__criteria(__file)
-        self.__subcriteria(__file)
-
-        # self.show_info()
-
-    def show_info(self):
-        """_summary_"""
-        print("#####Resultados de encuestas#####")
-        series = {
-            "Experto": self.weight_criteria.index,
-            "[C1:Ambiental  C2:Económico C3:Técnico]": self.weight_criteria[
-                "weights"
-            ].tolist(),
-        }
-
-        df_2print = pd.DataFrame(series)
-        print_table("Criterios", df_2print)
-        series = {
-            "Experto": self.weight_criteria.index,
-            "[C1.1:Emisión  C1.2:Suelo C1.3:Impacto]": self.weight_criteria[
-                "Ambiental"
-            ].tolist(),
-        }
-
-        df_2print = pd.DataFrame(series)
-        print_table("Subcriterios Ambientales", df_2print)
-        series = {
-            "Experto": self.weight_criteria.index,
-            "[C2.1:LCOE     C2.2:CAPEX    C2.3:OPEX]": self.weight_criteria[
-                "Económico"
-            ].tolist(),
-        }
-
-        df_2print = pd.DataFrame(series)
-        print_table("Subcriterios Económicos", df_2print)
-        series = {
-            "Experto": self.weight_criteria.index,
-            "[C3.1:Eficiencia C3.2:Despachabilidad C3.3:Autonomía]": self.weight_criteria[
-                "Técnico"
-            ].tolist(),
-        }
-
-        df_2print = pd.DataFrame(series)
-        print_table("Subcriterios Técnicos", df_2print)
-        series = {
-            "Experto": self.weight_criteria.index,
-            "[CI Criterios]": self.weight_criteria["CI_weights"].tolist(),
-        }
-
-        df_2print = pd.DataFrame(series)
-        print_table("Consistencia", df_2print)
-
-
 if __name__ == "__main__":
     test_obj = Criteria()
     test_obj.show_all = False
-    test_obj.fuzzy = True
+    test_obj.fuzzy = False
     test_obj.from_excel(path="./Repo/Articulo1/Encuesta/Resultados-9-02-2023.xlsx")
+    print(test_obj.weight_criteria)
+    #print(test_obj.get_weighting_array)
     #test_obj.from_excel(path="./Repo/Articulo1/Test/test2.xlsx")
     #test_obj.show_info()
