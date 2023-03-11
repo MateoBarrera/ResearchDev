@@ -1,7 +1,9 @@
-"""_summary_
+"""Model file
 
-Returns:
-    _type_: _description_
+This module include MCDA methods AHP and TOPSIS
+
+Autor: Mateo Barrera
+Date: 11-03-2023
 """
 from datetime import datetime
 from locale import normalize
@@ -52,7 +54,7 @@ def normalize(array: list, normalize_type: str):
         max_array = [(max(array) - x) / (max(array) - min(array)) for x in array]
         return list(max_array / sum(max_array))
 
-
+#*TODO mover a criteria.py
 def criteria_aggregation(df_criteria, method):
     """_summary_
 
@@ -102,7 +104,7 @@ def criteria_aggregation(df_criteria, method):
             criteria_agg[column] = [sum(aux_0), sum(aux_1), sum(aux_2)]
     return criteria_agg, method_str
 
-
+#*TODO mover a criteria.py
 def load_criteria_weight(
     show_criteria_matrix, show_expert_matrix, method_aggregation=0, test=0
 ):
@@ -143,7 +145,7 @@ def normalize_alternatives(alternative_matrix):
     print(alternative_matrix.to_markdown(floatfmt=".4f"))
     return alternative_matrix
 
-
+#*TODO mover a criteria.py
 def weighting_subcriteria(criteria: dict):
     weights = criteria["weights"]
     array_criteria = list()

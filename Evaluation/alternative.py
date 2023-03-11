@@ -1,6 +1,9 @@
-"""_summary_
+"""Alternative file
 
+This module include the class for generate the scenarios/alternatives specifications
 
+Autor: Mateo Barrera
+Date: 11-03-2023
 """
 from operator import length_hint
 import numpy as np

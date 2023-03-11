@@ -1,4 +1,9 @@
-"""_summary_
+"""Indicator file
+
+This module includes the structure for the construction and evaluation of indicators.
+
+Autor: Mateo Barrera
+Date: 11-03-2023
 """
 import numpy as np
 import pandas as pd  # pylint: disable=import-error
