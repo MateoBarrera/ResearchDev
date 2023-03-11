@@ -109,15 +109,15 @@ def load_criteria_weight(
     test_obj = Criteria()
     test_obj.show_all = show_expert_matrix
     if test == 1:
-        test_obj.from_excel(path="../Repo/Articulo1/Test/test1.xlsx")
+        test_obj.from_excel(path="./Repo/Articulo1/Test/test1.xlsx")
     elif test == 2:
-        test_obj.from_excel(path="../Repo/Articulo1/Test/test2.xlsx")
+        test_obj.from_excel(path="./Repo/Articulo1/Test/test2.xlsx")
     elif test == 3:
-        test_obj.from_excel(path="../Repo/Articulo1/Test/test3.xlsx")
+        test_obj.from_excel(path="./Repo/Articulo1/Test/test3.xlsx")
     elif test == 4:
-        test_obj.from_excel(path="../Repo/Articulo1/Test/test4.xlsx")
+        test_obj.from_excel(path="./Repo/Articulo1/Test/test4.xlsx")
     else:
-        test_obj.from_excel(path="../Repo/Articulo1/Encuesta/Resultados-9-02-2023.xlsx")
+        test_obj.from_excel(path="./Repo/Articulo1/Encuesta/Resultados-9-02-2023.xlsx")
     result, method_str = criteria_aggregation(
         test_obj.weight_criteria, method=method_aggregation
     )
@@ -286,14 +286,14 @@ def show_evaluation(result_df):
 def save_xls(df_name, dframe: pd.DataFrame):
     pass
     time = datetime.now().strftime("%H.%M")
-    with pd.ExcelWriter("../Repo/Articulo1/output/result.xlsx", mode="a") as writer:
+    with pd.ExcelWriter("./Repo/Articulo1/output/result.xlsx", mode="a") as writer:
         dframe.to_excel(writer, sheet_name=df_name +"-"+ str(time))
 
 
 if __name__ == "__main__":
     """test_obj = Criteria()
     test_obj.show_all = False
-    test_obj.from_excel(path="../Repo/Articulo1/Encuesta/Resultados-9-02-2023.xlsx")
+    test_obj.from_excel(path="./Repo/Articulo1/Encuesta/Resultados-9-02-2023.xlsx")
     result = criteria_aggregation(test_obj.weight_criteria, method=0)
     table = PrettyTable()
     table.title = "Resultado pesos agregados - media geométrica"

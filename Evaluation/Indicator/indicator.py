@@ -381,7 +381,7 @@ class Indicators:
     
 def save_xls(df_name, dframe: pd.DataFrame):
     time = datetime.now().strftime("%H.%M")
-    with pd.ExcelWriter("../Repo/Articulo1/output/result.xlsx", mode="a") as writer:
+    with pd.ExcelWriter("./Repo/Articulo1/output/result.xlsx", mode="a") as writer:
         dframe.to_excel(writer, sheet_name=df_name +"-"+ str(time))
 
 if __name__ == "__main__":

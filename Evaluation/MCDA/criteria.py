@@ -446,6 +446,6 @@ if __name__ == "__main__":
     test_obj = Criteria()
     test_obj.show_all = False
     test_obj.fuzzy = True
-    test_obj.from_excel(path="../Repo/Articulo1/Encuesta/Resultados-9-02-2023.xlsx")
-    #test_obj.from_excel(path="../Repo/Articulo1/Test/test2.xlsx")
+    test_obj.from_excel(path="./Repo/Articulo1/Encuesta/Resultados-9-02-2023.xlsx")
+    #test_obj.from_excel(path="./Repo/Articulo1/Test/test2.xlsx")
     #test_obj.show_info()
