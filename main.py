@@ -71,8 +71,6 @@ indicators.load("Evaluation/Indicator/indicators.json")
 alternative_matrix = indicators.evaluate_alternative(alternatives_kw)
 
 
-# Media geométrica 0; Ponderados por consistencia 1
-method_aggregation = 1
 # Escoge datos de evaluación de prueba
 ## 0 - expertos
 ## 1 - Igual importancia
@@ -83,16 +81,16 @@ test_criteria = 0
 
 
 AHP(
-    alternative_matrix=alternative_matrix,
-    show_criteria_matrix=False,
-    show_expert_matrix=False,
-    method_aggregation=method_aggregation,
-    test=test_criteria,
+    alternative_matrix = alternative_matrix,
+    show_criteria_matrix = True,
+    show_expert_matrix = False,
+    test = test_criteria,
+    fuzzy = False
 )
 TOPSIS(
-    alternative_matrix=alternative_matrix,
-    show_criteria_matrix=False,
-    show_expert_matrix=False,
-    method_aggregation=method_aggregation,
-    test=test_criteria,
+    alternative_matrix = alternative_matrix,
+    show_criteria_matrix = True,
+    show_expert_matrix = False,
+    test = test_criteria,
+    fuzzy = True
 )
