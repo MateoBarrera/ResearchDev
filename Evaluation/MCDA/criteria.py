@@ -431,7 +431,7 @@ class Criteria:
     def __aggregation(self, df_file, method=0):
         df_file = np.array(df_file)
         if len(df_file)==1:
-            return df_file
+            return  self.__weights(df_file[0])
         
         if method != 0:
             return self.__weights_through_ci(df_file)
@@ -481,8 +481,6 @@ class Criteria:
 
     def __fuzzy_aggregation(self, df_file):
         df_file = np.array(df_file)
-        if len(df_file)==1:
-            return df_file
         rows, columns = df_file[0].shape
         agg_df_file = list()
         #agg_defuzzy_df_file = list()

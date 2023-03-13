@@ -34,7 +34,7 @@ power = solar.potential(installed_capacity=1000, show=True)
 power = wind.potential(installed_capacity=1000, show=True)
 power = biomass.potential(installed_capacity=1000, show=True)
 
-total_installed_capacity = 430  # kW
+total_installed_capacity = 1000  # kW
 
 alternatives = Alternatives(
     resources_included=[1, 1, 1, 1],
@@ -77,19 +77,19 @@ alternative_matrix = indicators.evaluate_alternative(alternatives_kw)
 ## 2 - Enfoque Ambiental
 ## 3 - Enfoque Económico
 ## 4 - Enfoque Técnico
-test_criteria = 0
+test_criteria = 1
 
 
 AHP(
     alternative_matrix = alternative_matrix,
-    show_criteria_matrix = True,
+    show_criteria_matrix = False,
     show_expert_matrix = False,
     test = test_criteria,
-    fuzzy = False
+    fuzzy = True
 )
 TOPSIS(
     alternative_matrix = alternative_matrix,
-    show_criteria_matrix = True,
+    show_criteria_matrix = False,
     show_expert_matrix = False,
     test = test_criteria,
     fuzzy = True
