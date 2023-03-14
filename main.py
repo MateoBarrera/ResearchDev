@@ -38,7 +38,7 @@ total_installed_capacity = 1000  # kW
 
 alternatives = Alternatives(
     resources_included=[1, 1, 1, 1],
-    seed=[1,  0.5, 0],
+    seed=[1,  0.5, 0.25, 0],
     installed_capacity=total_installed_capacity,
 )
 df_alternatives = alternatives.get()
