@@ -6,11 +6,10 @@ Autor: Mateo Barrera
 Date: 11-03-2023
 """
 from datetime import datetime
-from locale import normalize
-from statistics import geometric_mean
 import numpy as np
 import pandas as pd  # pylint: disable=import-error
 from .criteria import Criteria  # pylint: disable=import-error
+from ..save import save_model
 
 from prettytable import PrettyTable  # pylint: disable=import-error
 
@@ -35,24 +34,6 @@ def normalize_criteria(array: list, normalize_type: str):
         max_array = array / max(array)
         return list(max_array / sum(max_array))
 
-
-def normalize(array: list, normalize_type: str):
-    """Normaliza el arreglo recibido teniendo en cuenta su característica de tipo costo o beneficio.
-
-    Args:
-        array (list): arreglo que se desea normalizar.
-        normalize_type (str): tipo de criterio: 0 -> Costo (Minimizar); 1 -> Beneficio (Maximizar)
-
-    Returns:
-        list: arreglo normalizado
-    """
-    array = np.array(array)
-    if normalize_type == 0:
-        min_array = [(x - min(array)) / (max(array) - min(array)) for x in array]
-        return list(min_array / sum(min_array))
-    elif normalize_type == 1:
-        max_array = [(max(array) - x) / (max(array) - min(array)) for x in array]
-        return list(max_array / sum(max_array))
 
 def load_path_evaluation(test=0):
     dict_paths = {
@@ -80,7 +61,9 @@ def ahp(
     show_criteria_matrix=False,
     show_expert_matrix=False,
     test=False,
-    fuzzy=False
+    fuzzy=False,
+    save=None,
+    alt_info=None
 ):
     """_summary_
 
@@ -98,16 +81,28 @@ def ahp(
     criteria_obj.from_excel(path=load_path_evaluation(test))
 
     criteria_aggregation = criteria_obj.get_weighting_array()
-    #save_xls("Criteria", pd.DataFrame(criteria_aggregation))
-    #save_xls("Criteria N", pd.DataFrame(criteria_aggregation))
-    #save_xls("Alternatives", alternative_matrix)
     alternative_matrix_norm = normalize_alternatives(alternative_matrix)
-    #save_xls("AHP-Criteria N", alternative_matrix_norm)
     alternative_array = alternative_matrix_norm.to_numpy()
     result = np.matmul(alternative_array, np.transpose(criteria_aggregation))
     result_df = pd.DataFrame({"Evaluation": result})
-    #save_xls("AHP-Ranking", result_df.sort_values(by="Evaluation", ascending=False))
     show_evaluation(result_df)
+    if save is not None:
+        info = {
+            "name": save,
+            "date": datetime.now().strftime("%D"),
+            "fuzzy": str(fuzzy),
+            "test_data": f" {test} // 0 - expertos; 1 - Igual importancia; 2 - Enfoque Ambiental; 3 - Enfoque Económico; 4 - Enfoque Técnico"
+        }
+
+        model = {
+            "info": pd.DataFrame(info, index=[0]),
+            "alternative_info":alt_info,
+            "alternatives_norm": alternative_matrix_norm,            
+            "criteria":pd.DataFrame(data=criteria_aggregation),
+            "result": result_df.sort_values(by="Evaluation", ascending=False),
+        }
+
+        save_model(save, model)
 
 
 def __topsis_normalize(alternatives):
@@ -125,6 +120,7 @@ def __topsis_print_norm(alternatives, info):
     )
     print("\n:: Criteria Normalized  ::")
     print(alternatives.to_markdown(floatfmt=".4f"))
+    return alternatives
     #save_xls("TOP-Criteria N", alternatives)
 
 
@@ -163,7 +159,9 @@ def topsis(
     show_criteria_matrix=False,
     show_expert_matrix=False,
     test=False,
-    fuzzy=False
+    fuzzy=False,
+    save=None,
+    alt_info=None
 ):
     """_summary_
 
@@ -184,7 +182,7 @@ def topsis(
 
     alternatives_array = __topsis_normalize(np.transpose(alternative_matrix.to_numpy()))
     alternatives_array = np.where(np.isnan(alternatives_array), 0, alternatives_array)
-    __topsis_print_norm(alternatives_array, alternative_matrix)
+    alternatives_norm = __topsis_print_norm(alternatives_array, alternative_matrix)
 
     weighted_alternatives = alternatives_array * np.transpose([criteria_aggregation])
 
@@ -195,6 +193,23 @@ def topsis(
     result_df = pd.DataFrame({"Evaluation": similarity_index})
     #save_xls("TOP-Ranking", result_df.sort_values(by="Evaluation", ascending=False))
     show_evaluation(result_df)
+    if save is not None:
+        info = {
+            "name": save,
+            "date": datetime.now().strftime("%D"),
+            "fuzzy": str(fuzzy),
+            "test_data": f" {test} // 0 - expertos; 1 - Igual importancia; 2 - Enfoque Ambiental; 3 - Enfoque Económico; 4 - Enfoque Técnico"
+        }
+        
+        model = {
+            "info": pd.DataFrame(info, index=[0]),
+            "alternative_info":alt_info,
+            "alternatives_norm": alternatives_norm,            
+            "criteria":pd.DataFrame(data=criteria_aggregation),
+            "result": result_df.sort_values(by="Evaluation", ascending=False),
+        }
+
+        save_model(save, model)
 
 
 def show_evaluation(result_df):
@@ -205,9 +220,3 @@ def show_evaluation(result_df):
         )
     )
 
-
-def save_xls(df_name, dframe: pd.DataFrame):
-    pass
-    time = datetime.now().strftime("%H.%M")
-    with pd.ExcelWriter("./Repo/Articulo1/output/result.xlsx", mode="a") as writer:
-        dframe.to_excel(writer, sheet_name=df_name +"-"+ str(time))
