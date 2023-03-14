@@ -93,11 +93,13 @@ class Hydro:
 
     def potential(self, show, installed_capacity=1000):
         ### Parameters ###
+        pt = 100
         e = 0.9  # Turbine efficiency
         n = 0.85  # Accessories efficiency
         H = 2  # Height
+        operation_regime = 8
         ### End Parameters ###
-
+        nt = math.ceil(installed_capacity/pt)
         df = pd.DataFrame(index=self.data_month_piv.index)
 
         df["Q"] = self.data_month_piv["mean"]
@@ -113,18 +115,17 @@ class Hydro:
         df.set_index = df.index.month
 
         def power_gen(x):
-            return (9.81 * (x["Qd"]) * H * e * n * 8 * x["days"]) if x["Qd"] > 0 else 0
-
+            return (nt * (0.98/1.3) * 9.81 * (x["Qd"]) * H * e * n * operation_regime * x["days"]) if x["Qd"] > 0 else 0
+        qd_mean = df["Qd"].mean()
         df["monthly energy"] = df.apply(power_gen, axis=1)
-
         def correction(x):
             return (
-                installed_capacity * e * n * 8 * x["days"]
-                if (x["monthly energy"] > installed_capacity * e * 24 * x["days"])
+                nt * x["monthly energy"]*(0.98/1.3)
+                if (x["monthly energy"] > installed_capacity * e * n * operation_regime * x["days"])
                 else x["monthly energy"]
             )
 
-        df["monthly energy"] = df.apply(correction, axis=1)
+        #df["monthly energy"] = df.apply(correction, axis=1)
         power_generation = np.sum(df["monthly energy"].tolist()) / 365
         df = df.rename(index=lambda x: x.strftime("%B"))
         df = df.drop(columns=["days"])

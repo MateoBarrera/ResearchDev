@@ -38,7 +38,7 @@ total_installed_capacity = 1000  # kW
 
 alternatives = Alternatives(
     resources_included=[1, 1, 1, 1],
-    seed=[1,  0.5, 0.25, 0],
+    seed=[1, 0.5, 0.25, 0],
     installed_capacity=total_installed_capacity,
 )
 df_alternatives = alternatives.get()
@@ -77,7 +77,7 @@ alternative_matrix = indicators.evaluate_alternative(alternatives_kw)
 ## 2 - Enfoque Ambiental
 ## 3 - Enfoque Económico
 ## 4 - Enfoque Técnico
-test_criteria = 1
+test_criteria = 0
 
 
 AHP(
