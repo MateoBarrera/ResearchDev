@@ -263,7 +263,7 @@ class Indicators:
                         (x["solar_generation"] / (freq_factor * 1000))
                         + (x["wind_generation"] / (freq_factor * 1000))
                         + (x["hydro_generation"] / (freq_factor * 1000))
-                        + (x["biomass_generation"] / (freq_factor * 1000)) * 1.55
+                        + (x["biomass_generation"] / (freq_factor * 1000))
                     )
                 ),
             },

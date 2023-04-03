@@ -179,7 +179,8 @@ def topsis(
 
     criteria_obj.from_excel(path=load_path_evaluation(test))
     criteria_aggregation = criteria_obj.get_weighting_array()
-
+    print("SHSISHHSHSHHSHSHHS")
+    print(criteria_aggregation)
     alternatives_array = __topsis_normalize(np.transpose(alternative_matrix.to_numpy()))
     alternatives_array = np.where(np.isnan(alternatives_array), 0, alternatives_array)
     alternatives_norm = __topsis_print_norm(alternatives_array, alternative_matrix)
