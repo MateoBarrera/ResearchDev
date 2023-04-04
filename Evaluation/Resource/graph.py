@@ -12,7 +12,6 @@ font = {
 }
 
 
-@classmethod
 def flow_permanece_curve(cls):
     """Evaluate the resource with the flow duration curve graph for the given data."""
     q_data_sort = np.sort(cls.q_data)[::-1]
