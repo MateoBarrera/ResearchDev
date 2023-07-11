@@ -50,20 +50,23 @@ def __filter_csv(file):
     )
 
 
-def __filter_csv_pw_nasa(file, _type=None):
+def __filter_csv_pw_nasa(file, _type):
     """_summary_
 
     Args:
         file (_type_): _description_
-        _type (_type_, optional): _description_. Defaults to None.
+        _type (_type_, optional): _description_.
 
     Returns:
         _type_: _description_
     """
+
     if _type == "pv":
         parameter = "ALLSKY_SFC_SW_DWN"
     elif _type == "wind":
         parameter = "WS10M"
+    else:
+        raise TypeError(f"Unexpected _type argument value: {_type}")
 
     file = file.filter(items=["YEAR", "MO", "DY", parameter])
     file = file.rename(

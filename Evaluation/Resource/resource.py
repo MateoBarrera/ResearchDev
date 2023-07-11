@@ -14,7 +14,7 @@ font = {
     "size": 10,
 }
 
-###Local Method###
+# Local Method #
 """
 * Importante
 ! deprecated
@@ -63,7 +63,8 @@ def calculate_variability(df):
 
 
 class Hydro:
-    """Analysis of the water resource through the flow permanence curve, resource variability and calculation of autonomy from historical monthly average flow data.
+    """Analysis of the water resource through the flow permanence curve, resource variability and calculation of \
+    autonomy from historical monthly average flow data.
 
     Returns:
         Object: Hydro object
@@ -74,6 +75,11 @@ class Hydro:
     __autonomy: float = None
 
     def __init__(self, data) -> None:
+        self.data_month_piv = None
+        self.data_month = None
+        self.q_mean = None
+        self.q_sr = None
+        self.q_sr_index = None
         self.data = data
         self.q_data = pd.DataFrame(data)["Valor"].to_list()
         self.calculate_autonomy()
@@ -92,14 +98,14 @@ class Hydro:
         self.__autonomy = calculate_autonomy(self.data_month_piv, self.q_sr)
 
     def potential(self, show, installed_capacity=1000):
-        ### Parameters ###
+        # Parameters #
         pt = 100
         e = 0.9  # Turbine efficiency
         n = 0.85  # Accessories efficiency
         H = 2  # Height
         operation_regime = 8
-        ### End Parameters ###
-        nt = math.ceil(installed_capacity/pt)
+        # End Parameters #
+        nt = math.ceil(installed_capacity / pt)
         df = pd.DataFrame(index=self.data_month_piv.index)
 
         df["Q"] = self.data_month_piv["mean"]
@@ -115,17 +121,20 @@ class Hydro:
         df.set_index = df.index.month
 
         def power_gen(x):
-            return (nt * (0.98/1.3) * 9.81 * (x["Qd"]) * H * e * n * operation_regime * x["days"]) if x["Qd"] > 0 else 0
-        qd_mean = df["Qd"].mean()
+            return (nt * (0.98 / 1.3) * 9.81 * (x["Qd"]) * H * e * n * operation_regime * x["days"]) \
+                    if x["Qd"] > 0 else 0
+
+        # qd_mean = df["Qd"].mean()
         df["monthly energy"] = df.apply(power_gen, axis=1)
+
         def correction(x):
             return (
-                nt * x["monthly energy"]*(0.98/1.3)
+                nt * x["monthly energy"] * (0.98 / 1.3)
                 if (x["monthly energy"] > installed_capacity * e * n * operation_regime * x["days"])
                 else x["monthly energy"]
             )
 
-        #df["monthly energy"] = df.apply(correction, axis=1)
+        # df["monthly energy"] = df.apply(correction, axis=1)
         power_generation = np.sum(df["monthly energy"].tolist()) / 365
         df = df.rename(index=lambda x: x.strftime("%B"))
         df = df.drop(columns=["days"])
@@ -134,11 +143,11 @@ class Hydro:
             print("\n:: Hydro ::")
             print(df.to_markdown(floatfmt=".1f"))
             print(
-                f"Generation {round(power_generation, 2)}[kW year]; Capacity Factor {round(capacity_factor*100,2)}%"
+                f"Generation {round(power_generation, 2)}[kW year]; Capacity Factor {round(capacity_factor * 100, 2)}%"
             )
         return power_generation
 
-    def flow_permanece_curve(self):
+    def flow_permanence_curve(self):
         """Evaluate the resource with the flow duration curve graph for the given data."""
         q_data_sort = np.sort(self.q_data)[::-1]
         q_frequency = (np.arange(1.0, len(q_data_sort) + 1) / len(q_data_sort)) * 100
@@ -173,16 +182,17 @@ class Hydro:
         # Flow permanence curve
         ax2.plot(q_frequency, q_data_sort)
 
-        ax2.fill_between(
-            q_frequency[0 : self.q_sr_index],
-            q_data_sort[0 : self.q_sr_index],
+        """ax2.fill_between(
+            q_frequency[0: self.q_sr_index],
+            q_data_sort[0: self.q_sr_index],
             self.q_sr,
             alpha=0.2,
             color="b",
-        )
+        )"""
+        
         ax2.fill_between(
-            q_frequency[self.q_sr_index :],
-            q_data_sort[self.q_sr_index :],
+            q_frequency[self.q_sr_index:],
+            q_data_sort[self.q_sr_index:],
             self.q_sr,
             alpha=0.2,
             color="r",
@@ -268,15 +278,15 @@ class Hydro:
         ax1.plot(q_frequency, q_data_sort)
 
         ax1.fill_between(
-            q_frequency[0 : self.q_sr_index],
-            q_data_sort[0 : self.q_sr_index],
+            q_frequency[0: self.q_sr_index],
+            q_data_sort[0: self.q_sr_index],
             self.q_sr,
             alpha=0.2,
             color="b",
         )
         ax1.fill_between(
-            q_frequency[self.q_sr_index :],
-            q_data_sort[self.q_sr_index :],
+            q_frequency[self.q_sr_index:],
+            q_data_sort[self.q_sr_index:],
             self.q_sr,
             alpha=0.2,
             color="r",
@@ -296,8 +306,8 @@ class Hydro:
         plt.subplots_adjust(hspace=0.3, bottom=0.1)
 
         # Flow permanence curve
-        q_sort = np.sort(df["q"])[::-1]
-        q_power_sort = np.sort(df["potencial"])[::-1]
+        # q_sort = np.sort(df["q"])[::-1]
+        # q_power_sort = np.sort(df["potencial"])[::-1]
         ax2.plot(q_data_sort, q_data_p)
 
         """ ax2.fill_between(q_frequency[0:self.q_sr_index],
@@ -330,7 +340,7 @@ class Hydro:
 
     @property
     def viability_graph(self):
-        return self.flow_permanece_curve()
+        return self.flow_permanence_curve()
 
     @property
     def is_viability(self):
@@ -351,13 +361,14 @@ class Hydro:
 
     @property
     def all_graph(self):
-        self.flow_permanece_curve()
+        self.flow_permanence_curve()
         self.graph_variability()
         return
 
 
 class Pv:
-    """Analysis of the solar resource through the Peak Sun Hours, resource variability and calculation of autonomy from historical monthly average flow data.
+    """Analysis of the solar resource through the Peak Sun Hours, resource variability and calculation of autonomy
+    from historical monthly average flow data.
 
     Returns:
         Object: Pv object
@@ -368,6 +379,10 @@ class Pv:
     __autonomy: float = None
 
     def __init__(self, data, min_irr_pv) -> None:
+        self.data_month_piv = None
+        self.data_month = None
+        self.irr_mean_month = None
+        self.irr_mean = None
         self.data = data
         self.min_irr_pv = min_irr_pv
         self.calculate_autonomy()
@@ -383,7 +398,7 @@ class Pv:
         self.__autonomy = calculate_autonomy(self.data_month_piv, self.min_irr_pv)
 
     def potential(self, show, installed_capacity=1000):
-        pp = 0.200  # Peak power of the panel [kW year]
+        # pp = 0.200  # Peak power of the panel [kW year]
         n = 0.90  # Typical conditions
         df = pd.DataFrame(index=self.data_month_piv.index)
         df["PSH"] = self.data_month_piv["mean"]
@@ -402,7 +417,7 @@ class Pv:
             print("\n:: Solar ::")
             print(df.to_markdown(floatfmt=".1f"))
             print(
-                f"Generation {round(power_generation, 2)}[kW year]; Capacity Factor {round(capacity_factor*100,2)}%"
+                f"Generation {round(power_generation, 2)}[kW year]; Capacity Factor {round(capacity_factor * 100, 2)}%"
             )
         return power_generation
 
@@ -521,7 +536,8 @@ class Pv:
 
 
 class Wind:
-    """Analysis of the wind resource through the Peak Sun Hours, resource variability and calculation of autonomy from historical monthly average flow data.
+    """Analysis of the wind resource through the Peak Sun Hours, resource variability and calculation of autonomy
+    from historical monthly average flow data.
 
     Returns:
         Object: Wind object
@@ -532,6 +548,10 @@ class Wind:
     __autonomy: float = None
 
     def __init__(self, data, min_ws_wind) -> None:
+        self.data_month = None
+        self.wind_mean_month = None
+        self.data_month_piv = None
+        self.wind_mean = None
         self.data = data
         self.min_ws_wind = min_ws_wind
         self.calculate_autonomy()
@@ -547,7 +567,7 @@ class Wind:
         self.__autonomy = calculate_autonomy(self.data_month_piv, self.min_ws_wind)
 
     def potential(self, show, installed_capacity=1000):
-        p = 100  # Prate kW
+        # p = 100  # Prate kW
         vc = 2
         vr = 12
         vf = 27
@@ -559,14 +579,14 @@ class Wind:
         def powe_gen_a(x):
             return (
                 installed_capacity * x["days"] * (x["v"] - vc) / (vr - vc)
-                if (vc < x["v"] and x["v"] < vr)
+                if (vc < x["v"] < vr)
                 else 0
             )
 
         def powe_gen_b(x):
             return (
                 installed_capacity * x["days"]
-                if (vr < x["v"] and x["v"] < vf)
+                if (vr < x["v"] < vf)
                 else x["monthly energy"]
             )
 
@@ -581,7 +601,7 @@ class Wind:
             print("\n:: Wind ::")
             print(df.to_markdown(floatfmt=".1f"))
             print(
-                f"Generation {round(power_generation, 2)}[kW year]; Capacity Factor {round(capacity_factor*100,2)}%"
+                f"Generation {round(power_generation, 2)}[kW year]; Capacity Factor {round(capacity_factor * 100, 2)}%"
             )
         return power_generation
 
@@ -705,7 +725,8 @@ class Wind:
 
 
 class Biomass:
-    """Analysis of the biomass resource through the biogas, resource variability and calculation of autonomy from historical monthly average flow data.
+    """Analysis of the biomass resource through the biogas, resource variability and calculation of autonomy from 
+    historical monthly average flow data.
 
     Returns:
         Object: Biomass object
@@ -731,7 +752,8 @@ class Biomass:
     def autonomy(self):
         return ":: Autonomy Resource: {:.2f}% ::".format(self.__autonomy * 100)
 
-    def transform_data(self, data, collection_regime):
+    @staticmethod
+    def transform_data(data, collection_regime):
         factor = list(data["Factor"])
         if collection_regime == 1:
             result = np.array(list(data[0.1])) * np.array(factor)
@@ -749,16 +771,16 @@ class Biomass:
     def potential(self, show, installed_capacity=1000):
         pci = 4.77  # Lower caloric potential[kW/h/m^3]
         n = 0.32  # Typical condition
-        n_turbine = math.ceil(installed_capacity/100)
+        n_turbine = math.ceil(installed_capacity / 100)
         operation_regime = 8
         q_turbine = 85
 
-        if n_turbine*q_turbine > self.data/24:
-            q_design = self.data/24
+        if n_turbine * q_turbine > self.data / 24:
+            q_design = self.data / 24
         else:
-            q_design = n_turbine*q_turbine
+            q_design = n_turbine * q_turbine
 
-        power_generation = pci * n * q_design * operation_regime 
+        power_generation = pci * n * q_design * operation_regime
         """ Llevas a dataframe y al cálculo por meses
         df["days"] = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
 
@@ -772,8 +794,8 @@ class Biomass:
         if show:
             capacity_factor = power_generation / (pci * n * q_design * 24)
             print("\n:: Biomass - Biogas ::")
-            #print(df.to_markdown(floatfmt=".1f"))
+            # print(df.to_markdown(floatfmt=".1f"))
             print(
-                f"Generation {round(power_generation, 2)}[kW month]; Capacity Factor {round(capacity_factor*100,2)}%"
+                f"Generation {round(power_generation, 2)}[kW month]; Capacity Factor {round(capacity_factor * 100, 2)}%"
             )
         return power_generation

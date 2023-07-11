@@ -75,6 +75,8 @@ def __filter_csv_pw_nasa(file, _type=None):
         parameter = "ALLSKY_SFC_SW_DWN"
     elif _type == "wind":
         parameter = "WS10M"
+    else:
+        raise TypeError(f"Unexpected _type argument value: {_type}")
 
     file = file.filter(items=["YEAR", "MO", "DY", parameter])
     file = file.rename(
@@ -281,6 +283,15 @@ class PrimaryResource:
             self.name, self.__date_start, self.__date_end, self.__frequency, self.__unit
         )
 
+    def __load_from_file(self, __file_obj):
+        self.__date_start = __file_obj["info"]["date_start"]
+        self.__date_end = __file_obj["info"]["date_end"]
+        self.__frequency = __file_obj["info"]["frequency"]
+        self.__unit = __file_obj["info"]["unit"]
+        self.__data_df = __file_obj["data"]
+        return True
+
+
     def from_csv(self, path=None) -> bool:
         """Set info PrimaryResource from a csv file.
         Args:
@@ -299,12 +310,11 @@ class PrimaryResource:
         elif self.source.lower() == "pw_nasa":
             __file_obj = read_pw_nasa_data(path=path, _type=self.__type_resource)
 
-        self.__date_start = __file_obj["info"]["date_start"]
-        self.__date_end = __file_obj["info"]["date_end"]
-        self.__frequency = __file_obj["info"]["frequency"]
-        self.__unit = __file_obj["info"]["unit"]
-        self.__data_df = __file_obj["data"]
-        return True
+        else:
+            raise TypeError(f"Unexpected source data argument value: {self.source.lower}")
+
+        return self.__load_from_file(__file_obj)
+
 
     def from_excel(self, path=None) -> bool:
         """Set info PrimaryResource from a .xlsx file.
@@ -328,13 +338,10 @@ class PrimaryResource:
 
         elif self.source.lower() == "other":
             __file_obj = read_other_data(path=path, _type=self.__type_resource)
+        else:
+            raise TypeError(f"Unexpected source data argument value: {self.source.lower}")
 
-        self.__date_start = __file_obj["info"]["date_start"]
-        self.__date_end = __file_obj["info"]["date_end"]
-        self.__frequency = __file_obj["info"]["frequency"]
-        self.__unit = __file_obj["info"]["unit"]
-        self.__data_df = __file_obj["data"]
-        return True
+        return self.__load_from_file(__file_obj)
 
     def from_json(self, json=None):
         """Set info PrimaryResource from a JSON object.
@@ -366,7 +373,7 @@ class ResourceViability:
         self.__min_biomass = min_biomass
 
     def evaluate_resource(self, resource):
-        """Mesure the viability and variability resource (pv, hydro, wind, biomass).
+        """Measure the viability and variability resource (pv, hydro, wind, biomass).
 
         Args:
             resource (PrimaryResource Object): Object with info and historical data.

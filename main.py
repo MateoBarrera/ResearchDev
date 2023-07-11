@@ -4,7 +4,6 @@ from Evaluation.Indicator.indicator import *
 from Evaluation.MCDA.model import ahp as AHP
 from Evaluation.MCDA.model import topsis as TOPSIS
 
-
 hydro_data = PrimaryResource(
     name="Caudal medio mensual", type_resource="hydro", source="Ideam", station=26057040
 )
@@ -28,11 +27,10 @@ wind.evaluate_resource(wind_data)
 biomass = ResourceViability()
 biomass.evaluate_resource(biomass_data)
 
-
-power = hydro.potential(installed_capacity=1000, show=True)
-power = solar.potential(installed_capacity=1000, show=True)
-power = wind.potential(installed_capacity=1000, show=True)
-power = biomass.potential(installed_capacity=1000, show=True)
+hydro.potential(installed_capacity=1000, show=True)
+solar.potential(installed_capacity=1000, show=True)
+wind.potential(installed_capacity=1000, show=True)
+biomass.potential(installed_capacity=1000, show=True)
 
 total_installed_capacity = 1000  # kW
 
@@ -58,7 +56,6 @@ for index, alternative in alternatives_kw.iterrows():
     wind_array.append(wind.potential(alternative["wind"]))
     biomass_array.append(biomass.potential(alternative["biomass"]))
 
-
 alternatives_kw["solar_generation"] = solar_array
 alternatives_kw["hydro_generation"] = hydro_array
 alternatives_kw["wind_generation"] = wind_array
@@ -70,33 +67,31 @@ indicators = Indicators()
 indicators.load("Evaluation/Indicator/indicators.json")
 alternative_matrix = indicators.evaluate_alternative(alternatives_kw)
 
-
 # Escoge datos de evaluación de prueba
-## 0 - expertos
-## 1 - Igual importancia
-## 2 - Enfoque Ambiental
-## 3 - Enfoque Económico
-## 4 - Enfoque Técnico
+# 0 - expertos
+# 1 - Igual importancia
+# 2 - Enfoque Ambiental
+# 3 - Enfoque Económico
+# 4 - Enfoque Técnico
 test_criteria = 0
 
-
 AHP(
-    alternative_matrix = alternative_matrix,
-    show_criteria_matrix = False,
-    show_expert_matrix = False,
-    test = test_criteria,
-    fuzzy = True,
-    save="AHP", 
-    alt_info = alternatives_kw
+    alternative_matrix=alternative_matrix,
+    show_criteria_matrix=False,
+    show_expert_matrix=False,
+    test=test_criteria,
+    fuzzy=True,
+    save="AHP",
+    alt_info=alternatives_kw
 )
 
 TOPSIS(
-    alternative_matrix = alternative_matrix,
-    show_criteria_matrix = False,
-    show_expert_matrix = False,
-    test = test_criteria,
-    fuzzy = True,
+    alternative_matrix=alternative_matrix,
+    show_criteria_matrix=False,
+    show_expert_matrix=False,
+    test=test_criteria,
+    fuzzy=True,
     save="TOPSIS",
-    alt_info = alternatives_kw
+    alt_info=alternatives_kw
 )
-## 0 - expertos; 1 - Igual importancia; 2 - Enfoque Ambiental; 3 - Enfoque Económico; 4 - Enfoque Técnico
+# 0 - expertos; 1 - Igual importancia; 2 - Enfoque Ambiental; 3 - Enfoque Económico; 4 - Enfoque Técnico
