@@ -9,6 +9,7 @@ hydro_data = PrimaryResource(
 )
 hydro_data.from_csv("data/hydro/caudal_medio_mensual/Jamundi.csv.csv")
 
+"""
 solar_data = PrimaryResource(name="Irradiance", type_resource="pv", source="pw_nasa")
 solar_data.from_csv("data/pv/PV-Jamundi-H.csv")
 
@@ -16,16 +17,19 @@ wind_data = PrimaryResource(name="Wind speed", type_resource="wind", source="pw_
 wind_data.from_csv("data/wind/Wind-Jamundi-D-Nasa.csv")
 
 biomass_data = PrimaryResource(name="Biogas", type_resource="biomass", source="Other")
-biomass_data.from_excel("data/biomass/biomasa.xlsx")
+biomass_data.from_excel("data/biomass/biomasa.xlsx")"""
 
 hydro = ResourceViability()
 hydro.evaluate_resource(hydro_data)
+hydro.graph_resource()
+"""
 solar = ResourceViability()
 solar.evaluate_resource(solar_data)
 wind = ResourceViability()
 wind.evaluate_resource(wind_data)
 biomass = ResourceViability()
 biomass.evaluate_resource(biomass_data)
+
 
 hydro.potential(installed_capacity=1000, show=True)
 solar.potential(installed_capacity=1000, show=True)
@@ -93,5 +97,5 @@ TOPSIS(
     fuzzy=True,
     save="TOPSIS",
     alt_info=alternatives_kw
-)
+)"""
 # 0 - expertos; 1 - Igual importancia; 2 - Enfoque Ambiental; 3 - Enfoque Económico; 4 - Enfoque Técnico

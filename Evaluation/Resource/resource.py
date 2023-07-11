@@ -1,18 +1,32 @@
 import math
 import pandas as pd
+import matplotlib
 import matplotlib.pyplot as plt  # pylint: disable=import-error
 import numpy as np
 import seaborn as sns  # pylint: disable=import-error
 
-# plt.style.use("seaborn-paper")
-# plt.style.use('ggplot')
-
-font = {
-    "family": "serif",
-    "color": "black",
-    "weight": "bold",
-    "size": 10,
-}
+plt.style.use('seaborn-v0_8-colorblind')
+# plt.style.use('Evaluation/Resource/graph.mplstyle')
+fsize = 18
+tsize = 10
+tdir = 'in'
+major = 5.0
+minor = 3.0
+lwidth = 0.8
+lhandle = 2.0
+plt.style.use('default')
+plt.rcParams['text.usetex'] = True
+plt.rcParams['font.size'] = fsize
+plt.rcParams['legend.fontsize'] = tsize
+plt.rcParams['xtick.direction'] = tdir
+plt.rcParams['ytick.direction'] = tdir
+plt.rcParams['xtick.major.size'] = major
+plt.rcParams['xtick.minor.size'] = minor
+plt.rcParams['ytick.major.size'] = 5.0
+plt.rcParams['ytick.minor.size'] = 3.0
+plt.rcParams['axes.linewidth'] = lwidth
+plt.rcParams['legend.handlelength'] = lhandle
+plt.rcParams['font.family'] = "serif"
 
 # Local Method #
 """
@@ -122,7 +136,7 @@ class Hydro:
 
         def power_gen(x):
             return (nt * (0.98 / 1.3) * 9.81 * (x["Qd"]) * H * e * n * operation_regime * x["days"]) \
-                    if x["Qd"] > 0 else 0
+                if x["Qd"] > 0 else 0
 
         # qd_mean = df["Qd"].mean()
         df["monthly energy"] = df.apply(power_gen, axis=1)
@@ -153,7 +167,7 @@ class Hydro:
         q_frequency = (np.arange(1.0, len(q_data_sort) + 1) / len(q_data_sort)) * 100
 
         # Plot figure
-        fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(10, 6))
+        fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(6.4, 10), dpi=300)
 
         # Plot raw data
         self.data.plot(kind="line", x="Fecha", y="Valor", ax=ax1, label="Q")
@@ -174,22 +188,22 @@ class Hydro:
             label="Qsr = {:.2f}".format(self.q_sr),
         )
 
-        ax1.set_title("Average monthly flow", fontdict=font)
-        ax1.set_xlabel("Year", fontdict=font)
-        ax1.set_ylabel("Q [m^3/s]", fontdict=font)
+        ax1.set_title("Average monthly flow")
+        ax1.set_xlabel("Year")
+        ax1.set_ylabel("$Q  m^3/s$")
         ax1.legend(loc="upper left")
 
         # Flow permanence curve
         ax2.plot(q_frequency, q_data_sort)
 
-        """ax2.fill_between(
+        ax2.fill_between(
             q_frequency[0: self.q_sr_index],
             q_data_sort[0: self.q_sr_index],
             self.q_sr,
             alpha=0.2,
             color="b",
-        )"""
-        
+        )
+
         ax2.fill_between(
             q_frequency[self.q_sr_index:],
             q_data_sort[self.q_sr_index:],
@@ -205,9 +219,9 @@ class Hydro:
             linestyles="--",
             label="Qsr = {:.2f}".format(self.q_sr),
         )
-        ax2.set_xlabel("Percentage of occurrence [%]", fontdict=font)
-        ax2.set_ylabel("Flow rate [m^3/s]", fontdict=font)
-        ax2.set_title("Flow permanence curve", fontdict=font)
+        ax2.set_xlabel("Percentage of occurrence $\%$")
+        ax2.set_ylabel("Flow rate $m^3/s$")
+        ax2.set_title("Flow permanence curve")
         ax2.legend(loc="upper right")
         plt.subplots_adjust(hspace=0.3, bottom=0.1)
 
@@ -219,13 +233,13 @@ class Hydro:
         data_month_piv = self.data_month_piv
 
         # Plot figure
-        fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(10, 6))
-        data_month_piv.plot(kind="line", ax=ax1, alpha=0.4)
+        fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(8, 8), dpi=300)
+        data_month_piv.plot(kind="line", ax=ax1, alpha=0.1, legend=None)
 
         # Mean chart
         data_month_piv["mean"] = data_month_piv.mean(axis=1)
         data_month_piv["std"] = data_month_piv.std(axis=1)
-        data_month_piv.plot(kind="line", y="mean", ax=ax1, style="--k")
+        data_month_piv.plot(kind="line", y="mean", label="$Q_{mean}$", ax=ax1, style="--k")
         ax1.fill_between(
             data_month_piv.index,
             data_month_piv["mean"] - data_month_piv["std"],
@@ -240,9 +254,9 @@ class Hydro:
             linestyles="--",
             label="Qsr = {:.2f}".format(self.q_sr),
         )
-        ax1.set_title("River regime", fontdict=font)
-        ax1.set_xlabel("Year", fontdict=font)
-        ax1.set_ylabel("Q [m^3/s]", fontdict=font)
+        ax1.set_title("River regime")
+        ax1.set_xlabel("Year")
+        ax1.set_ylabel("$Q m^3/s$")
 
         data_month["Mes"] = pd.to_datetime(
             data_month.index.month, format="%m"
@@ -250,9 +264,9 @@ class Hydro:
 
         # Boxplot chart
         sns.boxplot(data=data_month, x="Mes", y="Valor", ax=ax2)
-        ax2.set_title("Average monthly flow", fontdict=font)
-        ax2.set_xlabel("Year", fontdict=font)
-        ax2.set_ylabel("Q [m^3/s]", fontdict=font)
+        ax2.set_title("Average monthly flow")
+        ax2.set_xlabel("Year")
+        ax2.set_ylabel("$Q m^3/s$")
 
         plt.subplots_adjust(hspace=0.5, bottom=0.1)
         return fig
@@ -299,9 +313,9 @@ class Hydro:
             linestyles="--",
             label="Qsr = {:.2f}".format(self.q_sr),
         )
-        ax1.set_xlabel("Percentage of occurrence [%]", fontdict=font)
-        ax1.set_ylabel("Flow rate [m^3/s]", fontdict=font)
-        ax1.set_title("Flow permanence curve", fontdict=font)
+        ax1.set_xlabel("Percentage of occurrence [%]")
+        ax1.set_ylabel("Flow rate [m^3/s]")
+        ax1.set_title("Flow permanence curve")
         ax1.legend(loc="upper right")
         plt.subplots_adjust(hspace=0.3, bottom=0.1)
 
@@ -330,9 +344,9 @@ class Hydro:
             linestyles="--",
             label="Average Q = {:.2f}".format(self.q_mean),
         )
-        ax2.set_xlabel("Flow rate [m^3/s]", fontdict=font)
-        ax2.set_ylabel("Power generation [Wh]", fontdict=font)
-        ax2.set_title("Power duration curve", fontdict=font)
+        ax2.set_xlabel("Flow rate [m^3/s]")
+        ax2.set_ylabel("Power generation [Wh]")
+        ax2.set_title("Power duration curve")
         ax2.legend(loc="upper right")
         plt.subplots_adjust(hspace=0.3, bottom=0.1)
         plt.show()
@@ -387,6 +401,7 @@ class Pv:
         self.min_irr_pv = min_irr_pv
         self.calculate_autonomy()
 
+    # noinspection DuplicatedCode
     def calculate_autonomy(self):
         # Prepare data
         self.irr_mean_month = self.data.groupby(
@@ -438,11 +453,9 @@ class Pv:
             label="Average GHI= {:.2f}k".format(self.irr_mean),
         )
         ax1.set_title(
-            "Total daily solar irradiance incident - Global Horizontal Irradiance",
-            fontdict=font,
-        )
-        ax1.set_xlabel("Year", fontdict=font)
-        ax1.set_ylabel("Irradiance [kWh/m^2/day]", fontdict=font)
+            "Total daily solar irradiance incident - Global Horizontal Irradiance")
+        ax1.set_xlabel("Year")
+        ax1.set_ylabel("Irradiance [kWh/m^2/day]")
         ax1.legend(loc="upper left")
 
         # Plot month data
@@ -457,9 +470,9 @@ class Pv:
             linestyles="--",
             label="Average PHS= {:.2f}".format(self.irr_mean),
         )
-        ax2.set_title("Monthly Peak Sun Hours", fontdict=font)
-        ax2.set_xlabel("Year", fontdict=font)
-        ax2.set_ylabel("PHS [h]", fontdict=font)
+        ax2.set_title("Monthly Peak Sun Hours")
+        ax2.set_xlabel("Year")
+        ax2.set_ylabel("PHS [h]")
         ax2.legend(loc="upper left")
 
         return fig
@@ -491,9 +504,9 @@ class Pv:
             linestyles="--",
             label="Min Irradiance = {:.2f}".format(self.min_irr_pv),
         )
-        ax1.set_title("Monthly Peak Sun Hours", fontdict=font)
-        ax1.set_xlabel("Year", fontdict=font)
-        ax1.set_ylabel("PHS [h]", fontdict=font)
+        ax1.set_title("Monthly Peak Sun Hours")
+        ax1.set_xlabel("Year")
+        ax1.set_ylabel("PHS [h]")
 
         data_month["Mes"] = pd.to_datetime(
             data_month.index.month, format="%m"
@@ -501,9 +514,9 @@ class Pv:
 
         # Boxplot chart
         sns.boxplot(data=data_month, x="Mes", y="Valor", ax=ax2)
-        ax2.set_title("Monthly Peak Sun Hours", fontdict=font)
-        ax2.set_xlabel("Year", fontdict=font)
-        ax2.set_ylabel("PHS [h]", fontdict=font)
+        ax2.set_title("Monthly Peak Sun Hours")
+        ax2.set_xlabel("Year")
+        ax2.set_ylabel("PHS [h]")
 
         plt.subplots_adjust(hspace=0.5, bottom=0.1)
         return fig
@@ -629,9 +642,9 @@ class Wind:
             linestyles="--",
             label="min ws= {:.2f}".format(self.min_ws_wind),
         )
-        ax1.set_title("Monthly average wind speed", fontdict=font)
-        ax1.set_xlabel("Year", fontdict=font)
-        ax1.set_ylabel("Wind speed [m/s]", fontdict=font)
+        ax1.set_title("Monthly average wind speed")
+        ax1.set_xlabel("Year")
+        ax1.set_ylabel("Wind speed [m/s]")
         ax1.legend(loc="upper left")
 
         # Plot month data
@@ -646,9 +659,9 @@ class Wind:
             linestyles="--",
             label="Average ws= {:.2f}".format(self.wind_mean),
         )
-        ax2.set_title("Monthly average wind speed", fontdict=font)
-        ax2.set_xlabel("Year", fontdict=font)
-        ax2.set_ylabel("Wind speed [m/s]", fontdict=font)
+        ax2.set_title("Monthly average wind speed")
+        ax2.set_xlabel("Year")
+        ax2.set_ylabel("Wind speed [m/s]")
         ax2.legend(loc="upper left")
 
         return fig
@@ -680,9 +693,9 @@ class Wind:
             linestyles="--",
             label="Min wind speed = {:.2f}".format(self.min_ws_wind),
         )
-        ax1.set_title("Monthly average wind speed", fontdict=font)
-        ax1.set_xlabel("Year", fontdict=font)
-        ax1.set_ylabel("Wind speed [m/s]", fontdict=font)
+        ax1.set_title("Monthly average wind speed")
+        ax1.set_xlabel("Year")
+        ax1.set_ylabel("Wind speed [m/s]")
 
         data_month["Mes"] = pd.to_datetime(
             data_month.index.month, format="%m"
@@ -690,9 +703,9 @@ class Wind:
 
         # Boxplot chart
         sns.boxplot(data=data_month, x="Mes", y="Valor", ax=ax2)
-        ax2.set_title("Monthly average wind speed", fontdict=font)
-        ax2.set_xlabel("Year", fontdict=font)
-        ax2.set_ylabel("Wind speed [m/s]", fontdict=font)
+        ax2.set_title("Monthly average wind speed")
+        ax2.set_xlabel("Year")
+        ax2.set_ylabel("Wind speed [m/s]")
 
         plt.subplots_adjust(hspace=0.5, bottom=0.1)
         return fig
