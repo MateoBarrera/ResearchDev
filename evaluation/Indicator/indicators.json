@@ -1,0 +1,162 @@
+{
+	"101": {
+		"id": "C1.1",
+		"name": "Reducción de emisiones de CO2",
+		"criteria": 100,
+		"description": "Reducción en las emisiones CO2 para una capacidad determinada de generación mediante recursos limpios en comparación con el equivalente de generación con gas natural.",
+		"source": "",
+		"data": {
+			"solar": "",
+			"wind": "",
+			"hydro": "",
+			"biomass": ""
+		},
+		"year": "",
+		"unit": "tC02",
+		"type_indicator": "benefit"
+	},
+	"102": {
+		"id": "C1.2",
+		"name": "Ocupación del terreno",
+		"criteria": 100,
+		"description": "Área ocupada por el sistema de energía durante su vida útil, comparando la cantidad de metros cuadrados necesarios para producir un MWh de electricidad.",
+		"source": "",
+		"data": {
+			"solar": "0.33",
+			"wind": "1.57",
+			"hydro": "0.02",
+			"biomass": "12.65"
+		},
+		"year": "2013",
+		"unit": "m2/MW",
+		"type_indicator": "cost"
+	},
+	"103": {
+		"id": "C1.3",
+		"name": "Impacto potencial a los ecosistemas (Flora y Fauna) **",
+		"criteria": 100,
+		"description": "Impactos negativos causados al ecosistema debida a l explotación de los recursos, incluyendo la pérdida de biodiversidad (flora y fauna) debido a actividades de implementación, puesta en marcha y operación de los sistemas de generación",
+		"source": "",
+		"data": {
+			"solar": "L",
+			"wind": "L",
+			"hydro": "I",
+			"biomass": "L"
+		},
+		"year": "2013",
+		"unit": "qualitative",
+		"type_indicator": "cost"
+	},
+	"104": {
+		"id": "C1.4",
+		"name": "Consumo de agua",
+		"criteria": 100,
+		"description": "Se considera para cuantificar el volumen de agua consumida por la tecnología para producir un solo MW de electricidad durante toda su cadena de producción, teniendo en cuenta los procesos secundarios, como la refrigeración y el uso de agua para construcción de los componentes.",
+		"source": "biomasa articulo Rio Carrillo, demas - 5-15",
+		"data": {
+			"solar": "0.001",
+			"wind": "5.4e-5",
+			"hydro": "8.9e-6",
+			"biomass": "1"
+		},
+		"year": "2013",
+		"unit": "m3/MWh",
+		"type_indicator": "cost"
+	},
+	"201": {
+		"id": "C2.1",
+		"name": "LCOE",
+		"criteria": 200,
+		"description": "Costo nivelado de la energía.",
+		"source": "",
+		"data": {
+			"solar": "202.94",
+			"wind": "76.28",
+			"hydro": "124.97",
+			"biomass": "72"
+		},
+		"year": "2015",
+		"unit": "USD/MWh",
+		"type_indicator": "cost"
+	},
+	"202": {
+		"id": "C2.2",
+		"name": "CAPEX",
+		"criteria": 200,
+		"description": "Costo de inversión para proyecto de generación con recursos renovables no convencionales.",
+		"source": "",
+		"data": {
+			"solar": "1100",
+			"wind": "1350",
+			"hydro": "29900",
+			"biomass": "2000"
+		},
+		"year": "2015",
+		"unit": "USD/kW",
+		"type_indicator": "cost"
+	},
+	"203": {
+		"id": "C2.3",
+		"name": "OPEX",
+		"criteria": 200,
+		"description": "Costo operacional que se produce cada año tomando en cuenta los costos asociados al combustible, labores de operación y mantenimiento.",
+		"source": "",
+		"data": {
+			"solar": "6.5",
+			"wind": "40",
+			"hydro": "37",
+			"biomass": "21"
+		},
+		"year": "2015",
+		"unit": "USD/kW",
+		"type_indicator": "cost"
+	},
+	"301": {
+		"id": "C3.1",
+		"name": "Eficiencia de la generación",
+		"criteria": 300,
+		"description": "la eficiencia de trasformación del recurso primario en energía eléctrica para cada una de las tecnologías renovables.",
+		"source": "",
+		"data": {
+			"solar": "25",
+			"wind": "40",
+			"hydro": "89",
+			"biomass": "35"
+		},
+		"year": "2020",
+		"unit": "%",
+		"type_indicator": "benefit"
+	},
+	"302": {
+		"id": "C3.2",
+		"name": "Capacidad de responder a la demanda **",
+		"criteria": 300,
+		"description": "La capacidad de responder a los picos de demanda y asegurar la estabilidad general de la red a largo plazo en el contexto de una cuota creciente de generación intermitente a partir de algunas fuentes de energía renovables.",
+		"source": "",
+		"data": {
+			"solar": "No",
+			"wind": "No",
+			"hydro": "No",
+			"biomass": "Si, lento"
+		},
+		"year": "2020",
+		"unit": "qualitative",
+		"type_indicator": "benefit"
+	},
+	"303": {
+		"id": "C3.3",
+		"name": "Autonomía del recurso primario",
+		"criteria": 300,
+		"description": "Se evalúan las horas por año que puede suministrar energía eléctrica las alternativas renovables, de acuerdo con las características del entorno y el recurso primario disponible.",
+		"source": "",
+		"data": {
+			"solar": "100",
+			"wind": "66.67",
+			"hydro": "83.33",
+			"biomass": "100"
+		},
+		"year": "2020",
+		"unit": "%",
+		"type_indicator": "benefit"
+	}
+}

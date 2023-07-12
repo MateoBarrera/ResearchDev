@@ -1,15 +1,15 @@
-from Evaluation.Resource.load import *
-from Evaluation.alternative import *
-from Evaluation.Indicator.indicator import *
-from Evaluation.MCDA.model import ahp as AHP
-from Evaluation.MCDA.model import topsis as TOPSIS
+from evaluation.resource.load import *
+from evaluation.alternative import *
+from evaluation.Indicator.indicator import *
+from evaluation.MCDA.model import ahp as AHP
+from evaluation.MCDA.model import topsis as TOPSIS
 
 hydro_data = PrimaryResource(
     name="Caudal medio mensual", type_resource="hydro", source="Ideam", station=26057040
 )
 hydro_data.from_csv("data/hydro/caudal_medio_mensual/Jamundi.csv.csv")
 
-"""
+
 solar_data = PrimaryResource(name="Irradiance", type_resource="pv", source="pw_nasa")
 solar_data.from_csv("data/pv/PV-Jamundi-H.csv")
 
@@ -17,12 +17,12 @@ wind_data = PrimaryResource(name="Wind speed", type_resource="wind", source="pw_
 wind_data.from_csv("data/wind/Wind-Jamundi-D-Nasa.csv")
 
 biomass_data = PrimaryResource(name="Biogas", type_resource="biomass", source="Other")
-biomass_data.from_excel("data/biomass/biomasa.xlsx")"""
+biomass_data.from_excel("data/biomass/biomasa.xlsx")
 
 hydro = ResourceViability()
 hydro.evaluate_resource(hydro_data)
 hydro.graph_resource()
-"""
+
 solar = ResourceViability()
 solar.evaluate_resource(solar_data)
 wind = ResourceViability()
@@ -68,7 +68,7 @@ alternatives_kw["biomass_generation"] = biomass_array
 
 
 indicators = Indicators()
-indicators.load("Evaluation/Indicator/indicators.json")
+indicators.load("evaluation/Indicator/indicators.json")
 alternative_matrix = indicators.evaluate_alternative(alternatives_kw)
 
 # Escoge datos de evaluación de prueba
@@ -97,5 +97,5 @@ TOPSIS(
     fuzzy=True,
     save="TOPSIS",
     alt_info=alternatives_kw
-)"""
+)
 # 0 - expertos; 1 - Igual importancia; 2 - Enfoque Ambiental; 3 - Enfoque Económico; 4 - Enfoque Técnico
