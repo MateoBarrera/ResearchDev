@@ -246,16 +246,11 @@ class Hydro:
         return fig
 
     def graph_variability(self):
-        # Prepare data
-        data_month = self.data_month
-        data_month_piv = self.data_month_piv
-
-        # Plot figure
         fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(8, 12))
-        graph_variability_resource(ax1, dataframe=data_month_piv, title="River regime", y_label="$m^3/s$",
+        graph_variability_resource(ax1, dataframe=self.data_month_piv, title="River regime", y_label="$m^3/s$",
                                    label="$Q_{avg}$", min_viability=self.q_sr, viability_label="$Q_{sr}$")
 
-        grap_boxplot_resource(ax2, dataframe=data_month, title="River regime", y_label="$m^3/s$")
+        grap_boxplot_resource(ax2, dataframe=self.data_month, title="River regime", y_label="$m^3/s$")
         return fig
 
     def graph_pdc(self):
