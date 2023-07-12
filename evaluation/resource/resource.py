@@ -4,8 +4,11 @@ import pandas as pd
 import matplotlib.pyplot as plt  # pylint: disable=import-error
 import numpy as np
 import seaborn as sns  # pylint: disable=import-error
+import matplotlib.dates as mpl_dates
 
 plt.style.use(['seaborn-v0_8-colorblind', 'evaluation/resource/graph.mplstyle'])
+months_ticks_labels = pd.date_range('2014-01-01', '2014-12-31',
+                      freq='MS').strftime("%b").tolist()
 
 # Local Method #
 """
@@ -206,8 +209,8 @@ class Hydro:
         data_month_piv = self.data_month_piv
 
         # Plot figure
-        fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(8, 8), dpi=300)
-        data_month_piv.plot(kind="line", ax=ax1, alpha=0.1, legend=None)
+        fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(8, 12))
+        data_month_piv.plot(kind="line", ax=ax1, alpha=0.15, legend=None)
 
         # Mean chart
         data_month_piv["mean"] = data_month_piv.mean(axis=1)
@@ -225,23 +228,25 @@ class Hydro:
             xmax=data_month_piv.index.max(),
             colors="red",
             linestyles="--",
-            label="Qsr = {:.2f}".format(self.q_sr),
+            label="Q_sr = {:.2f}".format(self.q_sr),
         )
         ax1.set_title("River regime")
         ax1.set_xlabel("Year")
         ax1.set_ylabel("$Q m^3/s$")
+        ax1.xaxis.set_ticks(list(ax1.get_xticks()) + list(ax1.get_xticks(minor=True)))
+        ax1.set_xticklabels(months_ticks_labels)
 
         data_month["Mes"] = pd.to_datetime(
             data_month.index.month, format="%m"
         ).month_name()
 
         # Boxplot chart
-        sns.boxplot(data=data_month, x="Mes", y="Valor", ax=ax2)
+        hydro_boxplot = sns.boxplot(data=data_month, x="Mes", y="Valor", ax=ax2)
         ax2.set_title("Average monthly flow")
         ax2.set_xlabel("Year")
         ax2.set_ylabel("$Q m^3/s$")
-
         plt.subplots_adjust(hspace=0.5, bottom=0.1)
+        hydro_boxplot.set_xticklabels(months_ticks_labels)
         return fig
 
     def graph_pdc(self):

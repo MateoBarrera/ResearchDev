@@ -21,8 +21,8 @@ biomass_data.from_excel("data/biomass/biomasa.xlsx")
 
 hydro = ResourceViability()
 hydro.evaluate_resource(hydro_data)
-hydro.graph_resource(raw=1)
-
+hydro.graph_resource()
+"""
 solar = ResourceViability()
 solar.evaluate_resource(solar_data)
 wind = ResourceViability()
@@ -97,5 +97,5 @@ TOPSIS(
     fuzzy=True,
     save="TOPSIS",
     alt_info=alternatives_kw
-)
+)"""
 # 0 - expertos; 1 - Igual importancia; 2 - Enfoque Ambiental; 3 - Enfoque Económico; 4 - Enfoque Técnico
