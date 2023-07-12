@@ -1,7 +1,16 @@
-axes.titlesize : 24
-axes.labelsize : 20
-lines.linewidth : 3
-lines.markersize : 10
-xtick.labelsize : 16
-ytick.labelsize : 16
-mathtext.fontset : stix
+text.usetex : True
+font.size : 18
+legend.fontsize : 16
+xtick.direction : in
+ytick.direction : in
+xtick.major.size : 5.0
+xtick.minor.size : 3.0
+ytick.major.size : 5.0
+ytick.minor.size : 3.0
+axes.linewidth : 0.8
+legend.handlelength : 2.0
+font.family : serif
+figure.figsize : 8, 6
+figure.dpi : 100
+figure.autolayout : True
+date.converter : concise

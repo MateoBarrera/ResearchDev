@@ -400,7 +400,8 @@ class ResourceViability:
             self.__viability = Biomass(resource.data, self.__min_biomass)
         return True
 
-    def graph_resource(self):
+    def graph_resource(self, raw=False):
+        self.__viability.raw = raw
         # fig = self.__viability.viability_graph
         # fig2 = self.__viability.variability_graph
         self.__viability.all_graph

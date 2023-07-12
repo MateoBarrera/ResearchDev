@@ -1,32 +1,11 @@
 import math
 import pandas as pd
-import matplotlib
+# import matplotlib
 import matplotlib.pyplot as plt  # pylint: disable=import-error
 import numpy as np
 import seaborn as sns  # pylint: disable=import-error
 
-plt.style.use('seaborn-v0_8-colorblind')
-# plt.style.use('evaluation/resource/graph.mplstyle')
-fsize = 18
-tsize = 10
-tdir = 'in'
-major = 5.0
-minor = 3.0
-lwidth = 0.8
-lhandle = 2.0
-plt.style.use('default')
-plt.rcParams['text.usetex'] = True
-plt.rcParams['font.size'] = fsize
-plt.rcParams['legend.fontsize'] = tsize
-plt.rcParams['xtick.direction'] = tdir
-plt.rcParams['ytick.direction'] = tdir
-plt.rcParams['xtick.major.size'] = major
-plt.rcParams['xtick.minor.size'] = minor
-plt.rcParams['ytick.major.size'] = 5.0
-plt.rcParams['ytick.minor.size'] = 3.0
-plt.rcParams['axes.linewidth'] = lwidth
-plt.rcParams['legend.handlelength'] = lhandle
-plt.rcParams['font.family'] = "serif"
+plt.style.use(['seaborn-v0_8-colorblind', 'evaluation/resource/graph.mplstyle'])
 
 # Local Method #
 """
@@ -76,8 +55,26 @@ def calculate_variability(df):
     return df.apply(cv).mean()
 
 
+def graph_raw_data_resource(resource: str, dataframe, y_axis=None, label="None"):
+    fig = plt.figure()
+    ax = fig.add_subplot()
+    dataframe.plot(kind="line", x="Fecha", y="Valor", ax=ax, label=label)
+    ax.hlines(
+        y=dataframe["Valor"].mean(),
+        xmin=dataframe["Fecha"].min(),
+        xmax=dataframe["Fecha"].max(),
+        colors="black",
+        linestyles="--",
+        label=label + " {avg}" + " = {:.2f} ".format(dataframe["Valor"].mean()) + y_axis,
+    )
+    ax.set_title(resource.capitalize())
+    ax.set_xlabel("Year")
+    ax.set_ylabel(y_axis)
+    ax.legend(loc="upper right")
+
+
 class Hydro:
-    """Analysis of the water resource through the flow permanence curve, resource variability and calculation of \
+    """Analysis of water resource through the flow permanence curve, resource variability and calculation of \
     autonomy from historical monthly average flow data.
 
     Returns:
@@ -96,6 +93,8 @@ class Hydro:
         self.q_sr_index = None
         self.data = data
         self.q_data = pd.DataFrame(data)["Valor"].to_list()
+        self.raw = False
+        self.qd = None
         self.calculate_autonomy()
 
     def calculate_autonomy(self):
@@ -116,7 +115,7 @@ class Hydro:
         pt = 100
         e = 0.9  # Turbine efficiency
         n = 0.85  # Accessories efficiency
-        H = 2  # Height
+        h = 2  # Height
         operation_regime = 8
         # End Parameters #
         nt = math.ceil(installed_capacity / pt)
@@ -135,7 +134,7 @@ class Hydro:
         df.set_index = df.index.month
 
         def power_gen(x):
-            return (nt * (0.98 / 1.3) * 9.81 * (x["Qd"]) * H * e * n * operation_regime * x["days"]) \
+            return (nt * (0.98 / 1.3) * 9.81 * (x["Qd"]) * h * e * n * operation_regime * x["days"]) \
                 if x["Qd"] > 0 else 0
 
         # qd_mean = df["Qd"].mean()
@@ -153,7 +152,7 @@ class Hydro:
         df = df.rename(index=lambda x: x.strftime("%B"))
         df = df.drop(columns=["days"])
         if show:
-            capacity_factor = power_generation / (9.81 * 7 * H * e * n * 24)
+            capacity_factor = power_generation / (9.81 * 7 * h * e * n * 24)
             print("\n:: Hydro ::")
             print(df.to_markdown(floatfmt=".1f"))
             print(
@@ -161,70 +160,44 @@ class Hydro:
             )
         return power_generation
 
-    def flow_permanence_curve(self):
-        """Evaluate the resource with the flow duration curve graph for the given data."""
+    def flow_permanence_curve(self) -> object:
+        """Evaluate the resource with the flow duration curve graph for the given data.
+
+        Returns:
+            object: matplotlib.pyplot.figure corresponding to the flow  permanent graph
+        """
         q_data_sort = np.sort(self.q_data)[::-1]
         q_frequency = (np.arange(1.0, len(q_data_sort) + 1) / len(q_data_sort)) * 100
-
         # Plot figure
-        fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(6.4, 10), dpi=300)
-
-        # Plot raw data
-        self.data.plot(kind="line", x="Fecha", y="Valor", ax=ax1, label="Q")
-        ax1.hlines(
-            y=self.q_mean,
-            xmin=self.data["Fecha"].min(),
-            xmax=self.data["Fecha"].max(),
-            colors="gray",
-            linestyles="--",
-            label="Average Q= {:.2f}".format(self.q_mean),
-        )
-        ax1.hlines(
-            y=self.q_sr,
-            xmin=self.data["Fecha"].min(),
-            xmax=self.data["Fecha"].max(),
-            colors="red",
-            linestyles="--",
-            label="Qsr = {:.2f}".format(self.q_sr),
-        )
-
-        ax1.set_title("Average monthly flow")
-        ax1.set_xlabel("Year")
-        ax1.set_ylabel("$Q  m^3/s$")
-        ax1.legend(loc="upper left")
-
-        # Flow permanence curve
-        ax2.plot(q_frequency, q_data_sort)
-
-        ax2.fill_between(
+        fig = plt.figure()
+        ax1 = fig.add_subplot()
+        ax1.plot(q_frequency, q_data_sort)
+        ax1.fill_between(
             q_frequency[0: self.q_sr_index],
             q_data_sort[0: self.q_sr_index],
             self.q_sr,
             alpha=0.2,
             color="b",
         )
-
-        ax2.fill_between(
+        ax1.fill_between(
             q_frequency[self.q_sr_index:],
             q_data_sort[self.q_sr_index:],
             self.q_sr,
             alpha=0.2,
             color="r",
         )
-        ax2.hlines(
+        ax1.hlines(
             y=self.q_sr,
             xmin=q_frequency[0],
             xmax=q_frequency[-1],
             colors="red",
             linestyles="--",
-            label="Qsr = {:.2f}".format(self.q_sr),
+            label="Qsr = {:.2f} $m^3/s$".format(self.q_sr),
         )
-        ax2.set_xlabel("Percentage of occurrence $\%$")
-        ax2.set_ylabel("Flow rate $m^3/s$")
-        ax2.set_title("Flow permanence curve")
-        ax2.legend(loc="upper right")
-        plt.subplots_adjust(hspace=0.3, bottom=0.1)
-
+        ax1.set_xlabel("Percentage of occurrence $\%$")
+        ax1.set_ylabel("Flow rate $m^3/s$")
+        ax1.set_title("Flow permanence curve")
+        ax1.legend(loc="upper right")
         return fig
 
     def graph_variability(self):
@@ -273,17 +246,17 @@ class Hydro:
 
     def graph_pdc(self):
         y = 1000  #
-        H = 2
+        h = 2
         n = 0.85
         df = pd.DataFrame(index=self.data_month_piv.index)
         df["q"] = self.data_month_piv["mean"] - self.q_sr
         df[df < 0] = 0
-        df["potencial"] = y * df["q"] * H * n / 1000
+        df["potencial"] = y * df["q"] * h * n / 1000
 
         q_data_sort = np.sort(self.q_data)[::-1]
 
         q_frequency = (np.arange(1.0, len(q_data_sort) + 1) / len(q_data_sort)) * 100
-        q_data_p = q_frequency * q_data_sort * y * H * n / 1000
+        q_data_p = q_frequency * q_data_sort * y * h * n / 1000
         # print(q_data_p)
         # Plot figure
         fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(10, 6))
@@ -375,6 +348,8 @@ class Hydro:
 
     @property
     def all_graph(self):
+        if self.raw:
+            graph_raw_data_resource('average monthly flow', self.data, "$m^3/s$", "Q")
         self.flow_permanence_curve()
         self.graph_variability()
         return

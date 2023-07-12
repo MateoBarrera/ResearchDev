@@ -21,7 +21,7 @@ biomass_data.from_excel("data/biomass/biomasa.xlsx")
 
 hydro = ResourceViability()
 hydro.evaluate_resource(hydro_data)
-hydro.graph_resource()
+hydro.graph_resource(raw=1)
 
 solar = ResourceViability()
 solar.evaluate_resource(solar_data)
