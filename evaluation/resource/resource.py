@@ -77,11 +77,10 @@ def graph_raw_data_resource(resource: str, dataframe, y_axis=None, label="None")
 
 def graph_variability_resource(ax, dataframe, title="None", y_label="None", label="None",
                                min_viability=0, viability_label="None"):
-    # Mean chart
+
     dataframe["mean"] = dataframe.mean(axis=1)
     dataframe["std"] = dataframe.std(axis=1)
     dataframe.plot(kind="line", y="mean", label=label, ax=ax, style="--k")
-    # dataframe.plot(kind="line", ax=ax, alpha=0.15, legend=None)
     ax.fill_between(
         dataframe.index,
         dataframe["mean"] - dataframe["std"],
@@ -105,8 +104,18 @@ def graph_variability_resource(ax, dataframe, title="None", y_label="None", labe
     ax.set_xticklabels(months_ticks_labels)
 
 
-def grap_boxplot_resource(ax1, data_month_piv, label):
-    pass
+def grap_boxplot_resource(ax, dataframe, title="None", y_label="None"):
+    dataframe["Mes"] = pd.to_datetime(
+        dataframe.index.month, format="%m"
+    ).month_name()
+
+    # Boxplot chart
+    hydro_boxplot = sns.boxplot(data=dataframe, x="Mes", y="Valor", ax=ax)
+    ax.set_title(title)
+    ax.set_xlabel("Year")
+    ax.set_ylabel(y_label)
+    plt.subplots_adjust(hspace=0.5, bottom=0.1)
+    hydro_boxplot.set_xticklabels(months_ticks_labels)
 
 
 class Hydro:
@@ -246,17 +255,7 @@ class Hydro:
         graph_variability_resource(ax1, dataframe=data_month_piv, title="River regime", y_label="$m^3/s$",
                                    label="$Q_{avg}$", min_viability=self.q_sr, viability_label="$Q_{sr}$")
 
-        data_month["Mes"] = pd.to_datetime(
-            data_month.index.month, format="%m"
-        ).month_name()
-
-        # Boxplot chart
-        hydro_boxplot = sns.boxplot(data=data_month, x="Mes", y="Valor", ax=ax2)
-        ax2.set_title("Average monthly flow")
-        ax2.set_xlabel("Year")
-        ax2.set_ylabel("$Q m^3/s$")
-        plt.subplots_adjust(hspace=0.5, bottom=0.1)
-        hydro_boxplot.set_xticklabels(months_ticks_labels)
+        grap_boxplot_resource(ax2, dataframe=data_month, title="River regime", y_label="$m^3/s$")
         return fig
 
     def graph_pdc(self):
