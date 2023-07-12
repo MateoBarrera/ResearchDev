@@ -4,7 +4,6 @@ import pandas as pd
 import matplotlib.pyplot as plt  # pylint: disable=import-error
 import numpy as np
 import seaborn as sns  # pylint: disable=import-error
-import matplotlib.dates as mpl_dates
 
 plt.style.use(['seaborn-v0_8-colorblind', 'evaluation/resource/graph.mplstyle'])
 months_ticks_labels = pd.date_range('2014-01-01', '2014-12-31',
@@ -74,6 +73,40 @@ def graph_raw_data_resource(resource: str, dataframe, y_axis=None, label="None")
     ax.set_xlabel("Year")
     ax.set_ylabel(y_axis)
     ax.legend(loc="upper right")
+
+
+def graph_variability_resource(ax, dataframe, title="None", y_label="None", label="None",
+                               min_viability=0, viability_label="None"):
+    # Mean chart
+    dataframe["mean"] = dataframe.mean(axis=1)
+    dataframe["std"] = dataframe.std(axis=1)
+    dataframe.plot(kind="line", y="mean", label=label, ax=ax, style="--k")
+    # dataframe.plot(kind="line", ax=ax, alpha=0.15, legend=None)
+    ax.fill_between(
+        dataframe.index,
+        dataframe["mean"] - dataframe["std"],
+        dataframe["mean"] + dataframe["std"],
+        alpha=0.15,
+    )
+    ax.hlines(
+        y=min_viability,
+        xmin=dataframe.index.min(),
+        xmax=dataframe.index.max(),
+        colors="red",
+        linestyles="--",
+        label=viability_label+" = {:.2f} ".format(min_viability) + y_label,
+    )
+    ax.set_title(title)
+    ax.set_xlabel("Year")
+    ax.set_ylabel(y_label)
+    ax.legend(loc="upper right")
+    dataframe.plot(kind="line", ax=ax, alpha=0.15, legend=None)
+    ax.xaxis.set_ticks(list(ax.get_xticks()) + list(ax.get_xticks(minor=True)))
+    ax.set_xticklabels(months_ticks_labels)
+
+
+def grap_boxplot_resource(ax1, data_month_piv, label):
+    pass
 
 
 class Hydro:
@@ -210,31 +243,8 @@ class Hydro:
 
         # Plot figure
         fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(8, 12))
-        data_month_piv.plot(kind="line", ax=ax1, alpha=0.15, legend=None)
-
-        # Mean chart
-        data_month_piv["mean"] = data_month_piv.mean(axis=1)
-        data_month_piv["std"] = data_month_piv.std(axis=1)
-        data_month_piv.plot(kind="line", y="mean", label="$Q_{mean}$", ax=ax1, style="--k")
-        ax1.fill_between(
-            data_month_piv.index,
-            data_month_piv["mean"] - data_month_piv["std"],
-            data_month_piv["mean"] + data_month_piv["std"],
-            alpha=0.15,
-        )
-        ax1.hlines(
-            y=self.q_sr,
-            xmin=data_month_piv.index.min(),
-            xmax=data_month_piv.index.max(),
-            colors="red",
-            linestyles="--",
-            label="Q_sr = {:.2f}".format(self.q_sr),
-        )
-        ax1.set_title("River regime")
-        ax1.set_xlabel("Year")
-        ax1.set_ylabel("$Q m^3/s$")
-        ax1.xaxis.set_ticks(list(ax1.get_xticks()) + list(ax1.get_xticks(minor=True)))
-        ax1.set_xticklabels(months_ticks_labels)
+        graph_variability_resource(ax1, dataframe=data_month_piv, title="River regime", y_label="$m^3/s$",
+                                   label="$Q_{avg}$", min_viability=self.q_sr, viability_label="$Q_{sr}$")
 
         data_month["Mes"] = pd.to_datetime(
             data_month.index.month, format="%m"
