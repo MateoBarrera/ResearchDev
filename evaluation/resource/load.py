@@ -366,11 +366,11 @@ class ResourceViability:
     __viability: object = None
     y_hline: str = None
 
-    def __init__(self, min_hydro=20, min_pv=3.8, min_wind=2.0, min_biomass=0) -> None:
+    def __init__(self, min_hydro=20, min_pv=3.8, min_wind=2.0, biomass_scenario=0) -> None:
         self.__min_hydro = min_hydro
         self.__min_pv = min_pv
         self.__min_wind = min_wind
-        self.__min_biomass = min_biomass
+        self.__min_biomass = biomass_scenario
 
     def evaluate_resource(self, resource):
         """Measure the viability and variability resource (pv, hydro, wind, biomass).
