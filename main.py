@@ -19,12 +19,15 @@ wind_data.from_csv("data/wind/Wind-Jamundi-D-Nasa.csv")
 biomass_data = PrimaryResource(name="Biogas", type_resource="biomass", source="Other")
 biomass_data.from_excel("data/biomass/biomasa.xlsx")
 
+
 hydro = ResourceViability()
 hydro.evaluate_resource(hydro_data)
 hydro.graph_resource()
-"""
+
 solar = ResourceViability()
 solar.evaluate_resource(solar_data)
+solar.graph_resource(raw=1)
+"""
 wind = ResourceViability()
 wind.evaluate_resource(wind_data)
 biomass = ResourceViability()

@@ -67,9 +67,9 @@ def graph_raw_data_resource(resource: str, dataframe, y_axis=None, label="None")
         xmax=dataframe["Fecha"].max(),
         colors="black",
         linestyles="--",
-        label=label + " {avg}" + " = {:.2f} ".format(dataframe["Valor"].mean()) + y_axis,
+        label=label + "$_{avg}$" + " = {:.2f} ".format(dataframe["Valor"].mean()) + y_axis,
     )
-    ax.set_title(resource.capitalize())
+    ax.set_title(resource)
     ax.set_xlabel("Year")
     ax.set_ylabel(y_axis)
     ax.legend(loc="upper right")
@@ -215,23 +215,23 @@ class Hydro:
         q_frequency = (np.arange(1.0, len(q_data_sort) + 1) / len(q_data_sort)) * 100
         # Plot figure
         fig = plt.figure()
-        ax1 = fig.add_subplot()
-        ax1.plot(q_frequency, q_data_sort)
-        ax1.fill_between(
+        ax = fig.add_subplot()
+        ax.plot(q_frequency, q_data_sort)
+        ax.fill_between(
             q_frequency[0: self.q_sr_index],
             q_data_sort[0: self.q_sr_index],
             self.q_sr,
             alpha=0.2,
             color="b",
         )
-        ax1.fill_between(
+        ax.fill_between(
             q_frequency[self.q_sr_index:],
             q_data_sort[self.q_sr_index:],
             self.q_sr,
             alpha=0.2,
             color="r",
         )
-        ax1.hlines(
+        ax.hlines(
             y=self.q_sr,
             xmin=q_frequency[0],
             xmax=q_frequency[-1],
@@ -239,18 +239,18 @@ class Hydro:
             linestyles="--",
             label="Qsr = {:.2f} $m^3/s$".format(self.q_sr),
         )
-        ax1.set_xlabel("Percentage of occurrence $\%$")
-        ax1.set_ylabel("Flow rate $m^3/s$")
-        ax1.set_title("Flow permanence curve")
-        ax1.legend(loc="upper right")
+        ax.set_xlabel("Percentage of occurrence %")
+        ax.set_ylabel("Flow rate $m^3/s$")
+        ax.set_title("Flow permanence curve")
+        ax.legend(loc="upper right")
         return fig
 
     def graph_variability(self):
         fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(8, 12))
-        graph_variability_resource(ax1, dataframe=self.data_month_piv, title="River regime", y_label="$m^3/s$",
+        graph_variability_resource(ax1, dataframe=self.data_month_piv, title="Monthly Average Flow Rate", y_label="$m^3/s$",
                                    label="$Q_{avg}$", min_viability=self.q_sr, viability_label="$Q_{sr}$")
 
-        grap_boxplot_resource(ax2, dataframe=self.data_month, title="River regime", y_label="$m^3/s$")
+        grap_boxplot_resource(ax2, dataframe=self.data_month, title="Monthly Average Flow Rate", y_label="$m^3/s$")
         return fig
 
     def graph_pdc(self):
@@ -358,7 +358,7 @@ class Hydro:
     @property
     def all_graph(self):
         if self.raw:
-            graph_raw_data_resource('average monthly flow', self.data, "$m^3/s$", "Q")
+            graph_raw_data_resource("Average Monthly Flow Rate", self.data, "$m^3/s$", "Q")
         self.flow_permanence_curve()
         self.graph_variability()
         return
@@ -383,11 +383,10 @@ class Pv:
         self.irr_mean = None
         self.data = data
         self.min_irr_pv = min_irr_pv
+        self.raw = False
         self.calculate_autonomy()
 
-    # noinspection DuplicatedCode
     def calculate_autonomy(self):
-        # Prepare data
         self.irr_mean_month = self.data.groupby(
             pd.PeriodIndex(self.data["Fecha"], freq="M")
         )["Valor"].mean()
@@ -421,88 +420,47 @@ class Pv:
         return power_generation
 
     def psh_graph(self):
+        """Evaluate the resource with the flow duration curve graph for the given data.
+
+        Returns:
+            object: matplotlib.pyplot.figure corresponding to the flow  permanent graph
+        """
         # Plot figure
-        fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(10, 6))
-
-        # Plot raw data
-        self.data.plot(kind="line", x="Fecha", y="Valor", ax=ax1, label="GHI")
-
-        self.irr_mean = self.data["Valor"].mean()
-        ax1.hlines(
-            y=self.irr_mean,
-            xmin=self.data["Fecha"].min(),
-            xmax=self.data["Fecha"].max(),
-            colors="gray",
-            linestyles="--",
-            label="Average GHI= {:.2f}k".format(self.irr_mean),
-        )
-        ax1.set_title(
-            "Total daily solar irradiance incident - Global Horizontal Irradiance")
-        ax1.set_xlabel("Year")
-        ax1.set_ylabel("Irradiance [kWh/m^2/day]")
-        ax1.legend(loc="upper left")
-
+        fig = plt.figure()
+        ax = fig.add_subplot()
         # Plot month data
-        self.irr_mean_month.plot(kind="line", x="Fecha", y="Valor", ax=ax2, label="PHS")
+        self.irr_mean_month.plot(kind="line", x="Fecha", y="Valor", ax=ax, label="$PSH$")
 
         self.irr_mean = self.data["Valor"].mean()
-        ax2.hlines(
+        ax.hlines(
             y=self.irr_mean,
             xmin=self.data["Fecha"].min(),
             xmax=self.data["Fecha"].max(),
             colors="gray",
             linestyles="--",
-            label="Average PHS= {:.2f}".format(self.irr_mean),
+            label="$PSH_{avg}$"+" = {:.2f} $h$".format(self.irr_mean),
         )
-        ax2.set_title("Monthly Peak Sun Hours")
-        ax2.set_xlabel("Year")
-        ax2.set_ylabel("PHS [h]")
-        ax2.legend(loc="upper left")
+        ax.hlines(
+            y=self.min_irr_pv,
+            xmin=self.data["Fecha"].min(),
+            xmax=self.data["Fecha"].max(),
+            colors="red",
+            linestyles="--",
+            label="$PSH_{min}$"+"= {:.2f} $h$".format(self.min_irr_pv),
+        )
+        ax.set_title("Monthly Average PSH")
+        ax.set_xlabel("Year")
+        ax.set_ylabel("$h$")
+        ax.legend(loc="upper right")
 
         return fig
 
     def graph_variability(self):
-        # Prepare data
-        data_month = self.data_month
-        data_month_piv = self.data_month_piv
+        fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(8, 12))
+        graph_variability_resource(ax1, dataframe=self.data_month_piv, title="Monthly Average GHI", y_label="$kWh/m^2/da$",
+                                   label="$GHI_{avg}$", min_viability=self.min_irr_pv, viability_label="$GHI_{min}$")
 
-        # Plot figure
-        fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(10, 6))
-        data_month_piv.plot(kind="line", ax=ax1, alpha=0.4)
-
-        # Mean chart
-        data_month_piv["mean"] = data_month_piv.mean(axis=1)
-        data_month_piv["std"] = data_month_piv.std(axis=1)
-        data_month_piv.plot(kind="line", y="mean", ax=ax1, style="--k")
-        ax1.fill_between(
-            data_month_piv.index,
-            data_month_piv["mean"] - data_month_piv["std"],
-            data_month_piv["mean"] + data_month_piv["std"],
-            alpha=0.15,
-        )
-        ax1.hlines(
-            y=self.min_irr_pv,
-            xmin=data_month_piv.index.min(),
-            xmax=data_month_piv.index.max(),
-            colors="red",
-            linestyles="--",
-            label="Min Irradiance = {:.2f}".format(self.min_irr_pv),
-        )
-        ax1.set_title("Monthly Peak Sun Hours")
-        ax1.set_xlabel("Year")
-        ax1.set_ylabel("PHS [h]")
-
-        data_month["Mes"] = pd.to_datetime(
-            data_month.index.month, format="%m"
-        ).month_name()
-
-        # Boxplot chart
-        sns.boxplot(data=data_month, x="Mes", y="Valor", ax=ax2)
-        ax2.set_title("Monthly Peak Sun Hours")
-        ax2.set_xlabel("Year")
-        ax2.set_ylabel("PHS [h]")
-
-        plt.subplots_adjust(hspace=0.5, bottom=0.1)
+        grap_boxplot_resource(ax2, dataframe=self.data_month, title="Monthly Average GHI", y_label="$kWh/m^2/da$")
         return fig
 
     @property
@@ -527,6 +485,8 @@ class Pv:
 
     @property
     def all_graph(self):
+        if self.raw:
+            graph_raw_data_resource('Global Horizontal Irradiance (GHI)', self.data, "$kWh/m^2/day$", "GHI")
         self.psh_graph()
         self.graph_variability()
         return
@@ -551,6 +511,7 @@ class Wind:
         self.wind_mean = None
         self.data = data
         self.min_ws_wind = min_ws_wind
+        self.raw = False
         self.calculate_autonomy()
 
     def calculate_autonomy(self):
@@ -735,6 +696,7 @@ class Biomass:
 
     def __init__(self, data, collection_regime) -> None:
         self.data = self.transform_data(data, collection_regime)
+        self.raw = False
         self.calculate_autonomy()
 
     @property
