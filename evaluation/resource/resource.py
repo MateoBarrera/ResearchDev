@@ -6,8 +6,7 @@ import numpy as np
 import seaborn as sns  # pylint: disable=import-error
 
 plt.style.use(['seaborn-v0_8-colorblind', 'evaluation/resource/graph.mplstyle'])
-months_ticks_labels = pd.date_range('2014-01-01', '2014-12-31',
-                      freq='MS').strftime("%b").tolist()
+months_ticks_labels = pd.date_range('2014-01-01', '2014-12-31', freq='MS').strftime("%b").tolist()
 
 # Local Method #
 """
@@ -239,7 +238,7 @@ class Hydro:
             linestyles="--",
             label="Qsr = {:.2f} $m^3/s$".format(self.q_sr),
         )
-        ax.set_xlabel("Percentage of occurrence %")
+        ax.set_xlabel("Percentage of occurrence \%")
         ax.set_ylabel("Flow rate $m^3/s$")
         ax.set_title("Flow permanence curve")
         ax.legend(loc="upper right")
@@ -247,8 +246,9 @@ class Hydro:
 
     def graph_variability(self):
         fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(8, 12))
-        graph_variability_resource(ax1, dataframe=self.data_month_piv, title="Monthly Average Flow Rate", y_label="$m^3/s$",
-                                   label="$Q_{avg}$", min_viability=self.q_sr, viability_label="$Q_{sr}$")
+        graph_variability_resource(ax1, dataframe=self.data_month_piv, title="Monthly Average Flow Rate",
+                                   y_label="$m^3/s$", label="$Q_{avg}$", min_viability=self.q_sr,
+                                   viability_label="$Q_{sr}$")
 
         grap_boxplot_resource(ax2, dataframe=self.data_month, title="Monthly Average Flow Rate", y_label="$m^3/s$")
         return fig
@@ -457,10 +457,11 @@ class Pv:
 
     def graph_variability(self):
         fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(8, 12))
-        graph_variability_resource(ax1, dataframe=self.data_month_piv, title="Monthly Average GHI", y_label="$kWh/m^2/da$",
-                                   label="$GHI_{avg}$", min_viability=self.min_irr_pv, viability_label="$GHI_{min}$")
+        graph_variability_resource(ax1, dataframe=self.data_month_piv, title="Monthly Average GHI",
+                                   y_label="$kWh/m^2/day$", label="$GHI_{avg}$", min_viability=self.min_irr_pv,
+                                   viability_label="$GHI_{min}$")
 
-        grap_boxplot_resource(ax2, dataframe=self.data_month, title="Monthly Average GHI", y_label="$kWh/m^2/da$")
+        grap_boxplot_resource(ax2, dataframe=self.data_month, title="Monthly Average GHI", y_label="$kWh/m^2/day$")
         return fig
 
     @property
@@ -565,94 +566,76 @@ class Wind:
 
     def wind_speed_graph(self):
         # Plot figure
-        fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(10, 6))
-
-        # Plot raw data
-        self.data.plot(kind="line", x="Fecha", y="Valor", ax=ax1, label="wind speed")
-
-        self.wind_mean = self.data["Valor"].mean()
-        ax1.hlines(
-            y=self.wind_mean,
-            xmin=self.data["Fecha"].min(),
-            xmax=self.data["Fecha"].max(),
-            colors="gray",
-            linestyles="--",
-            label="Average ws= {:.2f}".format(self.wind_mean),
-        )
-        ax1.hlines(
-            y=self.min_ws_wind,
-            xmin=self.data["Fecha"].min(),
-            xmax=self.data["Fecha"].max(),
-            colors="red",
-            linestyles="--",
-            label="min ws= {:.2f}".format(self.min_ws_wind),
-        )
-        ax1.set_title("Monthly average wind speed")
-        ax1.set_xlabel("Year")
-        ax1.set_ylabel("Wind speed [m/s]")
-        ax1.legend(loc="upper left")
-
+        fig = plt.figure()
+        ax = fig.add_subplot()
         # Plot month data
-        self.wind_mean_month.plot(kind="line", x="Fecha", y="Valor", ax=ax2, label="ws")
+        self.wind_mean_month.plot(kind="line", x="Fecha", y="Valor", ax=ax, label="V")
 
         self.wind_mean = self.data["Valor"].mean()
-        ax2.hlines(
+        ax.hlines(
             y=self.wind_mean,
             xmin=self.data["Fecha"].min(),
             xmax=self.data["Fecha"].max(),
             colors="gray",
             linestyles="--",
-            label="Average ws= {:.2f}".format(self.wind_mean),
+            label="$V_{avg}$"+" = {:.2f}".format(self.wind_mean),
         )
-        ax2.set_title("Monthly average wind speed")
-        ax2.set_xlabel("Year")
-        ax2.set_ylabel("Wind speed [m/s]")
-        ax2.legend(loc="upper left")
+        ax.set_title("Monthly Average Wind Speed")
+        ax.set_xlabel("Year")
+        ax.set_ylabel("$m/s$")
+        ax.legend(loc="upper right")
 
         return fig
 
     def graph_variability(self):
-        # Prepare data
-        data_month = self.data_month
-        data_month_piv = self.data_month_piv
+        # # Prepare data
+        # data_month = self.data_month
+        # data_month_piv = self.data_month_piv
+        #
+        # # Plot figure
+        # fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(10, 6))
+        # data_month_piv.plot(kind="line", ax=ax1, alpha=0.4)
+        #
+        # # Mean chart
+        # data_month_piv["mean"] = data_month_piv.mean(axis=1)
+        # data_month_piv["std"] = data_month_piv.std(axis=1)
+        # data_month_piv.plot(kind="line", y="mean", ax=ax1, style="--k")
+        # ax1.fill_between(
+        #     data_month_piv.index,
+        #     data_month_piv["mean"] - data_month_piv["std"],
+        #     data_month_piv["mean"] + data_month_piv["std"],
+        #     alpha=0.15,
+        # )
+        # ax1.hlines(
+        #     y=self.min_ws_wind,
+        #     xmin=data_month_piv.index.min(),
+        #     xmax=data_month_piv.index.max(),
+        #     colors="red",
+        #     linestyles="--",
+        #     label="Min wind speed = {:.2f}".format(self.min_ws_wind),
+        # )
+        # ax1.set_title("Monthly average wind speed")
+        # ax1.set_xlabel("Year")
+        # ax1.set_ylabel("Wind speed [m/s]")
+        #
+        # data_month["Mes"] = pd.to_datetime(
+        #     data_month.index.month, format="%m"
+        # ).month_name()
+        #
+        # # Boxplot chart
+        # sns.boxplot(data=data_month, x="Mes", y="Valor", ax=ax2)
+        # ax2.set_title("Monthly average wind speed")
+        # ax2.set_xlabel("Year")
+        # ax2.set_ylabel("Wind speed [m/s]")
+        #
+        # plt.subplots_adjust(hspace=0.5, bottom=0.1)
 
-        # Plot figure
-        fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(10, 6))
-        data_month_piv.plot(kind="line", ax=ax1, alpha=0.4)
+        fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(8, 12))
+        graph_variability_resource(ax1, dataframe=self.data_month_piv, title="Monthly Average Wind Speed",
+                                   y_label="$m/s$", label="$V_{avg}$", min_viability=self.min_ws_wind,
+                                   viability_label="$V_{min}$")
 
-        # Mean chart
-        data_month_piv["mean"] = data_month_piv.mean(axis=1)
-        data_month_piv["std"] = data_month_piv.std(axis=1)
-        data_month_piv.plot(kind="line", y="mean", ax=ax1, style="--k")
-        ax1.fill_between(
-            data_month_piv.index,
-            data_month_piv["mean"] - data_month_piv["std"],
-            data_month_piv["mean"] + data_month_piv["std"],
-            alpha=0.15,
-        )
-        ax1.hlines(
-            y=self.min_ws_wind,
-            xmin=data_month_piv.index.min(),
-            xmax=data_month_piv.index.max(),
-            colors="red",
-            linestyles="--",
-            label="Min wind speed = {:.2f}".format(self.min_ws_wind),
-        )
-        ax1.set_title("Monthly average wind speed")
-        ax1.set_xlabel("Year")
-        ax1.set_ylabel("Wind speed [m/s]")
-
-        data_month["Mes"] = pd.to_datetime(
-            data_month.index.month, format="%m"
-        ).month_name()
-
-        # Boxplot chart
-        sns.boxplot(data=data_month, x="Mes", y="Valor", ax=ax2)
-        ax2.set_title("Monthly average wind speed")
-        ax2.set_xlabel("Year")
-        ax2.set_ylabel("Wind speed [m/s]")
-
-        plt.subplots_adjust(hspace=0.5, bottom=0.1)
+        grap_boxplot_resource(ax2, dataframe=self.data_month, title="Monthly Average Wind Speed", y_label="$m/s$")
         return fig
 
     @property
@@ -677,6 +660,8 @@ class Wind:
 
     @property
     def all_graph(self):
+        if self.raw:
+            graph_raw_data_resource('Wind Speed', self.data, "$m/s$", "V")
         self.wind_speed_graph()
         self.graph_variability()
         return

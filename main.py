@@ -26,10 +26,12 @@ hydro.graph_resource()
 
 solar = ResourceViability()
 solar.evaluate_resource(solar_data)
-solar.graph_resource(raw=1)
-"""
+solar.graph_resource()
+
 wind = ResourceViability()
 wind.evaluate_resource(wind_data)
+wind.graph_resource()
+"""
 biomass = ResourceViability()
 biomass.evaluate_resource(biomass_data)
 
