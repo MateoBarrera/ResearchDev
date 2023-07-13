@@ -640,9 +640,12 @@ class Biomass:
     def __init__(self, data, collection_regime) -> None:
         self.data, self.raw_data = self.transform_data(data, collection_regime)
         self.raw = False
-        # Porcine or Swine
+        # Porcine or Swine or Pig Slurry
+        # Cattle Slurry
+        # poultry manure
         print(self.raw_data)
-        self.raw_data.insert(0, "Source", ["Bovine", "Porcine", "Poultry", "Equine", "Goats", "Sheep", "Sugar Cane"])
+        self.raw_data.insert(0, "Source", ["Bovine", "Porcine", "Poultry", "Equine", "Goats", "Sheep",
+                                           "Sugar Cane Bagasse"])
         self.raw_data = self.raw_data.set_index("Source")
         self.calculate_autonomy()
         print(data)
@@ -677,7 +680,7 @@ class Biomass:
         ax1_twin.set_ylim([0, 0.5])
         ax1_twin.legend()
         ax1.bar_label(ax1.containers[0], fmt='%d')
-        #for p in ax1.patches:
+        # for p in ax1.patches:
         #    ax1.annotate(str(round(p.get_height()))+"\%", (p.get_x() * 1.005, p.get_height() * 1.005), )
 
         data.Biogas.plot.bar(ax=ax2, width=0.3, y=None)
