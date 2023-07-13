@@ -588,48 +588,6 @@ class Wind:
         return fig
 
     def graph_variability(self):
-        # # Prepare data
-        # data_month = self.data_month
-        # data_month_piv = self.data_month_piv
-        #
-        # # Plot figure
-        # fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(10, 6))
-        # data_month_piv.plot(kind="line", ax=ax1, alpha=0.4)
-        #
-        # # Mean chart
-        # data_month_piv["mean"] = data_month_piv.mean(axis=1)
-        # data_month_piv["std"] = data_month_piv.std(axis=1)
-        # data_month_piv.plot(kind="line", y="mean", ax=ax1, style="--k")
-        # ax1.fill_between(
-        #     data_month_piv.index,
-        #     data_month_piv["mean"] - data_month_piv["std"],
-        #     data_month_piv["mean"] + data_month_piv["std"],
-        #     alpha=0.15,
-        # )
-        # ax1.hlines(
-        #     y=self.min_ws_wind,
-        #     xmin=data_month_piv.index.min(),
-        #     xmax=data_month_piv.index.max(),
-        #     colors="red",
-        #     linestyles="--",
-        #     label="Min wind speed = {:.2f}".format(self.min_ws_wind),
-        # )
-        # ax1.set_title("Monthly average wind speed")
-        # ax1.set_xlabel("Year")
-        # ax1.set_ylabel("Wind speed [m/s]")
-        #
-        # data_month["Mes"] = pd.to_datetime(
-        #     data_month.index.month, format="%m"
-        # ).month_name()
-        #
-        # # Boxplot chart
-        # sns.boxplot(data=data_month, x="Mes", y="Valor", ax=ax2)
-        # ax2.set_title("Monthly average wind speed")
-        # ax2.set_xlabel("Year")
-        # ax2.set_ylabel("Wind speed [m/s]")
-        #
-        # plt.subplots_adjust(hspace=0.5, bottom=0.1)
-
         fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(8, 12))
         graph_variability_resource(ax1, dataframe=self.data_month_piv, title="Monthly Average Wind Speed",
                                    y_label="$m/s$", label="$V_{avg}$", min_viability=self.min_ws_wind,
@@ -680,9 +638,14 @@ class Biomass:
     __autonomy: float = None
 
     def __init__(self, data, collection_regime) -> None:
-        self.data = self.transform_data(data, collection_regime)
+        self.data, raw_data = self.transform_data(data, collection_regime)
         self.raw = False
+        # Porcine or Swine
+        self.raw_data = raw_data.to_frame()
+        self.raw_data.insert(0, 'Source', ['Bovine', 'Porcine', 'Poultry', 'Equine', 'Goats', 'Sheep', 'Sugar Cane'])
         self.calculate_autonomy()
+        print(data)
+        print(self.raw_data)
 
     @property
     def is_viability(self):
@@ -696,18 +659,34 @@ class Biomass:
     def autonomy(self):
         return ":: Autonomy resource: {:.2f}% ::".format(self.__autonomy * 100)
 
+    @property
+    def all_graph(self):
+        fig = plt.figure()
+        ax = fig.add_subplot()
+        self.raw_data.plot.bar(ax=ax)
+        ax.set_title("Monthly Average Wind Speed")
+        ax.set_xlabel("Year")
+        ax.set_ylabel("$m/s$")
+        ax.legend(loc="upper right")
+
+        return
+
     @staticmethod
     def transform_data(data, collection_regime):
         factor = list(data["Factor"])
         if collection_regime == 1:
+            raw_data = data[[0.1]]
             result = np.array(list(data[0.1])) * np.array(factor)
         elif collection_regime == 2:
+            raw_data = data[0.2]
             result = np.array(list(data[0.2])) * np.array(factor)
         elif collection_regime == 3:
+            raw_data = data[0.3]
             result = np.array(list(data[0.3])) * np.array(factor)
         else:
+            raw_data = data["Recomendado"]
             result = np.array(list(data["Recomendado"])) * np.array(factor)
-        return np.sum(result)
+        return np.sum(result), raw_data
 
     def calculate_autonomy(self):
         self.__autonomy = 1
