@@ -638,11 +638,12 @@ class Biomass:
     __autonomy: float = None
 
     def __init__(self, data, collection_regime) -> None:
-        self.data, raw_data = self.transform_data(data, collection_regime)
+        self.data, self.raw_data = self.transform_data(data, collection_regime)
         self.raw = False
         # Porcine or Swine
-        self.raw_data = raw_data.to_frame()
-        self.raw_data.insert(0, 'Source', ['Bovine', 'Porcine', 'Poultry', 'Equine', 'Goats', 'Sheep', 'Sugar Cane'])
+        print(self.raw_data)
+        self.raw_data.insert(0, "Source", ["Bovine", "Porcine", "Poultry", "Equine", "Goats", "Sheep", "Sugar Cane"])
+        self.raw_data = self.raw_data.set_index("Source")
         self.calculate_autonomy()
         print(data)
         print(self.raw_data)
@@ -661,13 +662,28 @@ class Biomass:
 
     @property
     def all_graph(self):
-        fig = plt.figure()
-        ax = fig.add_subplot()
-        self.raw_data.plot.bar(ax=ax)
-        ax.set_title("Monthly Average Wind Speed")
-        ax.set_xlabel("Year")
-        ax.set_ylabel("$m/s$")
-        ax.legend(loc="upper right")
+        fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(8, 12))
+        ax1_twin = ax1.twinx()
+        data = self.raw_data
+        data = data.drop('Sugar Cane')
+        print(data.to_markdown())
+        data.Percentage.plot.bar(ax=ax1, position=1, width=0.3, color="c")
+        data.Factor.plot.bar(ax=ax1_twin, position=0, width=0.3, color="g", secondary_y='factor')
+        ax1.set_title("Available resource")
+        ax1.set_ylabel("$\%$ used of available resource")
+        ax1.set_ylim([0, 50])
+        ax1_twin.set_ylabel("$m^3/day$ per unit")
+        ax1.legend(loc="upper center")
+        ax1_twin.set_ylim([0, 0.5])
+        ax1_twin.legend()
+        ax1.bar_label(ax1.containers[0], fmt='%d')
+        #for p in ax1.patches:
+        #    ax1.annotate(str(round(p.get_height()))+"\%", (p.get_x() * 1.005, p.get_height() * 1.005), )
+
+        data.Biogas.plot.bar(ax=ax2, width=0.3, y=None)
+        ax2.set_title("Biogas volume per source")
+        ax2.set_ylabel("$m^3/day$")
+        ax2.legend(loc="upper right")
 
         return
 
@@ -675,17 +691,23 @@ class Biomass:
     def transform_data(data, collection_regime):
         factor = list(data["Factor"])
         if collection_regime == 1:
-            raw_data = data[[0.1]]
-            result = np.array(list(data[0.1])) * np.array(factor)
+            regime_selected = 0.1
+
         elif collection_regime == 2:
-            raw_data = data[0.2]
-            result = np.array(list(data[0.2])) * np.array(factor)
+            regime_selected = 0.2
+
         elif collection_regime == 3:
-            raw_data = data[0.3]
-            result = np.array(list(data[0.3])) * np.array(factor)
+            regime_selected = 0.3
+
         else:
-            raw_data = data["Recomendado"]
-            result = np.array(list(data["Recomendado"])) * np.array(factor)
+            regime_selected = "Recomendado"
+
+        result = np.array(list(data[regime_selected])) * np.array(factor)
+        raw_data = data[[regime_selected, "Factor"]]
+        raw_data.insert(0, "Biogas", list(result))
+        raw_data = raw_data.rename(columns={regime_selected: 'Availability'})
+        raw_data.insert(0, "Percentage", list(np.array(list(raw_data['Availability'])) /
+                                              np.array(list(data['Total']))*100))
         return np.sum(result), raw_data
 
     def calculate_autonomy(self):
