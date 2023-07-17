@@ -364,6 +364,7 @@ class PrimaryResource:
 class ResourceViability:
     __resource: object = None
     __viability: object = None
+    __is_viability: bool = False
     y_hline: str = None
 
     def __init__(self, min_hydro=20, min_pv=3.8, min_wind=2.0, biomass_scenario=0) -> None:
@@ -486,6 +487,10 @@ class ResourceViability:
             return x * percentage_value
 
         return demand_result.apply(demand_percentage)
+
+    @property
+    def is_viability(self):
+        return self.__viability.is_viability
 
 
 class Potential:

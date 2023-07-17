@@ -4,8 +4,10 @@ import pandas as pd
 import matplotlib.pyplot as plt  # pylint: disable=import-error
 import numpy as np
 import seaborn as sns  # pylint: disable=import-error
+import squarify
 
 plt.style.use(['seaborn-v0_8-colorblind', 'evaluation/resource/graph.mplstyle'])
+# plt.style.use(['seaborn-v0_8-colorblind', '../graph.mplstyle'])
 months_ticks_labels = pd.date_range('2014-01-01', '2014-12-31', freq='MS').strftime("%b").tolist()
 
 # Local Method #
@@ -76,7 +78,6 @@ def graph_raw_data_resource(resource: str, dataframe, y_axis=None, label="None")
 
 def graph_variability_resource(ax, dataframe, title="None", y_label="None", label="None",
                                min_viability=0, viability_label="None"):
-
     dataframe["mean"] = dataframe.mean(axis=1)
     dataframe["std"] = dataframe.std(axis=1)
     dataframe.plot(kind="line", y="mean", label=label, ax=ax, style="--k")
@@ -92,7 +93,7 @@ def graph_variability_resource(ax, dataframe, title="None", y_label="None", labe
         xmax=dataframe.index.max(),
         colors="red",
         linestyles="--",
-        label=viability_label+" = {:.2f} ".format(min_viability) + y_label,
+        label=viability_label + " = {:.2f} ".format(min_viability) + y_label,
     )
     ax.set_title(title)
     ax.set_xlabel("Year")
@@ -438,7 +439,7 @@ class Pv:
             xmax=self.data["Fecha"].max(),
             colors="gray",
             linestyles="--",
-            label="$PSH_{avg}$"+" = {:.2f} $h$".format(self.irr_mean),
+            label="$PSH_{avg}$" + " = {:.2f} $h$".format(self.irr_mean),
         )
         ax.hlines(
             y=self.min_irr_pv,
@@ -446,7 +447,7 @@ class Pv:
             xmax=self.data["Fecha"].max(),
             colors="red",
             linestyles="--",
-            label="$PSH_{min}$"+"= {:.2f} $h$".format(self.min_irr_pv),
+            label="$PSH_{min}$" + "= {:.2f} $h$".format(self.min_irr_pv),
         )
         ax.set_title("Monthly Average PSH")
         ax.set_xlabel("Year")
@@ -578,7 +579,7 @@ class Wind:
             xmax=self.data["Fecha"].max(),
             colors="gray",
             linestyles="--",
-            label="$V_{avg}$"+" = {:.2f}".format(self.wind_mean),
+            label="$V_{avg}$" + " = {:.2f}".format(self.wind_mean),
         )
         ax.set_title("Monthly Average Wind Speed")
         ax.set_xlabel("Year")
@@ -665,33 +666,42 @@ class Biomass:
 
     @property
     def all_graph(self):
-        fig, (ax1, ax2, ax3) = plt.subplots(3, 1, figsize=(8, 32))
+        fig, ax1 = plt.subplots(1, 1, figsize=(8, 6))
         ax1_twin = ax1.twinx()
-        data = self.raw_data
-        # print(data.to_markdown())
-        data.Percentage.plot.bar(ax=ax1, position=1, width=0.3, color="c")
-        data.Factor.plot.bar(ax=ax1_twin, position=0, width=0.3, color="g", secondary_y='factor')
+        data = self.raw_data[self.raw_data.Biogas != 0]
+        """
+        print(data.to_markdown())
+        data.Biogas.plot.bar(ax=ax1, width=0.3)
+
         ax1.set_title("Available resource")
         ax1.set_ylabel("$\%$ used of available resource")
-        ax1.set_ylim([0, 50])
-        ax1_twin.set_ylabel("$m^3/day$ per unit")
+        ax1_twin.set_ylabel("$m^3/day$")
         ax1.legend(loc="upper center")
-        ax1_twin.set_ylim([0, 0.5])
-        ax1_twin.legend()
+        bottom, top = ax1.get_ylim()
+        ax1.set_ylim([0, top * 1.15])
         ax1.bar_label(ax1.containers[0], fmt='%d')
-
-        data.plot.scatter(ax=ax3, color="c", x='Percentage', y='Factor', s='Biogas')
-        ax3.legend(loc="upper right")
-
 
         # for p in ax1.patches:
         #    ax1.annotate(str(round(p.get_height()))+"\%", (p.get_x() * 1.005, p.get_height() * 1.005), )
+        plt.scatter(x=data.index.values, y=data["Percentage"], color="k", marker="D")
 
-        data.Biogas.plot.pie(ax=ax2)
-        ax2.set_title("Biogas volume per source")
-        ax2.set_ylabel("$m^3/day$")
-        ax2.legend(loc="upper right")
+        bottom, top = ax1_twin.get_ylim()
+        ax1_twin.set_ylim([0, top * 1.5])
+        """
+        fig = plt.figure()
+        # Sample data
+        values = data["Biogas"]
+        labels = [f"{value}\n{int(data['Biogas'][value])}"
+                  + " $m^3/day$"
+                  + f"\n{round(float(data['Percentage'][value]), 1)}"
+                  + "\% of total available"
+                  for value in data.index.values]
 
+        # Treemap
+        squarify.plot(sizes=values, label=labels, alpha=0.7, pad=0.01)
+
+        # Remove the axis:
+        plt.axis("off")
         return
 
     @staticmethod
@@ -714,7 +724,7 @@ class Biomass:
         raw_data.insert(0, "Biogas", list(result))
         raw_data = raw_data.rename(columns={regime_selected: 'Availability'})
         raw_data.insert(0, "Percentage", list(np.array(list(raw_data['Availability'])) /
-                                              np.array(list(data['Total']))*100))
+                                              np.array(list(data['Total'])) * 100))
         return np.sum(result), raw_data
 
     def calculate_autonomy(self):

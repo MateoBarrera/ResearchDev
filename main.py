@@ -34,7 +34,7 @@ wind.evaluate_resource(wind_data)
 
 biomass = ResourceViability(biomass_scenario=0)
 biomass.evaluate_resource(biomass_data)
-# biomass.graph_resource()
+biomass.graph_resource()
 
 
 hydro.potential(installed_capacity=1000, show=True)
@@ -84,15 +84,15 @@ alternative_matrix = indicators.evaluate_alternative(alternatives_kw)
 # 4 - Enfoque Técnico
 test_criteria = 0
 
-AHP(
-    alternative_matrix=alternative_matrix,
-    show_criteria_matrix=False,
-    show_expert_matrix=False,
-    test=test_criteria,
-    fuzzy=True,
-    save_as="AHP",
-    alt_info=alternatives_kw
-)
+# AHP(
+#     alternative_matrix=alternative_matrix,
+#     show_criteria_matrix=False,
+#     show_expert_matrix=False,
+#     test=test_criteria,
+#     fuzzy=True,
+#     save_as="AHP",
+#    alt_info=alternatives_kw
+# )
 
 TOPSIS(
     alternative_matrix=alternative_matrix,
