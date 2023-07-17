@@ -643,13 +643,13 @@ class Biomass:
         # Porcine or Swine or Pig Slurry
         # Cattle Slurry
         # poultry manure
-        print(self.raw_data)
+        # print(self.raw_data)
         self.raw_data.insert(0, "Source", ["Bovine", "Porcine", "Poultry", "Equine", "Goats", "Sheep",
                                            "Sugar Cane Bagasse"])
         self.raw_data = self.raw_data.set_index("Source")
         self.calculate_autonomy()
-        print(data)
-        print(self.raw_data)
+        # print(data)
+        # print(self.raw_data)
 
     @property
     def is_viability(self):
@@ -665,11 +665,10 @@ class Biomass:
 
     @property
     def all_graph(self):
-        fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(8, 12))
+        fig, (ax1, ax2, ax3) = plt.subplots(3, 1, figsize=(8, 32))
         ax1_twin = ax1.twinx()
         data = self.raw_data
-        data = data.drop('Sugar Cane')
-        print(data.to_markdown())
+        # print(data.to_markdown())
         data.Percentage.plot.bar(ax=ax1, position=1, width=0.3, color="c")
         data.Factor.plot.bar(ax=ax1_twin, position=0, width=0.3, color="g", secondary_y='factor')
         ax1.set_title("Available resource")
@@ -680,10 +679,15 @@ class Biomass:
         ax1_twin.set_ylim([0, 0.5])
         ax1_twin.legend()
         ax1.bar_label(ax1.containers[0], fmt='%d')
+
+        data.plot.scatter(ax=ax3, color="c", x='Percentage', y='Factor', s='Biogas')
+        ax3.legend(loc="upper right")
+
+
         # for p in ax1.patches:
         #    ax1.annotate(str(round(p.get_height()))+"\%", (p.get_x() * 1.005, p.get_height() * 1.005), )
 
-        data.Biogas.plot.bar(ax=ax2, width=0.3, y=None)
+        data.Biogas.plot.pie(ax=ax2)
         ax2.set_title("Biogas volume per source")
         ax2.set_ylabel("$m^3/day$")
         ax2.legend(loc="upper right")
