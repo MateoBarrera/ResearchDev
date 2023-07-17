@@ -104,14 +104,4 @@ TOPSIS(
     alt_info=alternatives_kw
 )
 
-TOPSIS(
-    alternative_matrix=alternative_matrix,
-    show_criteria_matrix=False,
-    show_expert_matrix=False,
-    test=test_criteria,
-    fuzzy=True,
-    save="TOPSIS",
-    alt_info=alternatives_kw
-)
-
 # 0 - expertos; 1 - Igual importancia; 2 - Enfoque Ambiental; 3 - Enfoque Económico; 4 - Enfoque Técnico
