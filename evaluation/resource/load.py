@@ -291,7 +291,6 @@ class PrimaryResource:
         self.__data_df = __file_obj["data"]
         return True
 
-
     def from_csv(self, path=None) -> bool:
         """Set info PrimaryResource from a csv file.
         Args:
@@ -314,7 +313,6 @@ class PrimaryResource:
             raise TypeError(f"Unexpected source data argument value: {self.source.lower}")
 
         return self.__load_from_file(__file_obj)
-
 
     def from_excel(self, path=None) -> bool:
         """Set info PrimaryResource from a .xlsx file.

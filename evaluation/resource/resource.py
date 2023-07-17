@@ -29,13 +29,14 @@ def get_data_month(df):
     Returns:
         _type_: _description_
     """
+    df = df.loc[df["Fecha"].between("2011-01-01", "2021-12-31")]
     data_month = df.set_index("Fecha")
     data_month = data_month.asfreq("M", method="ffill")
     data_month["Año"] = data_month.index.year
-    data_month["Mes"] = pd.to_datetime(data_month.index.month, format="%m")
+    data_month["Month"] = pd.to_datetime(data_month.index.month, format="%m")
 
     data_month_piv = pd.pivot_table(
-        data_month, index=["Mes"], columns=["Año"], values=["Valor"]
+        data_month, index=["Month"], columns=["Año"], values=["Valor"]
     )
     data_month_piv["mean"] = data_month_piv.mean(axis=1)
     data_month_piv.sort_index()
@@ -78,6 +79,9 @@ def graph_raw_data_resource(resource: str, dataframe, y_axis=None, label="None")
 
 def graph_variability_resource(ax, dataframe, title="None", y_label="None", label="None",
                                min_viability=0, viability_label="None"):
+    # Temporal
+    # print(dataframe.to_markdown())
+
     dataframe["mean"] = dataframe.mean(axis=1)
     dataframe["std"] = dataframe.std(axis=1)
     dataframe.plot(kind="line", y="mean", label=label, ax=ax, style="--k")
@@ -96,26 +100,33 @@ def graph_variability_resource(ax, dataframe, title="None", y_label="None", labe
         label=viability_label + " = {:.2f} ".format(min_viability) + y_label,
     )
     ax.set_title(title)
-    ax.set_xlabel("Year")
+    ax.set_xlabel("Month")
     ax.set_ylabel(y_label)
     ax.legend(loc="upper right")
     dataframe.plot(kind="line", ax=ax, alpha=0.15, legend=None)
     ax.xaxis.set_ticks(list(ax.get_xticks()) + list(ax.get_xticks(minor=True)))
     ax.set_xticklabels(months_ticks_labels)
+    bottom, top = ax.get_ylim()
+    ax.set_ylim([0.7, top])
 
 
 def grap_boxplot_resource(ax, dataframe, title="None", y_label="None"):
-    dataframe["Mes"] = pd.to_datetime(
+    dataframe["Month"] = pd.to_datetime(
         dataframe.index.month, format="%m"
     ).month_name()
 
     # Boxplot chart
-    hydro_boxplot = sns.boxplot(data=dataframe, x="Mes", y="Valor", ax=ax)
+    hydro_boxplot = sns.boxplot(data=dataframe, x="Month", y="Valor", ax=ax)
     ax.set_title(title)
-    ax.set_xlabel("Year")
+    ax.set_xlabel("Month")
     ax.set_ylabel(y_label)
     plt.subplots_adjust(hspace=0.5, bottom=0.1)
     hydro_boxplot.set_xticklabels(months_ticks_labels)
+
+
+def save_graph(fig):
+    plt.savefig(fig, format="png", metadata=None,
+                bbox_inches=None, pad_inches=0.1)
 
 
 class Hydro:
@@ -246,13 +257,17 @@ class Hydro:
         return fig
 
     def graph_variability(self):
-        fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(8, 12))
+        fig = plt.figure()
+        ax1 = fig.add_subplot()
         graph_variability_resource(ax1, dataframe=self.data_month_piv, title="Monthly Average Flow Rate",
                                    y_label="$m^3/s$", label="$Q_{avg}$", min_viability=self.q_sr,
                                    viability_label="$Q_{sr}$")
-
+        save_graph("hydro_fig.png")
+        fig2 = plt.figure()
+        ax2 = fig2.add_subplot()
         grap_boxplot_resource(ax2, dataframe=self.data_month, title="Monthly Average Flow Rate", y_label="$m^3/s$")
-        return fig
+        save_graph("hydro_fig2.png")
+        return fig, fig2
 
     def graph_pdc(self):
         y = 1000  #
@@ -397,7 +412,7 @@ class Pv:
         self.__autonomy = calculate_autonomy(self.data_month_piv, self.min_irr_pv)
 
     def potential(self, show, installed_capacity=1000):
-        # pp = 0.200  # Peak power of the panel [kW year]
+        # pp = 0.200 Peak power of the panel [kW year]
         n = 0.90  # Typical conditions
         df = pd.DataFrame(index=self.data_month_piv.index)
         df["PSH"] = self.data_month_piv["mean"]
@@ -457,13 +472,17 @@ class Pv:
         return fig
 
     def graph_variability(self):
-        fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(8, 12))
+        fig = plt.figure()
+        ax1 = fig.add_subplot()
         graph_variability_resource(ax1, dataframe=self.data_month_piv, title="Monthly Average GHI",
                                    y_label="$kWh/m^2/day$", label="$GHI_{avg}$", min_viability=self.min_irr_pv,
                                    viability_label="$GHI_{min}$")
-
+        save_graph("pv_fig1.png")
+        fig2 = plt.figure()
+        ax2 = fig2.add_subplot()
         grap_boxplot_resource(ax2, dataframe=self.data_month, title="Monthly Average GHI", y_label="$kWh/m^2/day$")
-        return fig
+        save_graph("pv_fig2.png")
+        return fig, fig2
 
     @property
     def is_viability(self):
@@ -589,13 +608,17 @@ class Wind:
         return fig
 
     def graph_variability(self):
-        fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(8, 12))
+        fig = plt.figure()
+        ax1 = fig.add_subplot()
         graph_variability_resource(ax1, dataframe=self.data_month_piv, title="Monthly Average Wind Speed",
                                    y_label="$m/s$", label="$V_{avg}$", min_viability=self.min_ws_wind,
                                    viability_label="$V_{min}$")
-
+        save_graph("wind_fig1.png")
+        fig2 = plt.figure()
+        ax2 = fig2.add_subplot()
         grap_boxplot_resource(ax2, dataframe=self.data_month, title="Monthly Average Wind Speed", y_label="$m/s$")
-        return fig
+        save_graph("wind_fig2.png")
+        return fig, fig2
 
     @property
     def is_viability(self):
@@ -645,8 +668,9 @@ class Biomass:
         # Cattle Slurry
         # poultry manure
         # print(self.raw_data)
-        self.raw_data.insert(0, "Source", ["Cattle slurry", "Pig slurry", "Poultry", "Equine manure", "Goat manure", "Sheep",
-                                           "Sugar Cane Bagasse"])
+        self.raw_data.insert(0, "Source",
+                             ["Cattle slurry", "Pig slurry", "Poultry", "Equine manure", "Goat manure", "Sheep",
+                              "Sugar Cane Bagasse"])
         self.raw_data = self.raw_data.set_index("Source")
         self.calculate_autonomy()
         # print(data)
@@ -669,8 +693,7 @@ class Biomass:
         fig, ax1 = plt.subplots(1, 1, figsize=(8, 6))
         ax1_twin = ax1.twinx()
         data = self.raw_data[self.raw_data.Biogas != 0]
-        """
-        print(data.to_markdown())
+
         data.Biogas.plot.bar(ax=ax1, width=0.3)
 
         ax1.set_title("Available resource")
@@ -687,7 +710,9 @@ class Biomass:
 
         bottom, top = ax1_twin.get_ylim()
         ax1_twin.set_ylim([0, top * 1.5])
-        """
+        ax1.tick_params(axis='x', rotation=45)
+        save_graph("biomass_fig1.png")
+
         fig = plt.figure()
         ax = fig.add_subplot()
         # Sample data
@@ -704,6 +729,7 @@ class Biomass:
 
         # Remove the axis:
         plt.axis("off")
+        save_graph("biomass_fig2.png")
         return
 
     @staticmethod

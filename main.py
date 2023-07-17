@@ -26,17 +26,19 @@ hydro.evaluate_resource(hydro_data)
 
 solar = ResourceViability()
 solar.evaluate_resource(solar_data)
-# solar.graph_resource()
+solar.graph_resource()
+
 
 wind = ResourceViability()
 wind.evaluate_resource(wind_data)
-# wind.graph_resource()
+wind.graph_resource()
+
 
 biomass = ResourceViability(biomass_scenario=0)
 biomass.evaluate_resource(biomass_data)
 biomass.graph_resource()
 
-
+"""
 hydro.potential(installed_capacity=1000, show=True)
 solar.potential(installed_capacity=1000, show=True)
 wind.potential(installed_capacity=1000, show=True)
@@ -103,5 +105,5 @@ TOPSIS(
     save_as="TOPSIS",
     alt_info=alternatives_kw
 )
-
+"""
 # 0 - expertos; 1 - Igual importancia; 2 - Enfoque Ambiental; 3 - Enfoque Económico; 4 - Enfoque Técnico
