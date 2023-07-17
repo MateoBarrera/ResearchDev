@@ -252,14 +252,18 @@ def show_evaluation(result_df, alternative_kw=None, graph=False):
     print(result_df.sort_values(by="Evaluation", ascending=False).to_markdown(
         floatfmt=".3f"
     ))
+
     fig = plt.figure()
     ax = fig.add_subplot()
     alternative_ordered = alternative_kw.sort_values(by="Evaluation", ascending=False).reset_index(drop=True)
-    alternative_ordered.plot.bar(stacked=True, ax=ax, y=["solar", "wind", "hydro", "biomass"])
-    ax_twin = ax.twinx()
-    ax = alternative_ordered["Evaluation"].plot(ax=ax_twin, secondary_y=True, color="k", marker="o")
-    ax.set_title("Evaluation result")
+
+    alternative_ordered.plot.bar(stacked=True, ax=ax, y=["solar", "wind", "hydro", "biomass"], linewidth=1, edgecolor="black", legend=False)
     ax.set_xlabel("Alternative")
     ax.set_ylabel("Resource participation \%")
+    ax = alternative_ordered["Evaluation"].plot(ax=ax, secondary_y=True, color="k", marker="o", legend=False)
+    ax.set_ylim([0, 1])
+    ax.set_ylabel("Cj")
+    # plt.figlegend(loc='lower center', bbox_to_anchor=(0.5, -0.27), fancybox=True, framealpha=1, ncol=5)
+    ax.set_title("Evaluation result")
     ax.legend(loc="lower center", bbox_to_anchor=(0.5, -0.27), ncol=4, frameon=False)
     plt.show()
