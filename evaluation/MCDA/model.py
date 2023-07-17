@@ -4,7 +4,6 @@ This module include MCDA methods AHP and TOPSIS
 Autor: Mateo Barrera
 Date: 11-03-2023
 """
-from datetime import datetime
 import numpy as np
 import pandas as pd  # pylint: disable=import-error
 import matplotlib.pyplot as plt
@@ -207,7 +206,6 @@ def topsis(
         topsis_weighted_alternatives, ideal_positive, ideal_negative
     )
     topsis_result_df = pd.DataFrame({"Evaluation": similarity_index})
-    # save_xls("TOP-Ranking", topsis_result_df.sort_values(by="Evaluation", ascending=False))
     show_evaluation(topsis_result_df, alternative_kw=alt_info)
     if save_as is not None:
         model = {
@@ -223,7 +221,8 @@ def topsis(
 def show_evaluation(result_df, alternative_kw=None, graph=True):
     """
     The show_evaluation function is used to display the results of the evaluation process.
-    It prints a table with all alternatives and their respective evaluations, and it also plots a bar graph showing how each alternative is composed in terms of resource participation.
+    It prints a table with all alternatives and their respective evaluations, and it also plots a bar graph showing how
+    each alternative is composed in terms of resource participation.
 
 
     :param result_df: Store the results of the evaluation
@@ -260,11 +259,12 @@ def show_evaluation(result_df, alternative_kw=None, graph=True):
         ax_twin = ax.twinx()
 
         ax.legend(loc="lower left", bbox_to_anchor=(-0.12, -0.28), ncol=4, frameon=False)
-        ax = alternative_ordered["Evaluation"].plot(ax=ax_twin, secondary_y=True, color="k", marker="D", linestyle='--', label="$C_j$", legend=False)
-        ax.set_ylim([0, 0.8])
+        ax = alternative_ordered["Evaluation"].plot(ax=ax_twin, secondary_y=True, color="k", marker="D", linestyle='--',
+                                                    label="$C_j$", legend=False)
+        bottom, top = ax.get_ylim()
+        ax.set_ylim([0, top*1.15])
         ax.legend(loc="lower left", bbox_to_anchor=(0.81, -0.29), ncol=1, frameon=False)
         ax.set_title("Evaluation result")
         ax.set_xticks(ax.get_xticks(), ax.get_xticklabels(), rotation=100, ha='right')
 
         plt.show()
-
