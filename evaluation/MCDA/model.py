@@ -9,7 +9,7 @@ import numpy as np
 import pandas as pd  # pylint: disable=import-error
 import matplotlib.pyplot as plt
 from .criteria import Criteria  # pylint: disable=import-error
-from ..save import save_model
+from ..save import save
 
 plt.style.use(['seaborn-v0_8-colorblind', 'evaluation/resource/graph.mplstyle'])
 months_ticks_labels = pd.date_range('2014-01-01', '2014-12-31', freq='MS').strftime("%b").tolist()
@@ -65,7 +65,7 @@ def ahp(
         show_expert_matrix=False,
         test=False,
         fuzzy=False,
-        save=None,
+        save_as=None,
         alt_info=None
 ):
     """
@@ -80,43 +80,34 @@ def ahp(
     :param show_expert_matrix: Show the expert matrix in the console
     :param test: Load the criteria matrix from a test file
     :param fuzzy: Determine if the evaluation will be fuzzy or not
-    :param save: Save the model in a file with the name specified
+    :param save_as: Save the model in a file with the name specified
     :param alt_info: Show the alternatives in a more friendly way
     :return: A dictionary with the following keys:
     :doc-author: Trelent
     """
     print("\n:: AHP ::")
-    criteria_obj = Criteria()
-    criteria_obj.show_result_matrix = show_criteria_matrix
-    criteria_obj.show_all = show_expert_matrix
-    criteria_obj.fuzzy = fuzzy
+    ahp_criteria_obj = Criteria()
+    ahp_criteria_obj.show_result_matrix = show_criteria_matrix
+    ahp_criteria_obj.show_all = show_expert_matrix
+    ahp_criteria_obj.fuzzy = fuzzy
 
-    criteria_obj.from_excel(path=load_path_evaluation(test))
+    ahp_criteria_obj.from_excel(path=load_path_evaluation(test))
 
-    criteria_aggregation = criteria_obj.get_weighting_array()
+    ahp_criteria_aggregation = ahp_criteria_obj.get_weighting_array()
     alternative_matrix_norm = normalize_alternatives(alternative_matrix)
     alternative_array = alternative_matrix_norm.to_numpy()
-    result = np.matmul(alternative_array, np.transpose(criteria_aggregation))
-    result_df = pd.DataFrame({"Evaluation": result})
-    show_evaluation(result_df, alternative_kw=alt_info)
-    if save is not None:
-        info = {
-            "name": save,
-            "date": datetime.now().strftime("%D"),
-            "fuzzy": str(fuzzy),
-            "test_data": f" {test} // 0 - expertos; 1 - Igual importancia; 2 - Enfoque Ambiental; 3 - Enfoque "
-                         f"Económico; 4 - Enfoque Técnico"
-        }
-
+    ahp_result = np.matmul(alternative_array, np.transpose(ahp_criteria_aggregation))
+    ahp_result_df = pd.DataFrame({"Evaluation": ahp_result})
+    show_evaluation(ahp_result_df, alternative_kw=alt_info)
+    if save_as is not None:
         model = {
-            "info": pd.DataFrame(info, index=[0]),
+            "info": None,
             "alternative_info": alt_info,
             "alternatives_norm": alternative_matrix_norm,
-            "criteria": pd.DataFrame(data=criteria_aggregation),
-            "result": result_df.sort_values(by="Evaluation", ascending=False),
+            "criteria": pd.DataFrame(data=ahp_criteria_aggregation),
+            "result": ahp_result_df.sort_values(by="Evaluation", ascending=False),
         }
-
-        save_model(save, model)
+        save(save_as, model, fuzzy=str(fuzzy), test=test)
 
 
 def __topsis_normalize(alternatives):
@@ -174,7 +165,7 @@ def topsis(
         show_expert_matrix=False,
         test=False,
         fuzzy=False,
-        save=None,
+        save_as=None,
         alt_info=None
 ):
     """
@@ -190,7 +181,7 @@ def topsis(
     :param show_expert_matrix: Show the matrix of experts
     :param test: Select the data to be used in the evaluation
     :param fuzzy: Determine if the evaluation is fuzzy or not
-    :param save: Save the model in a file called &quot;save&quot;
+    :param save_as: Save the model in a file called &quot;save&quot;
     :param alt_info: Save the information of the alternatives in a dataframe
     :return: A dataframe with the similarity index
     :doc-author: Trelent
@@ -204,7 +195,6 @@ def topsis(
 
     topsis_criteria_obj.from_excel(path=load_path_evaluation(test))
     topsis_criteria_aggregation = topsis_criteria_obj.get_weighting_array()
-    print("SHSISHHSHSHHSHSHHS")
     print(topsis_criteria_aggregation)
     topsis_alternatives_array = __topsis_normalize(np.transpose(alternative_matrix.to_numpy()))
     topsis_alternatives_array = np.where(np.isnan(topsis_alternatives_array), 0, topsis_alternatives_array)
@@ -219,28 +209,29 @@ def topsis(
     topsis_result_df = pd.DataFrame({"Evaluation": similarity_index})
     # save_xls("TOP-Ranking", topsis_result_df.sort_values(by="Evaluation", ascending=False))
     show_evaluation(topsis_result_df, alternative_kw=alt_info)
-    if save is not None:
-        info = {
-            "name": save,
-            "date": datetime.now().strftime("%D"),
-            "fuzzy": str(fuzzy),
-            "test_data": f" {test} // 0 - expertos; 1 - Igual importancia; 2 - Enfoque Ambiental; 3 - Enfoque "
-                         f"Económico; 4 - Enfoque Técnico"
-        }
-
+    if save_as is not None:
         model = {
-            "info": pd.DataFrame(info, index=[0]),
+            "info": None,
             "alternative_info": alt_info,
             "alternatives_norm": topsis_alternatives_norm,
             "criteria": pd.DataFrame(data=topsis_criteria_aggregation),
             "result": topsis_result_df.sort_values(by="Evaluation", ascending=False),
         }
-
-        save_model(save, model)
+        save(save_as, model, fuzzy=str(fuzzy), test=test)
 
 
 def show_evaluation(result_df, alternative_kw=None, graph=True):
+    """
+    The show_evaluation function is used to display the results of the evaluation process.
+    It prints a table with all alternatives and their respective evaluations, and it also plots a bar graph showing how each alternative is composed in terms of resource participation.
 
+
+    :param result_df: Store the results of the evaluation
+    :param alternative_kw: Plot the graph
+    :param graph: Show the graph of the alternatives
+    :return: The ranking of alternatives
+    :doc-author: Trelent
+    """
     print("\n:: Ranking of alternatives ::")
     print(result_df.sort_values(by="Evaluation", ascending=False).to_markdown(
         floatfmt=".3f"
@@ -261,8 +252,10 @@ def show_evaluation(result_df, alternative_kw=None, graph=True):
 
         alternative_ordered = alternative_kw.sort_values(by="Evaluation", ascending=False).reset_index(drop=True)
 
-        alternative_ordered.plot.bar(stacked=True, ax=ax, y=["solar", "wind", "hydro", "biomass"], x="Alternatives", linewidth=0.5, edgecolor="black", legend=False)
+        alternative_ordered.plot.bar(stacked=True, ax=ax, y=["solar", "wind", "hydro", "biomass"], x="Alternatives",
+                                     width=0.45, linewidth=0.5, edgecolor="black", legend=False)
         ax.set_xlabel("Alternative")
+        ax.tick_params(axis='x', labelsize=14, rotation=45)
         ax.set_ylabel("Resource participation \%")
         ax_twin = ax.twinx()
 
@@ -271,4 +264,7 @@ def show_evaluation(result_df, alternative_kw=None, graph=True):
         ax.set_ylim([0, 0.8])
         ax.legend(loc="lower left", bbox_to_anchor=(0.81, -0.29), ncol=1, frameon=False)
         ax.set_title("Evaluation result")
+        ax.set_xticks(ax.get_xticks(), ax.get_xticklabels(), rotation=100, ha='right')
+
         plt.show()
+
