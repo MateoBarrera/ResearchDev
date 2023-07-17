@@ -645,7 +645,7 @@ class Biomass:
         # Cattle Slurry
         # poultry manure
         # print(self.raw_data)
-        self.raw_data.insert(0, "Source", ["Bovine", "Porcine", "Poultry", "Equine", "Goats", "Sheep",
+        self.raw_data.insert(0, "Source", ["Cattle slurry", "Pig slurry", "Poultry", "Equine manure", "Goat manure", "Sheep",
                                            "Sugar Cane Bagasse"])
         self.raw_data = self.raw_data.set_index("Source")
         self.calculate_autonomy()
@@ -689,16 +689,18 @@ class Biomass:
         ax1_twin.set_ylim([0, top * 1.5])
         """
         fig = plt.figure()
+        ax = fig.add_subplot()
         # Sample data
         values = data["Biogas"]
         labels = [f"{value}\n{int(data['Biogas'][value])}"
                   + " $m^3/day$"
                   + f"\n{round(float(data['Percentage'][value]), 1)}"
-                  + "\% of total available"
+                  + r"\% of total available"
                   for value in data.index.values]
 
         # Treemap
-        squarify.plot(sizes=values, label=labels, alpha=0.7, pad=0.01)
+        squarify.plot(ax=ax, sizes=values, label=labels, alpha=0.7, pad=1, text_kwargs={'fontsize': 14},
+                      color=sns.color_palette("colorblind", len(values)))
 
         # Remove the axis:
         plt.axis("off")
