@@ -239,7 +239,7 @@ def topsis(
         save_model(save, model)
 
 
-def show_evaluation(result_df, alternative_kw=None, graph=False):
+def show_evaluation(result_df, alternative_kw=None, graph=True):
 
     print("\n:: Ranking of alternatives ::")
     print(result_df.sort_values(by="Evaluation", ascending=False).to_markdown(
@@ -253,10 +253,8 @@ def show_evaluation(result_df, alternative_kw=None, graph=False):
         def to_percentage(x): return (x / target_capacity) * 100
 
         alternative_kw = alternative_kw.apply(to_percentage, axis=1)
-        result_df["Alternatives"] = ["$A_{"+str(index)+"}$" for index in result_df.index.values]
-        print(result_df.index.values)
+        result_df["Alternatives"] = ["$A_{"+'{:0>2}'.format(index)+"}$" for index in result_df.index.values]
         alternative_kw = alternative_kw.join(result_df)
-
 
         fig = plt.figure(layout="constrained")
         ax = fig.add_subplot()
