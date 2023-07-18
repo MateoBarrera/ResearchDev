@@ -358,7 +358,7 @@ class Indicators:
                     (
                         x["solar"] * 1
                         + x["wind"] * 0.6667
-                        + x["hydro"] * 0.8333
+                        + x["hydro"] * 0.75
                         # + (x["biomass"] * 0.057 #LTP
                         # + (x["biomass"] * 1 #PRP/COP
                         + x["biomass"] * 0.35 

@@ -267,4 +267,7 @@ def show_evaluation(result_df, alternative_kw=None, graph=True):
         ax.set_title("Evaluation result")
         ax.set_xticks(ax.get_xticks(), ax.get_xticklabels(), rotation=100, ha='right')
 
+        plt.savefig("result.png", format="png", metadata=None,
+                    bbox_inches=None, pad_inches=0.1)
         plt.show()
+
