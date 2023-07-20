@@ -724,7 +724,7 @@ class Biomass:
                   for value in data.index.values]
 
         # Treemap
-        squarify.plot(ax=ax, sizes=values, label=labels, alpha=0.7, pad=1, text_kwargs={'fontsize': 14},
+        squarify.plot(ax=ax, sizes=values, label=labels, alpha=0.7, pad=1, text_kwargs={'fontsize': 16},
                       color=sns.color_palette("colorblind", len(values)))
 
         # Remove the axis:
