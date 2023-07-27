@@ -2,15 +2,6 @@ import pandas as pd
 
 
 def __open_csv(path, header="infer"):
-    """_summary_
-
-    Args:
-        path (_type_): _description_
-        header (str, optional): _description_. Defaults to "infer".
-
-    Returns:
-        _type_: _description_
-    """
     return pd.read_csv(path, header=header)
 
 
