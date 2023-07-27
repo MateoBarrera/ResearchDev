@@ -5,9 +5,7 @@ This module includes the structure for the construction and evaluation of indica
 Autor: Mateo Barrera
 Date: 11-03-2023
 """
-import numpy as np
 import pandas as pd  # pylint: disable=import-error
-from prettytable import PrettyTable  # pylint: disable=import-error
 import json
 from datetime import datetime
 
@@ -106,9 +104,13 @@ class Indicator:
         """_summary_
 
         Args:
-            path (str): _description_
+            data (str): _description_
         """
         print(data)
+
+    @type_indicator.setter
+    def type_indicator(self, value):
+        self._type_indicator = value
 
 
 class Indicators:
@@ -146,7 +148,8 @@ class Indicators:
         """
         return self.__ambiental_indicators
 
-    def __validate_json(self, file):
+    @staticmethod
+    def __validate_json(file):
         """_summary_
 
         Args:
@@ -202,10 +205,12 @@ class Indicators:
                 self.__ambiental_indicators[count].update(
                     {"formula": __funtions_indicators[item]["formula"]}
                 )
-            except:
+            except KeyError as e:
+                print(e)
                 continue
 
-    def evaluate_alternative(self, alternatives, freq_analysis="d"):
+    @staticmethod
+    def evaluate_alternative(alternatives, freq_analysis="d"):
         """_summary_
 
         Args:
@@ -235,10 +240,10 @@ class Indicators:
             "102": {
                 "id": "C1.2",
                 "formula": lambda x: (
-                    (x["solar"] / (1000)) * 0.33
-                    + (x["wind"] / (1000)) * 1.57
-                    + (x["hydro"] / (1000)) * 0.02
-                    + (x["biomass_generation"] / (1000)) * 12.65
+                    (x["solar"] / 1000) * 0.33
+                    + (x["wind"] / 1000) * 1.57
+                    + (x["hydro"] / 1000) * 0.02
+                    + (x["biomass_generation"] / 1000) * 12.65
                 ),
             },
             "104": {
@@ -291,7 +296,7 @@ class Indicators:
                         x["solar"] * 1100
                         + x["wind"] * 1350
                         + x["hydro"] * 29900
-                         + x["biomass"] * 2000
+                        + x["biomass"] * 2000
                     )
                     / (
                         x["solar"]
@@ -383,9 +388,10 @@ class Indicators:
         print(alternatives.iloc[:, 4:8].to_markdown(floatfmt=".2f"))
         print("\n:: Criteria  ::")
         print(alternatives.iloc[:, 8:].to_markdown(floatfmt=".4f"))
-        #save_xls("Alternativas resumen", alternatives)
+        # save_xls("Alternativas resumen", alternatives)
         return alternatives.iloc[:, 8:]
-    
+
+
 def save_xls(df_name, dframe: pd.DataFrame):
     """_summary_
 
@@ -395,7 +401,7 @@ def save_xls(df_name, dframe: pd.DataFrame):
     """    
     time = datetime.now().strftime("%H.%M")
     with pd.ExcelWriter("./Repo/Articulo1/output/result.xlsx", mode="a") as writer:
-        dframe.to_excel(writer, sheet_name=df_name +"-"+ str(time))
+        dframe.to_excel(writer, sheet_name=df_name + "-" + str(time))
 
 
 if __name__ == "__main__":
@@ -404,7 +410,6 @@ if __name__ == "__main__":
     # print(ind)
     # ind.add_formula()
     # print(ind.ambiental[0]["formula"])
-    ["solar", "wind", "hydro", "biomass"]
     df = pd.DataFrame(
         {
             "solar": [1, 0.5, 0],
