@@ -38,13 +38,14 @@ biomass = ResourceViability(biomass_scenario=0)
 biomass.evaluate_resource(biomass_data)
 # biomass.graph_resource()
 
+capacity_target = 100000
 
-hydro.potential(installed_capacity=1000, show=True)
-solar.potential(installed_capacity=1000, show=True)
-wind.potential(installed_capacity=1000, show=True)
-biomass.potential(installed_capacity=1000, show=True)
+hydro.potential(installed_capacity=capacity_target, show=True)
+solar.potential(installed_capacity=capacity_target, show=True)
+wind.potential(installed_capacity=capacity_target, show=True)
+biomass.potential(installed_capacity=capacity_target, show=True)
 
-total_installed_capacity = 1000  # kW
+total_installed_capacity = capacity_target # kW
 
 alternatives = Alternatives(
     resources_included=[1, 1, 1, 1],
@@ -76,7 +77,7 @@ alternatives_kw["biomass_generation"] = biomass_array
 
 
 indicators = Indicators()
-indicators.load("evaluation/Indicator/indicators.json")
+# indicators.load("evaluation/Indicator/indicators.json")
 alternative_matrix = indicators.evaluate_alternative(alternatives_kw)
 # Escoge datos de evaluación de prueba
 # 0 - expertos

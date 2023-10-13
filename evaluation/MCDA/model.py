@@ -238,8 +238,7 @@ def show_evaluation(result_df, alternative_kw=None, graph=True):
 
     if graph:
         alternative_kw = alternative_kw.filter(["solar", "wind", "hydro", "biomass"], axis=1)
-        target_capacity = 1000
-
+        target_capacity = alternative_kw["solar"].max()
         def to_percentage(x): return (x / target_capacity) * 100
 
         alternative_kw = alternative_kw.apply(to_percentage, axis=1)
