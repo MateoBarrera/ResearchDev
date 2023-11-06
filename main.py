@@ -38,7 +38,7 @@ biomass = ResourceViability(biomass_scenario=0)
 biomass.evaluate_resource(biomass_data)
 # biomass.graph_resource()
 
-capacity_target = 100000
+capacity_target = 1000
 
 hydro.potential(installed_capacity=capacity_target, show=True)
 solar.potential(installed_capacity=capacity_target, show=True)
@@ -99,7 +99,7 @@ test_criteria = 0
 
 TOPSIS(
     alternative_matrix=alternative_matrix,
-    show_criteria_matrix=False,
+    show_criteria_matrix=True,
     show_expert_matrix=False,
     test=test_criteria,
     fuzzy=True,
