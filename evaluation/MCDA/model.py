@@ -250,6 +250,9 @@ def show_evaluation(result_df, alternative_kw=None, graph=True):
 
         alternative_ordered = alternative_kw.sort_values(by="Evaluation", ascending=False).reset_index(drop=True)
 
+        if alternative_ordered.shape[0] > 30:
+            alternative_ordered = alternative_ordered.iloc[:20]
+
         alternative_ordered.plot.bar(stacked=True, ax=ax, y=["solar", "wind", "hydro", "biomass"], x="Alternatives",
                                      width=0.45, linewidth=0.5, edgecolor="black", legend=False)
         ax.set_xlabel("Alternative")
