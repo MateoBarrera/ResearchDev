@@ -125,7 +125,7 @@ class Indicators:
 
     __ambiental_indicators: list
     __economic_indicators: list
-    __tecnical_indicators: list
+    __technical_indicators: list
 
     def __init__(self) -> None:
         """_summary_"""
@@ -215,7 +215,7 @@ class Indicators:
 
         Args:
             alternatives (_type_): _description_
-            freq_analysis (str, optional): _description_. Defaults to "m".
+            freq_analysis (str, optional): _description_. Defaults to "d".
 
         Returns:
             _type_: _description_
@@ -226,7 +226,7 @@ class Indicators:
             freq_factor = 720
         else:
             freq_factor = 8760
-        funtions_indicators = {
+        functions_indicators = {
             "101": {
                 "id": "C1.1",
                 "formula": lambda x: 0.367
@@ -377,7 +377,7 @@ class Indicators:
                 ),
             },
         }
-        for indicator in funtions_indicators.values():
+        for indicator in functions_indicators.values():
             alternatives[indicator["id"]] = alternatives.apply(
                 indicator["formula"], axis=1
             )
@@ -406,7 +406,7 @@ def save_xls(df_name, dframe: pd.DataFrame):
 
 if __name__ == "__main__":
     ind = Indicators()
-    ind.load("evaluation/Indicator/indicators.json")
+    ind.load("indicators.json")
     # print(ind)
     # ind.add_formula()
     # print(ind.ambiental[0]["formula"])

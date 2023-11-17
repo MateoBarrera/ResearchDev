@@ -238,8 +238,7 @@ def show_evaluation(result_df, alternative_kw=None, graph=True):
 
     if graph:
         alternative_kw = alternative_kw.filter(["solar", "wind", "hydro", "biomass"], axis=1)
-        target_capacity = 1000
-
+        target_capacity = alternative_kw["solar"].max()
         def to_percentage(x): return (x / target_capacity) * 100
 
         alternative_kw = alternative_kw.apply(to_percentage, axis=1)
@@ -250,6 +249,9 @@ def show_evaluation(result_df, alternative_kw=None, graph=True):
         ax = fig.add_subplot()
 
         alternative_ordered = alternative_kw.sort_values(by="Evaluation", ascending=False).reset_index(drop=True)
+
+        if alternative_ordered.shape[0] > 30:
+            alternative_ordered = alternative_ordered.iloc[:20]
 
         alternative_ordered.plot.bar(stacked=True, ax=ax, y=["solar", "wind", "hydro", "biomass"], x="Alternatives",
                                      width=0.45, linewidth=0.5, edgecolor="black", legend=False)

@@ -9,6 +9,7 @@ import numpy as np
 import pandas as pd  # pylint: disable=import-error
 from prettytable import PrettyTable  # pylint: disable=import-error
 from statistics import geometric_mean
+import matplotlib.pyplot as plt
 
 
 def open_excel(path, sheet_name="Form Responses 1"):
@@ -187,6 +188,51 @@ class Criteria:
         str_dic = pd.DataFrame(criteria).to_markdown(floatfmt=".4f")
         print("\n:: Criteria weights ::")
         print(str_dic)  # self.show_info()
+        self.graph_weighs(criteria)
+
+    def graph_weighs(self, criteria):
+        print(criteria)
+        data = {'Ambiental': criteria['Ambiental'],
+                'Económico': criteria['Económico'],
+                'Técnico': criteria['Técnico'],
+                }
+
+        df = pd.DataFrame(data, columns=['Ambiental', 'Económico', 'Técnico'],
+                          index=['Fluidez', '% Savings', 'Escalabilidade'])
+        df_dummy = df.copy()
+        df_dummy = df_dummy * 100
+        percentage_values = [str(round(item, 1)) for item in df_dummy.values.flatten().tolist()]
+        group_names = df.columns
+        # group_size = [100 / len(group_names)] * len(group_names)
+        group_size = criteria['weights']
+        subgroup_names = ['C1.1.', 'C1.2.', 'C1.3.', 'C2.1.', 'C2.2.', 'C2.3.', 'C3.1.', 'C3.2.', 'C3.3.']
+
+        # Make data: I have 4 groups and 12 subgroups - 3 for each group
+        subgroup_size = []
+        for group, size in zip(df.columns, group_size):
+            subgroup_sum = df[group].sum()
+            subgroup_size += [subgr / subgroup_sum * size for subgr in df[group]]
+        # Create colors
+        a, b, c, d = [plt.cm.Greens, plt.cm.Reds, plt.cm.Blues, plt.cm.Greys]
+        subgroup_names = [x + '\n ' + y +'\%' for x, y in zip(subgroup_names, percentage_values)]
+        group_size_str = [str(round(item*100, 1)) for item in criteria['weights']]
+        group_names = [x + '\n' + y +'\%' for x, y in zip(group_names, group_size_str)]
+        # First Ring (outside)
+        fig, ax = plt.subplots()
+        ax.axis('equal')
+        mypie, _ = ax.pie(group_size, radius=1.25-0.2, labels=group_names, labeldistance=0.38,
+                          colors=[a(0.6), b(0.6), c(0.6), d(0.6)])
+        plt.setp(mypie, width=0.8, edgecolor='white')
+
+        # Second Ring (Inside)
+        mypie2, _ = ax.pie(subgroup_size, radius=1.25, labels=subgroup_names, labeldistance=1.1,
+                           colors=[a(0.5), a(0.4), a(0.3), b(0.5), b(0.4), b(0.3), c(0.6), c(0.5), c(0.4), d(0.3),
+                                   d(0.2),
+                                   d(0.4)])
+        plt.setp(mypie2, width=0.4, edgecolor='white')
+        plt.margins(0, 0)
+
+        plt.show()
 
     def show_info(self):
         """_summary_"""
@@ -533,7 +579,7 @@ if __name__ == "__main__":
     test_obj = Criteria()
     test_obj.show_all = True
     test_obj.fuzzy = True
-    test_obj.from_excel(path="./Repo/Articulo1/Encuesta/Resultados-9-02-2023.xlsx")
+    test_obj.from_excel(path="../../Repo/Articulo1/Encuesta/Resultados-9-02-2023.xlsx")
     # print(test_obj.get_weighting_array)
     # test_obj.from_excel(path="./Repo/Articulo1/Test/test2.xlsx")
-    test_obj.show_info()
+    test_obj.show_weighs()
