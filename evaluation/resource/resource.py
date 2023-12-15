@@ -257,15 +257,19 @@ class Hydro:
         return fig
 
     def graph_variability(self):
+        title = "Monthly Average Flow Rate"
+        # SPANISH
+        title = "Caudal promedio mensual"
+
         fig = plt.figure()
         ax1 = fig.add_subplot()
-        graph_variability_resource(ax1, dataframe=self.data_month_piv, title="Monthly Average Flow Rate",
+        graph_variability_resource(ax1, dataframe=self.data_month_piv, title=title,
                                    y_label="$m^3/s$", label="$Q_{avg}$", min_viability=self.q_sr,
                                    viability_label="$Q_{sr}$")
         save_graph("hydro_fig.png")
         fig2 = plt.figure()
         ax2 = fig2.add_subplot()
-        grap_boxplot_resource(ax2, dataframe=self.data_month, title="Monthly Average Flow Rate", y_label="$m^3/s$")
+        grap_boxplot_resource(ax2, dataframe=self.data_month, title=title, y_label="$m^3/s$")
         save_graph("hydro_fig2.png")
         return fig, fig2
 
@@ -442,6 +446,9 @@ class Pv:
             object: matplotlib.pyplot.figure corresponding to the flow  permanent graph
         """
         # Plot figure
+        title = "Monthly Average GHI"
+        # SPANISH
+        title = "Irradiancia horizontal promedio mensual"
         fig = plt.figure()
         ax = fig.add_subplot()
         # Plot month data
@@ -464,7 +471,7 @@ class Pv:
             linestyles="--",
             label="$PSH_{min}$" + "= {:.2f} $h$".format(self.min_irr_pv),
         )
-        ax.set_title("Monthly Average PSH")
+        ax.set_title(title)
         ax.set_xlabel("Year")
         ax.set_ylabel("$h$")
         ax.legend(loc="upper right")
@@ -472,15 +479,18 @@ class Pv:
         return fig
 
     def graph_variability(self):
+        title = "Monthly Average GHI"
+        # SPANISH
+        title = "Irradiancia horizontal promedio mensual"
         fig = plt.figure()
         ax1 = fig.add_subplot()
-        graph_variability_resource(ax1, dataframe=self.data_month_piv, title="Monthly Average GHI",
-                                   y_label="$kWh/m^2/day$", label="$GHI_{avg}$", min_viability=self.min_irr_pv,
+        graph_variability_resource(ax1, dataframe=self.data_month_piv, title=title,
+                                   y_label="$kWh/m^2/dia$", label="$GHI_{avg}$", min_viability=self.min_irr_pv,
                                    viability_label="$GHI_{min}$")
         save_graph("pv_fig1.png")
         fig2 = plt.figure()
         ax2 = fig2.add_subplot()
-        grap_boxplot_resource(ax2, dataframe=self.data_month, title="Monthly Average GHI", y_label="$kWh/m^2/day$")
+        grap_boxplot_resource(ax2, dataframe=self.data_month, title=title, y_label="$kWh/m^2/dia$")
         save_graph("pv_fig2.png")
         return fig, fig2
 
@@ -586,6 +596,9 @@ class Wind:
 
     def wind_speed_graph(self):
         # Plot figure
+        title = "Monthly Average Wind Speed"
+        # SPANISH
+        title = "Velocidad del viento promedio mensual"
         fig = plt.figure()
         ax = fig.add_subplot()
         # Plot month data
@@ -600,7 +613,7 @@ class Wind:
             linestyles="--",
             label="$V_{avg}$" + " = {:.2f}".format(self.wind_mean),
         )
-        ax.set_title("Monthly Average Wind Speed")
+        ax.set_title(title)
         ax.set_xlabel("Year")
         ax.set_ylabel("$m/s$")
         ax.legend(loc="upper right")
@@ -608,15 +621,18 @@ class Wind:
         return fig
 
     def graph_variability(self):
+        title = "Monthly Average Wind Speed"
+        # SPANISH
+        title = "Velocidad del viento promedio mensual"
         fig = plt.figure()
         ax1 = fig.add_subplot()
-        graph_variability_resource(ax1, dataframe=self.data_month_piv, title="Monthly Average Wind Speed",
+        graph_variability_resource(ax1, dataframe=self.data_month_piv, title=title,
                                    y_label="$m/s$", label="$V_{avg}$", min_viability=self.min_ws_wind,
                                    viability_label="$V_{min}$")
         save_graph("wind_fig1.png")
         fig2 = plt.figure()
         ax2 = fig2.add_subplot()
-        grap_boxplot_resource(ax2, dataframe=self.data_month, title="Monthly Average Wind Speed", y_label="$m/s$")
+        grap_boxplot_resource(ax2, dataframe=self.data_month, title=title, y_label="$m/s$")
         save_graph("wind_fig2.png")
         return fig, fig2
 
@@ -668,9 +684,13 @@ class Biomass:
         # Cattle Slurry
         # poultry manure
         # print(self.raw_data)
+        resources_names = ["Cattle slurry", "Pig slurry", "Poultry", "Equine manure", "Goat manure", "Sheep",
+                              "Sugar Cane Bagasse"]
+        # SPANISH
+        resources_names = ["Estiércol de ganado", "Estiércol de cerdo", "Desechos avícolas", "Estiércol de equinos",
+                           "Desechos de cabras", "Desechos de ovejas", "Bagazo de caña de azúcar"]
         self.raw_data.insert(0, "Source",
-                             ["Cattle slurry", "Pig slurry", "Poultry", "Equine manure", "Goat manure", "Sheep",
-                              "Sugar Cane Bagasse"])
+                             resources_names)
         self.raw_data = self.raw_data.set_index("Source")
         self.calculate_autonomy()
         # print(data)
@@ -690,14 +710,20 @@ class Biomass:
 
     @property
     def all_graph(self):
+        title = "Available resource"
+        # SPANISH
+        title = "Recursos disponibles"
+        ylabel = "$\%$ used of available resource"
+        # SPANISH
+        ylabel = "$\%$ de explotación del recurso"
         fig, ax1 = plt.subplots(1, 1, figsize=(8, 6))
         ax1_twin = ax1.twinx()
         data = self.raw_data[self.raw_data.Biogas != 0]
 
         data.Biogas.plot.bar(ax=ax1, width=0.3)
 
-        ax1.set_title("Available resource")
-        ax1.set_ylabel("$\%$ used of available resource")
+        ax1.set_title(title)
+        ax1.set_ylabel(ylabel)
         ax1_twin.set_ylabel("$m^3/day$")
         ax1.legend(loc="upper center")
         bottom, top = ax1.get_ylim()
@@ -717,10 +743,16 @@ class Biomass:
         ax = fig.add_subplot()
         # Sample data
         values = data["Biogas"]
-        labels = [f"{value}\n{int(data['Biogas'][value])}"
+        """labels = [f"{value}\n{int(data['Biogas'][value])}"
                   + " $m^3/day$"
                   + f"\n{round(float(data['Percentage'][value]), 1)}"
                   + r"\% of total available"
+                  for value in data.index.values]"""
+        # SPANISH
+        labels = [f"{value}\n{int(data['Biogas'][value])}"
+                  + " $m^3/dia$"
+                  + f"\n{round(float(data['Percentage'][value]), 1)}"
+                  + r"\% del total disponible"
                   for value in data.index.values]
 
         # Treemap

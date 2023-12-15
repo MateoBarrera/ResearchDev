@@ -255,9 +255,13 @@ def show_evaluation(result_df, alternative_kw=None, graph=True):
 
         alternative_ordered.plot.bar(stacked=True, ax=ax, y=["solar", "wind", "hydro", "biomass"], x="Alternatives",
                                      width=0.45, linewidth=0.5, edgecolor="black", legend=False)
-        ax.set_xlabel("Alternative")
+        ax.set_xlabel("Alternativa")
         ax.tick_params(axis='x', labelsize=14, rotation=45)
-        ax.set_ylabel("Resource participation \%")
+
+        ylable = "Resource participation \%"
+        # SPANISH
+        ylable = "Participación por recurso \%"
+        ax.set_ylabel(ylable)
         ax_twin = ax.twinx()
 
         ax.legend(loc="lower left", bbox_to_anchor=(-0.12, -0.28), ncol=4, frameon=False)
@@ -266,7 +270,10 @@ def show_evaluation(result_df, alternative_kw=None, graph=True):
         bottom, top = ax.get_ylim()
         ax.set_ylim([0, top*1.15])
         ax.legend(loc="lower left", bbox_to_anchor=(0.81, -0.29), ncol=1, frameon=False)
-        ax.set_title("Evaluation result")
+        # SPANISH
+        title = "Evaluation result"
+        title = "Resultado de evaluación"
+        ax.set_title(title)
         ax.set_xticks(ax.get_xticks(), ax.get_xticklabels(), rotation=100, ha='right')
 
         plt.savefig("result.png", format="png", metadata=None,
