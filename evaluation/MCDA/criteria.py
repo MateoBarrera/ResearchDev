@@ -65,7 +65,7 @@ def print_evaluation(name_matrix, matrix, wj_array, fuzzy=False):
 
 
 def graph_weighs(criteria):
-    print(criteria)
+    #print(criteria)
     data = {'Ambiental': criteria['Ambiental'],
             'Económico': criteria['Económico'],
             'Técnico': criteria['Técnico'],
@@ -97,8 +97,10 @@ def graph_weighs(criteria):
     mypie, _ = ax.pie(group_size, radius=1.25 - 0.2, labels=group_names, labeldistance=0.38,
                       colors=[a(0.6), b(0.6), c(0.6), d(0.6)])
     plt.setp(mypie, width=0.8, edgecolor='white')
+    pd.DataFrame({'labels':group_names,'size':group_size}).to_csv('File2BI/criteria_pie.csv', index=False)
 
     # Second Ring (Inside)
+    pd.DataFrame({'labels':subgroup_names,'size':subgroup_size}).to_csv('File2BI/sub_criteria_pie.csv', index=False)
     mypie2, _ = ax.pie(subgroup_size, radius=1.25, labels=subgroup_names, labeldistance=1.1,
                        colors=[a(0.5), a(0.4), a(0.3), b(0.5), b(0.4), b(0.3), c(0.6), c(0.5), c(0.4), d(0.3),
                                d(0.2),

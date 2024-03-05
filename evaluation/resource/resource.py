@@ -227,6 +227,9 @@ class Hydro:
         # Plot figure
         fig = plt.figure()
         ax = fig.add_subplot()
+        print('?'*10)
+        test_df = pd.DataFrame({'q_data_sort': q_data_sort, 'q_frequency': q_frequency})
+        test_df.to_csv("File2BI/hydro.csv", index=False)
         ax.plot(q_frequency, q_data_sort)
         ax.fill_between(
             q_frequency[0: self.q_sr_index],
@@ -266,11 +269,13 @@ class Hydro:
         graph_variability_resource(ax1, dataframe=self.data_month_piv, title=title,
                                    y_label="$m^3/s$", label="$Q_{avg}$", min_viability=self.q_sr,
                                    viability_label="$Q_{sr}$")
-        save_graph("hydro_fig.png")
+        # save_graph("hydro_fig.png")
+        self.data_month_piv.to_csv("File2BI/hydro_variability.csv", index=False)
         fig2 = plt.figure()
         ax2 = fig2.add_subplot()
         grap_boxplot_resource(ax2, dataframe=self.data_month, title=title, y_label="$m^3/s$")
-        save_graph("hydro_fig2.png")
+        self.data_month.to_csv("File2BI/hydro_boxplot.csv", index=False)
+        # save_graph("hydro_fig2.png")
         return fig, fig2
 
     def graph_pdc(self):
@@ -487,11 +492,13 @@ class Pv:
         graph_variability_resource(ax1, dataframe=self.data_month_piv, title=title,
                                    y_label="$kWh/m^2/dia$", label="$GHI_{avg}$", min_viability=self.min_irr_pv,
                                    viability_label="$GHI_{min}$")
-        save_graph("pv_fig1.png")
+        self.data_month_piv.to_csv("File2BI/solar_variability.csv", index=False)
+        # save_graph("pv_fig1.png")
         fig2 = plt.figure()
         ax2 = fig2.add_subplot()
         grap_boxplot_resource(ax2, dataframe=self.data_month, title=title, y_label="$kWh/m^2/dia$")
-        save_graph("pv_fig2.png")
+        self.data_month.to_csv("File2BI/solar_boxplot.csv", index=False)
+        # save_graph("pv_fig2.png")
         return fig, fig2
 
     @property
@@ -629,11 +636,13 @@ class Wind:
         graph_variability_resource(ax1, dataframe=self.data_month_piv, title=title,
                                    y_label="$m/s$", label="$V_{avg}$", min_viability=self.min_ws_wind,
                                    viability_label="$V_{min}$")
-        save_graph("wind_fig1.png")
+        # save_graph("wind_fig1.png")
+        self.data_month_piv.to_csv("File2BI/wind_variability.csv", index=False)
         fig2 = plt.figure()
         ax2 = fig2.add_subplot()
         grap_boxplot_resource(ax2, dataframe=self.data_month, title=title, y_label="$m/s$")
-        save_graph("wind_fig2.png")
+        # save_graph("wind_fig2.png")
+        self.data_month.to_csv("File2BI/wind_boxplot.csv", index=False)
         return fig, fig2
 
     @property
@@ -758,10 +767,12 @@ class Biomass:
         # Treemap
         squarify.plot(ax=ax, sizes=values, label=labels, alpha=0.7, pad=1, text_kwargs={'fontsize': 16},
                       color=sns.color_palette("colorblind", len(values)))
-
+        test_df = pd.DataFrame({'labels':labels, 'values':values})
+        test_df.to_csv('File2BI/biomass.csv', index=False)
+        print(test_df)
         # Remove the axis:
         plt.axis("off")
-        save_graph("biomass_fig2.png")
+        # save_graph("biomass_fig2.png")
         return
 
     @staticmethod

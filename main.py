@@ -24,6 +24,8 @@ hydro = ResourceViability()
 hydro.evaluate_resource(hydro_data)
 # hydro.graph_resource()
 
+
+
 solar = ResourceViability()
 solar.evaluate_resource(solar_data)
 # solar.graph_resource()
