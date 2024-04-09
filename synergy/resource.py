@@ -1,3 +1,5 @@
+from altair import value
+from pkg_resources import resource_isdir
 from pydantic import BaseModel
 from typing import Optional, List
 
@@ -18,6 +20,32 @@ class Resource(BaseModel):
 from typing import List
 from datetime import datetime
 from pydantic import BaseModel
+from .enums import ResourceType, Unit
+
+
+# New clases definition
+class Resource(BaseModel):
+    resource_is: int
+    site_id: int
+    name: str
+    resource_type: ResourceType
+    description: str
+
+
+class ResourceVariables(BaseModel):
+    variable_id: int
+    name: str
+    unit: Unit
+    source: str
+    frequency: str
+    date_added: datetime
+    date_updated: datetime
+
+
+class TimeSeries(BaseModel):
+    variable_id: int
+    date: datetime
+    value: float
 
 
 class BaseHistoricalData(BaseModel):
