@@ -9,7 +9,7 @@ numpy==1.26.4
 openpyxl==3.1.2
 packaging==21.3
 pandas==1.5.1
-pillow==10.2.0
+pillow==10.3.0
 prettytable==3.5.0
 pydantic==2.6.4
 pydantic_core==2.16.3
