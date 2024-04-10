@@ -1,6 +1,20 @@
 from django.db import models
 
 
+class ResourceEvaluation(models.Model):
+    resource_name = models.CharField(max_length=100)
+    type = models.CharField(max_length=50)
+    overall_score = models.FloatField()
+    technical_score = models.FloatField()
+    economic_score = models.FloatField()
+    environmental_score = models.FloatField()
+    installed_capacity = models.IntegerField()
+    generation_per_year = models.FloatField()
+
+    def __str__(self):
+        return self.resource_name
+
+
 class Analysis(models.Model):
     analysis_id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=255)
