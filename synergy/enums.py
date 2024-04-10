@@ -15,3 +15,15 @@ class ResourceType(Enum):
     Solar = "Solar"
     Wind = "Wind"
     Biomass = "Biomass"
+
+
+class Dimension(Enum):
+    SOCIAL = "Social"
+    ECONOMIC = "Economic"
+    ENVIRONMENTAL = "Environmental"
+    TECHNICAL = "Technical"
+
+
+class CriteriaType(Enum):
+    COST = "Cost"
+    BENEFIT = "Benefit"

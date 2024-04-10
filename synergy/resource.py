@@ -1,9 +1,3 @@
-from altair import value
-from pkg_resources import resource_isdir
-from pydantic import BaseModel
-from typing import Optional, List
-
-
 """ class Historical(BaseModel):
     date: str
     source: str
@@ -15,7 +9,6 @@ class Resource(BaseModel):
     ubication: str
     is_viability: Optional[bool] = False
     historical: List[Historical] """
-
 
 from typing import List
 from datetime import datetime
@@ -32,7 +25,7 @@ class Resource(BaseModel):
     description: str
 
 
-class ResourceVariables(BaseModel):
+class ResourceVariable(BaseModel):
     variable_id: int
     name: str
     unit: Unit
@@ -42,9 +35,9 @@ class ResourceVariables(BaseModel):
     date_updated: datetime
 
 
-class TimeSeries(BaseModel):
+class TimeSerie(BaseModel):
     variable_id: int
-    date: datetime
+    time_stamp: datetime
     value: float
 
 
