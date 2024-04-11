@@ -1,4 +1,5 @@
-from .models import Analysis, SynergyResult, Site, SiteAttribute
+from importlib import resources
+from .models import Analysis, SynergyResult, Site, ResourceVariable, Source, TimeSeries
 from ninja import ModelSchema, Schema
 
 
@@ -8,7 +9,29 @@ class SynergyResultSchema(ModelSchema):
         fields = "__all__"
 
 
+class SourceSchema(ModelSchema):
+    class Meta:
+        model = Source
+        fields = "__all__"
+
+
+class TimeSeriesSchema(ModelSchema):
+    class Meta:
+        model = TimeSeries
+        fields = "__all__"
+
+
+class ResourceVariableSchema(ModelSchema):
+    time_series: TimeSeriesSchema | None = None
+
+    class Meta:
+        model = ResourceVariable
+        fields = "__all__"
+
+
 class SiteSchema(ModelSchema):
+    resources: list[ResourceVariableSchema] | None = []
+
     class Meta:
         model = Site
         fields = "__all__"
@@ -20,7 +43,11 @@ class SiteCreateSchema(Schema):
     latitude: float
     longitude: float
     elevation: float
-    resources_description: str
+    resources: list[int]
+
+
+class SitePatchSchema(Schema):
+    resource_id: int
 
 
 class AnalysisSchema(ModelSchema):

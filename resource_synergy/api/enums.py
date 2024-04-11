@@ -1,6 +1,6 @@
 from enum import Enum
 
-from evaluation.resource.resource import Biomass, Hydro, Wind
+from pytz import HOUR
 
 
 class Unit(Enum):
@@ -8,6 +8,13 @@ class Unit(Enum):
     CUBIT_METER = "m³"
     CELSIUS = "Celsius"
     FAHRENHEIT = "Fahrenheit"
+
+
+class Frequency(Enum):
+    HOURLY = "Hourly"
+    DAILY = "Daily"
+    MONTHLY = "Monthly"
+    YEARLY = "Yearly"
 
 
 class ResourceType(Enum):
