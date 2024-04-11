@@ -2,10 +2,25 @@ from .models import Analysis, SynergyResult, Site, SiteAttribute
 from ninja import ModelSchema, Schema
 
 
+class SynergyResultSchema(ModelSchema):
+    class Meta:
+        model = SynergyResult
+        fields = "__all__"
+
+
 class SiteSchema(ModelSchema):
     class Meta:
         model = Site
         fields = "__all__"
+
+
+class SiteCreateSchema(Schema):
+    name: str
+    description: str
+    latitude: float
+    longitude: float
+    elevation: float
+    resources_description: str
 
 
 class AnalysisSchema(ModelSchema):
@@ -25,23 +40,11 @@ class AnalysisCreateSchema(Schema):
     total_alternatives: int
 
 
-class SynergyResultSchema(ModelSchema):
-    class Meta:
-        model = SynergyResult
-        fields = "__all__"
-
-
-class SiteAttributeSchema(ModelSchema):
-    class Meta:
-        model = SiteAttribute
-        fields = "__all__"
+class AnalysisSitePatch(Schema):
+    site_id: int
 
 
 class ErrorSchema(Schema):
     detail: str
     code: str
     more_info: str | None = None
-
-
-class AnalysisSitePatch(Schema):
-    site_id: int

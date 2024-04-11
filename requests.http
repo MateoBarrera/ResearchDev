@@ -3,18 +3,62 @@ POST http://localhost:8000/api/v1/analysis/
 Content-Type: application/json
 
 {
-    "name": "Test Analysis 2",
+    "name": "Test Analysis 3",
     "description": "This is a test analysis",
-    "site_id": 11,
     "demand": 100.0,
     "seed_alternatives": "Test alternatives",
     "total_alternatives": 5
 }
 
 ###
-POST http://localhost:8000/api/v1/analysis/test-analysis-2-2/set-site/
+POST http://localhost:8000/api/v1/analysis/3/set-site/
 Content-Type: application/json
 
 {
-    "site_id": null
+    "site_id": 1
 }
+
+###
+PUT http://localhost:8000/api/v1/analysis/3
+Content-Type: application/json
+
+{
+    "name": "Test Analysis 3 update",
+    "description": "This is a test analysis",
+    "demand": 1008.0,
+    "seed_alternatives": "Test alternatives",
+    "total_alternatives": 4
+}
+
+###
+DELETE  http://localhost:8000/api/v1/analysis/4
+
+
+### SITE
+POST http://localhost:8000/api/v1/site/
+Content-Type: application/json
+
+{
+    "name": "Yumbo",
+    "description": "Municipio del valle del cauca, colombia",
+    "latitude": 3.3100333333333,
+    "longitude": -76.539444444444,
+    "elevation": 1082,
+    "resources_description": "Hídrico, solar, bajo biomasa y eólico"
+}
+
+###
+PUT http://localhost:8000/api/v1/site/3
+Content-Type: application/json
+
+{
+    "name": "Yumbo Rural",
+    "description": "Municipio del valle del cauca, colombia",
+    "latitude": 3.3100333333333,
+    "longitude": -76.539444444444,
+    "elevation": 1082,
+    "resources_description": "Hídrico, solar, bajo biomasa y eólico"
+}
+
+###
+DELETE http://localhost:8000/api/v1/site/3
