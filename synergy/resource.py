@@ -1,7 +1,3 @@
-from pydantic import BaseModel
-from typing import Optional, List
-
-
 """ class Historical(BaseModel):
     date: str
     source: str
@@ -14,10 +10,35 @@ class Resource(BaseModel):
     is_viability: Optional[bool] = False
     historical: List[Historical] """
 
-
 from typing import List
 from datetime import datetime
 from pydantic import BaseModel
+from .enums import ResourceType, Unit
+
+
+# New clases definition
+class Resource(BaseModel):
+    resource_is: int
+    site_id: int
+    name: str
+    resource_type: ResourceType
+    description: str
+
+
+class ResourceVariable(BaseModel):
+    variable_id: int
+    name: str
+    unit: Unit
+    source: str
+    frequency: str
+    date_added: datetime
+    date_updated: datetime
+
+
+class TimeSerie(BaseModel):
+    variable_id: int
+    time_stamp: datetime
+    value: float
 
 
 class BaseHistoricalData(BaseModel):
