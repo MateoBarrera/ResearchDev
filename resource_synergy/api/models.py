@@ -1,30 +1,35 @@
 from django.db import models
+from django_extensions.db.fields import AutoSlugField  # type: ignore
 
 
-class ResourceEvaluation(models.Model):
-    resource_name = models.CharField(max_length=100)
-    type = models.CharField(max_length=50)
-    overall_score = models.FloatField()
-    technical_score = models.FloatField()
-    economic_score = models.FloatField()
-    environmental_score = models.FloatField()
-    installed_capacity = models.IntegerField()
-    generation_per_year = models.FloatField()
+class Site(models.Model):
+    id = models.AutoField(primary_key=True)
+    name = models.CharField(max_length=255)
+    description = models.TextField()
+    latitude = models.FloatField()
+    longitude = models.FloatField()
+    elevation = models.FloatField()
+    resources_description = models.TextField()
 
     def __str__(self):
-        return self.resource_name
+        return self.name
 
 
 class Analysis(models.Model):
-    analysis_id = models.AutoField(primary_key=True)
+    id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=255)
+    slug = AutoSlugField(populate_from="name")
     description = models.TextField()
-    site_id = models.IntegerField()
     demand = models.FloatField()
     seed_alternatives = models.CharField(max_length=255)
     total_alternatives = models.IntegerField()
     date_created = models.DateTimeField(auto_now_add=True)
     date_updated = models.DateTimeField(auto_now=True)
+
+    site = models.ForeignKey(Site, on_delete=models.SET_NULL, null=True, blank=True)
+
+    def __str__(self):
+        return f"{self.name} - {self.analysis_id}"
 
 
 class SynergyResult(models.Model):
@@ -42,16 +47,6 @@ class Scenario(models.Model):
     description = models.TextField()
     criteria_weight = models.JSONField()
     subcriteria_weight = models.JSONField()
-
-
-class Site(models.Model):
-    site_id = models.AutoField(primary_key=True)
-    name = models.CharField(max_length=255)
-    description = models.TextField()
-    latitude = models.FloatField()
-    longitude = models.FloatField()
-    elevation = models.FloatField()
-    resources_description = models.TextField()
 
 
 class SiteAttribute(models.Model):

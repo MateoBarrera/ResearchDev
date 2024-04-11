@@ -1,0 +1,20 @@
+### Crear un nuevo análisis
+POST http://localhost:8000/api/v1/analysis/
+Content-Type: application/json
+
+{
+    "name": "Test Analysis 2",
+    "description": "This is a test analysis",
+    "site_id": 11,
+    "demand": 100.0,
+    "seed_alternatives": "Test alternatives",
+    "total_alternatives": 5
+}
+
+###
+POST http://localhost:8000/api/v1/analysis/test-analysis-2-2/set-site/
+Content-Type: application/json
+
+{
+    "site_id": null
+}
