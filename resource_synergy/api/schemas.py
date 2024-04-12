@@ -1,6 +1,9 @@
-from importlib import resources
-from .models import Analysis, SynergyResult, Site, ResourceVariable, Source, TimeSeries
+from sqlite3 import Time
+from .models import Analysis, SynergyResult, Site, ResourceVariable, Source
 from ninja import ModelSchema, Schema
+from pydantic import BaseModel, validator
+from typing import List
+from datetime import datetime
 
 
 class SynergyResultSchema(ModelSchema):
@@ -15,22 +18,27 @@ class SourceSchema(ModelSchema):
         fields = "__all__"
 
 
-class TimeSeriesSchema(ModelSchema):
-    class Meta:
-        model = TimeSeries
-        fields = "__all__"
+class TimeSerieItem(BaseModel):
+    time_stamp: datetime
+    value: float
 
 
 class ResourceVariableSchema(ModelSchema):
-    time_series: TimeSeriesSchema | None = None
+    time_series: List[TimeSerieItem] | None = []
 
     class Meta:
         model = ResourceVariable
         fields = "__all__"
 
+    @validator("time_series", each_item=True)
+    def validate_time_series(cls, value):
+        if not isinstance(value, TimeSerieItem):
+            raise ValueError("Time series must be a TimeSeriesItem")
+        return value
+
 
 class SiteSchema(ModelSchema):
-    resources: list[ResourceVariableSchema] | None = []
+    resources: List[ResourceVariableSchema] | None = []
 
     class Meta:
         model = Site
@@ -43,7 +51,7 @@ class SiteCreateSchema(Schema):
     latitude: float
     longitude: float
     elevation: float
-    resources: list[int]
+    resources: List[int]
 
 
 class SitePatchSchema(Schema):

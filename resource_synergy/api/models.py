@@ -1,12 +1,7 @@
+from uuid import uuid4
 from django.db import models
 from django_extensions.db.fields import AutoSlugField  # type: ignore
 from api.enums import ResourceType, Unit, Frequency
-
-
-class TimeSeries(models.Model):
-    id = models.AutoField(primary_key=True)
-    time_stamp = models.DateTimeField()
-    value = models.FloatField()
 
 
 class ResourceVariable(models.Model):
@@ -20,9 +15,9 @@ class ResourceVariable(models.Model):
         max_length=20,
         choices=[(frequency.value, frequency.name) for frequency in Frequency],
     )
-    date_added = models.DateTimeField()
-    date_updated = models.DateTimeField()
-    time_series = models.ManyToManyField("TimeSeries", related_name="data")
+    date_created = models.DateTimeField(auto_now_add=True)
+    date_updated = models.DateTimeField(auto_now=True)
+    time_series = models.JSONField(null=True, blank=True)
 
 
 class Site(models.Model):
@@ -32,7 +27,11 @@ class Site(models.Model):
     latitude = models.FloatField()
     longitude = models.FloatField()
     elevation = models.FloatField()
-    resources = models.ManyToManyField("ResourceVariable", related_name="variable")
+    date_created = models.DateTimeField(auto_now_add=True)
+    date_updated = models.DateTimeField(auto_now=True)
+    resources = models.ManyToManyField(
+        "ResourceVariable", related_name="variable", blank=True
+    )
 
     def __str__(self):
         return self.name
@@ -52,7 +51,7 @@ class Analysis(models.Model):
     site = models.ForeignKey(Site, on_delete=models.SET_NULL, null=True, blank=True)
 
     def __str__(self):
-        return f"{self.name} - {self.analysis_id}"
+        return f"{self.name} - {self.id}"
 
 
 class SynergyResult(models.Model):

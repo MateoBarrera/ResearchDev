@@ -6,7 +6,6 @@ from api.models import (
     Scenario,
     Source,
     ResourceVariable,
-    TimeSeries,
 )
 
 # Register your models here.
@@ -16,4 +15,3 @@ admin.site.register(SynergyResult)
 admin.site.register(Scenario)
 admin.site.register(Source)
 admin.site.register(ResourceVariable)
-admin.site.register(TimeSeries)
