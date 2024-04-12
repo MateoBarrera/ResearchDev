@@ -1,20 +1,78 @@
-### Crear un nuevo análisis
+### Analysis
 POST http://localhost:8000/api/v1/analysis/
 Content-Type: application/json
 
 {
-    "name": "Test Analysis 2",
+    "name": "Test Analysis 3",
     "description": "This is a test analysis",
-    "site_id": 11,
     "demand": 100.0,
     "seed_alternatives": "Test alternatives",
-    "total_alternatives": 5
+    "total_alternatives": 5,
+    "site_id": 2
 }
 
-###
-POST http://localhost:8000/api/v1/analysis/test-analysis-2-2/set-site/
+### Analysis
+POST http://localhost:8000/api/v1/analysis/5/set-site/
 Content-Type: application/json
 
 {
-    "site_id": null
+    "site_id": 1
 }
+
+### Analysis
+PUT http://localhost:8000/api/v1/analysis/7
+Content-Type: application/json
+
+{
+    "name": "Test Analysis 3 update",
+    "description": "This is a test analysis",
+    "demand": 1008.0,
+    "seed_alternatives": "Test alternatives",
+    "total_alternatives": 4,
+    "site_id": 1
+}
+
+### Analysis
+DELETE  http://localhost:8000/api/v1/analysis/4
+
+
+### Site
+POST http://localhost:8000/api/v1/site/
+Content-Type: application/json
+
+{
+    "name": "Santander",
+    "description": "Municipio del cauca, colombia",
+    "latitude": 3.3100333333333,
+    "longitude": -76.539444444444,
+    "elevation": 1082,
+    "resources": [1,2,3
+    ]
+}
+
+### Site
+PUT http://localhost:8000/api/v1/site/3
+Content-Type: application/json
+
+{
+    "name": "Yumbo Rural",
+    "description": "Municipio del valle del cauca, colombia",
+    "latitude": 3.3100333333333,
+    "longitude": -76.539444444444,
+    "elevation": 1082,
+    "resources_description": "Hídrico, solar, bajo biomasa y eólico"
+}
+
+### Site
+POST http://localhost:8000/api/v1/site/1/set-resources/
+Content-Type: application/json
+
+[   
+    {"resource_id":1},
+    {"resource_id":2}
+]
+
+
+### Site
+DELETE http://localhost:8000/api/v1/site/3
+

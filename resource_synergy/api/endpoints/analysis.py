@@ -1,4 +1,4 @@
-from ninja import Router, Form
+from ninja import Router
 from api.models import Analysis, Site
 from api.schemas import (
     AnalysisSchema,
@@ -7,7 +7,6 @@ from api.schemas import (
     AnalysisSitePatch,
 )
 from django.shortcuts import get_object_or_404
-from django.forms.models import model_to_dict
 from typing import List
 
 
@@ -37,9 +36,9 @@ def create_analysis(request, analysis: AnalysisCreateSchema):
     return analysis_instance
 
 
-@analysis_router.post("/{slug}/set-site/", response=AnalysisSchema)
-def update_analysis_site(request, slug, site: AnalysisSitePatch):
-    analysis = get_object_or_404(Analysis, slug=slug)
+@analysis_router.post("/{id}/set-site/", response=AnalysisSchema)
+def update_analysis_site(request, id, site: AnalysisSitePatch):
+    analysis = get_object_or_404(Analysis, id=id)
     if site.site_id:
         site = get_object_or_404(Site, id=site.site_id)
         analysis.site = site
@@ -51,15 +50,15 @@ def update_analysis_site(request, slug, site: AnalysisSitePatch):
 
 @analysis_router.put("/{id}", response=AnalysisSchema)
 def update_analysis(request, id: int, analysis: AnalysisCreateSchema):
-    analysis_instance = Analysis.objects.get(id=id)
+    analysis_instance = get_object_or_404(Analysis, id=id)
     for attr, value in analysis.dict().items():
         setattr(analysis_instance, attr, value)
     analysis_instance.save()
-    return {"success": True, "analysis": model_to_dict(analysis_instance)}
+    return analysis_instance
 
 
 @analysis_router.delete("/{id}")
 def delete_analysis(request, id: int):
-    analysis = Analysis.objects.get(id=id)
+    analysis = get_object_or_404(Analysis, id=id)
     analysis.delete()
     return {"success": True, "message": "Analysis deleted successfully"}

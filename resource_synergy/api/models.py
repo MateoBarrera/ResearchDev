@@ -1,5 +1,23 @@
+from uuid import uuid4
 from django.db import models
 from django_extensions.db.fields import AutoSlugField  # type: ignore
+from api.enums import ResourceType, Unit, Frequency
+
+
+class ResourceVariable(models.Model):
+    id = models.AutoField(primary_key=True)
+    name = models.CharField(max_length=255)
+    unit = models.CharField(
+        max_length=20, choices=[(unit.value, unit.name) for unit in Unit]
+    )  # Asumiendo que "Unit" es una cadena
+    source = models.CharField(max_length=255)
+    frequency = models.CharField(
+        max_length=20,
+        choices=[(frequency.value, frequency.name) for frequency in Frequency],
+    )
+    date_created = models.DateTimeField(auto_now_add=True)
+    date_updated = models.DateTimeField(auto_now=True)
+    time_series = models.JSONField(null=True, blank=True)
 
 
 class Site(models.Model):
@@ -9,7 +27,11 @@ class Site(models.Model):
     latitude = models.FloatField()
     longitude = models.FloatField()
     elevation = models.FloatField()
-    resources_description = models.TextField()
+    date_created = models.DateTimeField(auto_now_add=True)
+    date_updated = models.DateTimeField(auto_now=True)
+    resources = models.ManyToManyField(
+        "ResourceVariable", related_name="variable", blank=True
+    )
 
     def __str__(self):
         return self.name
@@ -29,7 +51,7 @@ class Analysis(models.Model):
     site = models.ForeignKey(Site, on_delete=models.SET_NULL, null=True, blank=True)
 
     def __str__(self):
-        return f"{self.name} - {self.analysis_id}"
+        return f"{self.name} - {self.id}"
 
 
 class SynergyResult(models.Model):
@@ -49,39 +71,18 @@ class Scenario(models.Model):
     subcriteria_weight = models.JSONField()
 
 
-class SiteAttribute(models.Model):
-    site_attribute_id = models.AutoField(primary_key=True)
-    site_id = models.IntegerField()
-    attribute_id = models.IntegerField()
-    name = models.CharField(max_length=255)
-    value = models.FloatField()
-    description = models.TextField()
-
-
-class Resource(models.Model):
-    resource_id = models.AutoField(primary_key=True)
-    site_id = models.IntegerField()
+class Source(models.Model):
+    id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=255)
     resource_type = models.CharField(
-        max_length=255
-    )  # Asumiendo que "ResourceType" es una cadena
+        max_length=25,
+        choices=[(resource.value, resource.name) for resource in ResourceType],
+    )
     description = models.TextField()
+    site = models.ForeignKey(Site, on_delete=models.CASCADE, null=True, blank=True)
 
-
-class ResourceVariable(models.Model):
-    variable_id = models.AutoField(primary_key=True)
-    name = models.CharField(max_length=255)
-    unit = models.CharField(max_length=255)  # Asumiendo que "Unit" es una cadena
-    source = models.CharField(max_length=255)
-    frequency = models.CharField(max_length=255)
-    date_added = models.DateTimeField()
-    date_updated = models.DateTimeField()
-
-
-class TimeSerie(models.Model):
-    variable_id = models.IntegerField()
-    time_stamp = models.DateTimeField()
-    value = models.FloatField()
+    def __str__(self):
+        return f"{self.name} - {self.id}"
 
 
 class Criteria(models.Model):
