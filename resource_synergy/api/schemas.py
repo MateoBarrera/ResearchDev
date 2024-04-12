@@ -51,7 +51,7 @@ class SiteCreateSchema(Schema):
     latitude: float
     longitude: float
     elevation: float
-    resources: List[int]
+    resources: List[int] | None = None
 
 
 class SitePatchSchema(Schema):

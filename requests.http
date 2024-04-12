@@ -45,9 +45,8 @@ Content-Type: application/json
     "description": "Municipio del cauca, colombia",
     "latitude": 3.3100333333333,
     "longitude": -76.539444444444,
-    "elevation": 1082,
-    "resources": [1,2,3
-    ]
+    "elevation": 1082
+
 }
 
 ### Site
@@ -60,7 +59,7 @@ Content-Type: application/json
     "latitude": 3.3100333333333,
     "longitude": -76.539444444444,
     "elevation": 1082,
-    "resources_description": "Hídrico, solar, bajo biomasa y eólico"
+    "resources": [1]
 }
 
 ### Site

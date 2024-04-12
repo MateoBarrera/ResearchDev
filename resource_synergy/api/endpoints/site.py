@@ -26,19 +26,23 @@ def read_site(request, id: int):
 
 @site_router.post("/", response={200: SiteSchema, 404: ErrorSchema})
 def create_site(request, site: SiteCreateSchema):
+    resources = None
     if site.resources:
-        resources = ResourceVariable.objects.filter(id__in=site.resources).exists()
-        if not resources:
+        resources = ResourceVariable.objects.filter(id__in=site.resources)
+        if not resources.exist():
             return 404, {
                 "detail": "Resource does not exist",
                 "code": "resource_not_found",
             }
-    else:
-        resources = ResourceVariable.objects.filter(id__in=site.resources)
+        else:
+            resources = None
     site_data = site.model_dump()
-    site_data.pop("resources")
+    site_data.pop("resources", None)
     site_instance = Site.objects.create(**site_data)
-    site_instance.resources.add(resources)
+
+    if resources:
+        site_instance.resources.add(resources)
+
     return site_instance
 
 
@@ -56,7 +60,15 @@ def update_site_resources(request, id: int, resources: List[SitePatchSchema]):
 @site_router.put("/{id}", response=SiteSchema)
 def update_site(request, id: int, site: SiteCreateSchema):
     site_instance = get_object_or_404(Site, id=id)
-    for attr, value in site.dict().items():
+    if site.resources:
+        site_instance.resources.clear()
+        resources = ResourceVariable.objects.filter(id__in=site.resources)
+        if resources.exists():
+            site_instance.resources.add(*resources)
+
+    site_data = site.model_dump()
+    site_data.pop("resources", None)
+    for attr, value in site_data.items():
         setattr(site_instance, attr, value)
     site_instance.save()
     return site_instance
