@@ -75,3 +75,59 @@ Content-Type: application/json
 ### Site
 DELETE http://localhost:8000/api/v1/site/3
 
+
+### Resources
+### Listar todas las ResourceVariables
+GET http://localhost:8000/api/v1/site/1/resource
+
+
+###
+
+### Obtener una ResourceVariable específica
+GET http://localhost:8000/api/v1/site/1/resource/1
+Content-Type: application/json
+
+###
+
+### Crear una nueva ResourceVariable
+POST http://localhost:8000/api/v1/site/1/set-resources/
+Content-Type: application/json
+
+{
+    "name": "ResourceVariable1",
+    "unit": "unit1",
+    "source": "source1",
+    "frequency": "frequency1",
+    "time_series": {"key": "value"}
+}
+
+###
+
+### Agregar resources a un Site
+POST http://localhost:8000/api/v1/site/1/set-resources/
+Content-Type: application/json
+
+
+[{"resource_id":407}]
+
+###
+
+### Actualizar una ResourceVariable existente
+PUT http://localhost:8000/api/v1/resourcevariable/1/
+Content-Type: application/json
+
+{
+    "name": "ResourceVariable1 actualizada",
+    "unit": "unit1 actualizada",
+    "source": "source1 actualizada",
+    "frequency": "frequency1 actualizada",
+    "time_series": {"key_actualizado": "valor_actualizado"}
+}
+
+###
+
+### Eliminar una ResourceVariable existente
+DELETE http://localhost:8000/api/v1/resourcevariable/1/
+Content-Type: application/json
+
+###

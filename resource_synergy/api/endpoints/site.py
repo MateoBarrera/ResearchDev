@@ -5,6 +5,7 @@ from api.schemas import (
     SiteCreateSchema,
     SitePatchSchema,
     ResourceVariableSchema,
+    TimeSerieItem,
     ErrorSchema,
 )
 from django.shortcuts import get_object_or_404
@@ -95,14 +96,18 @@ def get_resource_data(request, id: int, resource_id: int):
     return resource
 
 
-""" @site_router.post(
+@site_router.post(
     "/{id}/resource/{resource_id}/set-data",
     response={200: ResourceVariableSchema, 404: ErrorSchema},
 )
-def set_resource_data(request, id: int, resource_id: int, data: ):
-    if not Site.objects.filter(id=id).exists():
-        return 404, {"detail": "Site does not exist", "code": "site_not_found"}
-    resource = get_object_or_404(ResourceVariable, id=resource_id)
-    resource.data = data.data
-    resource.save()
-    return resource """
+def set_resource_data(request, id: int, resource_id: int, data: List[TimeSerieItem]):
+    try:
+        resource = ResourceVariable.objects.get(id=resource_id, site_id=id)
+        resource.data = data
+        resource.save()
+        return resource
+    except ResourceVariable.DoesNotExist:
+        return 404, {
+            "detail": "ResourceVariable or Site does not exist",
+            "code": "not_found",
+        }

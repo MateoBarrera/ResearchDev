@@ -5,7 +5,7 @@ from pytz import HOUR
 
 class Unit(Enum):
     METER_PER_SECOND = "m/s"
-    CUBIT_METER = "m³"
+    CUBIT_METER = "m^3/s"
     CELSIUS = "Celsius"
     FAHRENHEIT = "Fahrenheit"
 
