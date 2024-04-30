@@ -7,7 +7,7 @@ from evaluation.MCDA.model import topsis as TOPSIS
 hydro_data = PrimaryResource(
     name="Caudal medio mensual", type_resource="hydro", source="Ideam", station=26057040
 )
-hydro_data.from_csv("data/hydro/caudal_medio_mensual/Jamundi.csv.csv")
+hydro_data.from_csv("data/hydro/caudal_medio_mensual/Jamundi.csv")
 
 
 solar_data = PrimaryResource(name="Irradiance", type_resource="pv", source="pw_nasa")
@@ -45,7 +45,7 @@ solar.potential(installed_capacity=capacity_target, show=True)
 wind.potential(installed_capacity=capacity_target, show=True)
 biomass.potential(installed_capacity=capacity_target, show=True)
 
-total_installed_capacity = capacity_target # kW
+total_installed_capacity = capacity_target  # kW
 
 alternatives = Alternatives(
     resources_included=[1, 1, 1, 1],
@@ -104,7 +104,7 @@ TOPSIS(
     test=test_criteria,
     fuzzy=True,
     save_as="TOPSIS",
-    alt_info=alternatives_kw
+    alt_info=alternatives_kw,
 )
 
 # 0 - expertos; 1 - Igual importancia; 2 - Enfoque Ambiental; 3 - Enfoque Económico; 4 - Enfoque Técnico

@@ -5,12 +5,14 @@ This module includes the structure for the construction and evaluation of indica
 Autor: Mateo Barrera
 Date: 11-03-2023
 """
+
 import pandas as pd  # pylint: disable=import-error
 import json
+from pydantic import BaseModel
 from datetime import datetime
 
 
-class Indicator:
+class Indicator(BaseModel):
     """_summary_"""
 
     __id: str
@@ -285,7 +287,7 @@ class Indicators:
                         x["solar_generation"] / (freq_factor * 1000)
                         + x["wind_generation"] / (freq_factor * 1000)
                         + x["hydro_generation"] / (freq_factor * 1000)
-                        + x["biomass_generation"]/(freq_factor * 1000)
+                        + x["biomass_generation"] / (freq_factor * 1000)
                     )
                 ),
             },
@@ -298,12 +300,7 @@ class Indicators:
                         + x["hydro"] * 29900
                         + x["biomass"] * 2000
                     )
-                    / (
-                        x["solar"]
-                        + x["wind"]
-                        + x["hydro"]
-                        + x["biomass"]
-                    )
+                    / (x["solar"] + x["wind"] + x["hydro"] + x["biomass"])
                 ),
             },
             "203": {
@@ -315,12 +312,7 @@ class Indicators:
                         + x["hydro"] * 37
                         + x["biomass"] * 21
                     )
-                    / (
-                        x["solar"]
-                        + x["wind"]
-                        + x["hydro"]
-                        + x["biomass"]
-                    )
+                    / (x["solar"] + x["wind"] + x["hydro"] + x["biomass"])
                 ),
             },
             "301": {
@@ -330,14 +322,9 @@ class Indicators:
                         x["solar"] * 0.25
                         + x["wind"] * 0.40
                         + x["hydro"] * 0.89
-                        + x["biomass"] * .35
+                        + x["biomass"] * 0.35
                     )
-                    / (
-                        x["solar"]
-                        + x["wind"]
-                        + x["hydro"]
-                        + x["biomass"]
-                    )
+                    / (x["solar"] + x["wind"] + x["hydro"] + x["biomass"])
                 ),
             },
             "302": {
@@ -349,12 +336,7 @@ class Indicators:
                         + x["hydro"] * 0
                         + x["biomass"] * 0.5
                     )
-                    / (
-                        x["solar"]
-                        + x["wind"]
-                        + x["hydro"]
-                        + x["biomass"]
-                    )
+                    / (x["solar"] + x["wind"] + x["hydro"] + x["biomass"])
                 ),
             },
             "303": {
@@ -366,14 +348,9 @@ class Indicators:
                         + x["hydro"] * 0.75
                         # + (x["biomass"] * 0.057 #LTP
                         # + (x["biomass"] * 1 #PRP/COP
-                        + x["biomass"] * 0.35 
+                        + x["biomass"] * 0.35
                     )
-                    / (
-                        x["solar"]
-                        + x["wind"]
-                        + x["hydro"]
-                        + x["biomass"]
-                    )
+                    / (x["solar"] + x["wind"] + x["hydro"] + x["biomass"])
                 ),
             },
         }
@@ -398,7 +375,7 @@ def save_xls(df_name, dframe: pd.DataFrame):
     Args:
         df_name (_type_): _description_
         dframe (pd.DataFrame): _description_
-    """    
+    """
     time = datetime.now().strftime("%H.%M")
     with pd.ExcelWriter("./Repo/Articulo1/output/result.xlsx", mode="a") as writer:
         dframe.to_excel(writer, sheet_name=df_name + "-" + str(time))

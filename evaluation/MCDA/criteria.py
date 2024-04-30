@@ -214,9 +214,9 @@ class Criteria:
             subgroup_size += [subgr / subgroup_sum * size for subgr in df[group]]
         # Create colors
         a, b, c, d = [plt.cm.Greens, plt.cm.Reds, plt.cm.Blues, plt.cm.Greys]
-        subgroup_names = [x + '\n ' + y +'\%' for x, y in zip(subgroup_names, percentage_values)]
+        subgroup_names = [x + '\n ' + y +'%' for x, y in zip(subgroup_names, percentage_values)]
         group_size_str = [str(round(item*100, 1)) for item in criteria['weights']]
-        group_names = [x + '\n' + y +'\%' for x, y in zip(group_names, group_size_str)]
+        group_names = [x + '\n' + y +'%' for x, y in zip(group_names, group_size_str)]
         # First Ring (outside)
         fig, ax = plt.subplots()
         ax.axis('equal')
@@ -231,8 +231,8 @@ class Criteria:
                                    d(0.4)])
         plt.setp(mypie2, width=0.4, edgecolor='white')
         plt.margins(0, 0)
-
-        plt.show()
+        plt.savefig("criteria.png", format="png", metadata=None,
+                    bbox_inches=None, pad_inches=0.1)
 
     def show_info(self):
         """_summary_"""
@@ -518,7 +518,7 @@ class Criteria:
         matrix_fuzzy = list()
         for index, item in enumerate(df_file):
             data_frame = pd.DataFrame(item)
-            data_frame = data_frame.applymap(fuzzification)
+            data_frame = data_frame.map(fuzzification)
 
             if False:
                 print_evaluation(f"Evaluación (fuzzy) {index}", data_frame.to_numpy(), ["NA"], fuzzy=True)

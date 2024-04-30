@@ -4,14 +4,17 @@ This module include MCDA methods AHP and TOPSIS
 Autor: Mateo Barrera
 Date: 11-03-2023
 """
+
 import numpy as np
 import pandas as pd  # pylint: disable=import-error
 import matplotlib.pyplot as plt
 from .criteria import Criteria  # pylint: disable=import-error
 from ..save import save
 
-plt.style.use(['seaborn-v0_8-colorblind', 'evaluation/resource/graph.mplstyle'])
-months_ticks_labels = pd.date_range('2014-01-01', '2014-12-31', freq='MS').strftime("%b").tolist()
+plt.style.use(["seaborn-v0_8-colorblind", "evaluation/resource/graph.mplstyle"])
+months_ticks_labels = (
+    pd.date_range("2014-01-01", "2014-12-31", freq="MS").strftime("%b").tolist()
+)
 
 
 def normalize_criteria(array: list, normalize_type: int):
@@ -59,13 +62,13 @@ def normalize_alternatives(alternative_matrix):
 
 
 def ahp(
-        alternative_matrix,
-        show_criteria_matrix=False,
-        show_expert_matrix=False,
-        test=False,
-        fuzzy=False,
-        save_as=None,
-        alt_info=None
+    alternative_matrix,
+    show_criteria_matrix=False,
+    show_expert_matrix=False,
+    test=False,
+    fuzzy=False,
+    save_as=None,
+    alt_info=None,
 ):
     """
     The ahp function is the main function of this module. It takes in a matrix
@@ -111,7 +114,7 @@ def ahp(
 
 def __topsis_normalize(alternatives):
     alternatives_norm = np.zeros(alternatives.shape)
-    mean_array = np.sqrt(np.sum(alternatives ** 2, 1))
+    mean_array = np.sqrt(np.sum(alternatives**2, 1))
     np.seterr(all="ignore")
     alternatives_norm = alternatives / np.transpose([mean_array])
     np.seterr()
@@ -129,7 +132,7 @@ def __topsis_print_norm(alternatives, info):
 
 
 def __topsis_ideal_solution(
-        alternatives_array, type_indicator=(1, 0, 0, 0, 0, 0, 1, 1, 1)
+    alternatives_array, type_indicator=(1, 0, 0, 0, 0, 0, 1, 1, 1)
 ):
     ideal_positive = np.zeros(len(type_indicator))
     ideal_negative = np.zeros(len(type_indicator))
@@ -159,13 +162,13 @@ def __topsis_distance(alternatives_array, ideal_positive, ideal_negative):
 
 
 def topsis(
-        alternative_matrix,
-        show_criteria_matrix=False,
-        show_expert_matrix=False,
-        test=False,
-        fuzzy=False,
-        save_as=None,
-        alt_info=None
+    alternative_matrix,
+    show_criteria_matrix=False,
+    show_expert_matrix=False,
+    test=False,
+    fuzzy=False,
+    save_as=None,
+    alt_info=None,
 ):
     """
     The topsis function takes in a matrix of alternatives and criteria,
@@ -195,13 +198,23 @@ def topsis(
     topsis_criteria_obj.from_excel(path=load_path_evaluation(test))
     topsis_criteria_aggregation = topsis_criteria_obj.get_weighting_array()
     print(topsis_criteria_aggregation)
-    topsis_alternatives_array = __topsis_normalize(np.transpose(alternative_matrix.to_numpy()))
-    topsis_alternatives_array = np.where(np.isnan(topsis_alternatives_array), 0, topsis_alternatives_array)
-    topsis_alternatives_norm = __topsis_print_norm(topsis_alternatives_array, alternative_matrix)
+    topsis_alternatives_array = __topsis_normalize(
+        np.transpose(alternative_matrix.to_numpy())
+    )
+    topsis_alternatives_array = np.where(
+        np.isnan(topsis_alternatives_array), 0, topsis_alternatives_array
+    )
+    topsis_alternatives_norm = __topsis_print_norm(
+        topsis_alternatives_array, alternative_matrix
+    )
 
-    topsis_weighted_alternatives = topsis_alternatives_array * np.transpose([topsis_criteria_aggregation])
+    topsis_weighted_alternatives = topsis_alternatives_array * np.transpose(
+        [topsis_criteria_aggregation]
+    )
 
-    ideal_positive, ideal_negative = __topsis_ideal_solution(topsis_weighted_alternatives)
+    ideal_positive, ideal_negative = __topsis_ideal_solution(
+        topsis_weighted_alternatives
+    )
     positive_distance, negative_distance, similarity_index = __topsis_distance(
         topsis_weighted_alternatives, ideal_positive, ideal_negative
     )
@@ -232,44 +245,70 @@ def show_evaluation(result_df, alternative_kw=None, graph=True):
     :doc-author: Trelent
     """
     print("\n:: Ranking of alternatives ::")
-    print(result_df.sort_values(by="Evaluation", ascending=False).to_markdown(
-        floatfmt=".3f"
-    ))
+    print(
+        result_df.sort_values(by="Evaluation", ascending=False).to_markdown(
+            floatfmt=".3f"
+        )
+    )
 
     if graph:
-        alternative_kw = alternative_kw.filter(["solar", "wind", "hydro", "biomass"], axis=1)
+        alternative_kw = alternative_kw.filter(
+            ["solar", "wind", "hydro", "biomass"], axis=1
+        )
         target_capacity = alternative_kw["solar"].max()
-        def to_percentage(x): return (x / target_capacity) * 100
+
+        def to_percentage(x):
+            return (x / target_capacity) * 100
 
         alternative_kw = alternative_kw.apply(to_percentage, axis=1)
-        result_df["Alternatives"] = ["$A_{"+'{:0>2}'.format(index)+"}$" for index in result_df.index.values]
+        result_df["Alternatives"] = [
+            "$A_{" + "{:0>2}".format(index) + "}$" for index in result_df.index.values
+        ]
         alternative_kw = alternative_kw.join(result_df)
 
         fig = plt.figure(layout="constrained")
         ax = fig.add_subplot()
 
-        alternative_ordered = alternative_kw.sort_values(by="Evaluation", ascending=False).reset_index(drop=True)
+        alternative_ordered = alternative_kw.sort_values(
+            by="Evaluation", ascending=False
+        ).reset_index(drop=True)
 
         if alternative_ordered.shape[0] > 30:
             alternative_ordered = alternative_ordered.iloc[:20]
 
-        alternative_ordered.plot.bar(stacked=True, ax=ax, y=["solar", "wind", "hydro", "biomass"], x="Alternatives",
-                                     width=0.45, linewidth=0.5, edgecolor="black", legend=False)
+        alternative_ordered.plot.bar(
+            stacked=True,
+            ax=ax,
+            y=["solar", "wind", "hydro", "biomass"],
+            x="Alternatives",
+            width=0.45,
+            linewidth=0.5,
+            edgecolor="black",
+            legend=False,
+        )
         ax.set_xlabel("Alternative")
-        ax.tick_params(axis='x', labelsize=14, rotation=45)
-        ax.set_ylabel("Resource participation \%")
+        ax.tick_params(axis="x", labelsize=14, rotation=45)
+        ax.set_ylabel("Resource participation %")
         ax_twin = ax.twinx()
 
-        ax.legend(loc="lower left", bbox_to_anchor=(-0.12, -0.28), ncol=4, frameon=False)
-        ax = alternative_ordered["Evaluation"].plot(ax=ax_twin, secondary_y=True, color="k", marker="D", linestyle='--',
-                                                    label="$C_j$", legend=False)
+        ax.legend(
+            loc="lower left", bbox_to_anchor=(-0.12, -0.28), ncol=4, frameon=False
+        )
+        ax = alternative_ordered["Evaluation"].plot(
+            ax=ax_twin,
+            secondary_y=True,
+            color="k",
+            marker="D",
+            linestyle="--",
+            label="$C_j$",
+            legend=False,
+        )
         bottom, top = ax.get_ylim()
-        ax.set_ylim([0, top*1.15])
+        ax.set_ylim([0, top * 1.15])
         ax.legend(loc="lower left", bbox_to_anchor=(0.81, -0.29), ncol=1, frameon=False)
         ax.set_title("Evaluation result")
-        ax.set_xticks(ax.get_xticks(), ax.get_xticklabels(), rotation=100, ha='right')
+        ax.set_xticks(ax.get_xticks(), ax.get_xticklabels(), rotation=100, ha="right")
 
-        plt.savefig("result.png", format="png", metadata=None,
-                    bbox_inches=None, pad_inches=0.1)
-        plt.show()
-
+        plt.savefig(
+            "result.png", format="png", metadata=None, bbox_inches=None, pad_inches=0.1
+        )

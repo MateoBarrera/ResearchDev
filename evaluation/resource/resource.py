@@ -31,7 +31,7 @@ def get_data_month(df):
     """
     df = df.loc[df["Fecha"].between("2011-01-01", "2021-12-31")]
     data_month = df.set_index("Fecha")
-    data_month = data_month.asfreq("M", method="ffill")
+    data_month = data_month.asfreq("ME", method="ffill")
     data_month["Año"] = data_month.index.year
     data_month["Month"] = pd.to_datetime(data_month.index.month, format="%m")
 
@@ -250,7 +250,7 @@ class Hydro:
             linestyles="--",
             label="Qsr = {:.2f} $m^3/s$".format(self.q_sr),
         )
-        ax.set_xlabel("Percentage of occurrence \%")
+        ax.set_xlabel("Percentage of occurrence %")
         ax.set_ylabel("Flow rate $m^3/s$")
         ax.set_title("Flow permanence curve")
         ax.legend(loc="upper right")
@@ -697,7 +697,7 @@ class Biomass:
         data.Biogas.plot.bar(ax=ax1, width=0.3)
 
         ax1.set_title("Available resource")
-        ax1.set_ylabel("$\%$ used of available resource")
+        ax1.set_ylabel("$%$ used of available resource")
         ax1_twin.set_ylabel("$m^3/day$")
         ax1.legend(loc="upper center")
         bottom, top = ax1.get_ylim()
@@ -720,7 +720,7 @@ class Biomass:
         labels = [f"{value}\n{int(data['Biogas'][value])}"
                   + " $m^3/day$"
                   + f"\n{round(float(data['Percentage'][value]), 1)}"
-                  + r"\% of total available"
+                  + r"% of total available"
                   for value in data.index.values]
 
         # Treemap
