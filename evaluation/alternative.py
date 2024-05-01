@@ -5,6 +5,7 @@ This module includes the class for generate the scenarios/alternatives specifica
 Autor: Mateo Barrera
 Date: 11-03-2023
 """
+
 import numpy as np
 import pandas as pd
 from itertools import product
@@ -14,9 +15,9 @@ from prettytable import PrettyTable
 class Alternatives:
     def __init__(
         self,
-            resources_included=None,
-            seed=None,
-            installed_capacity: float = 100,
+        resources_included=None,
+        seed=None,
+        installed_capacity: float = 100,
     ) -> None:
         """
         **Alternatives** object allow the scenario construction base in all possible combinations of resources.
@@ -71,28 +72,19 @@ class Alternatives:
         return self.alternatives
 
     def __generate_scenarios(self):
-
         """
         The __generate_scenarios function generates all possible scenarios for the given resources.
-        
+
 
         :param self: Represent the instance of the class
         :return: A dataframe and a list
         :doc-author: Trelent
         """
-        (
-            solar_inclusion,
-            wind_inclusion,
-            hydro_inclusion,
-            biomass_inclusion,
-        ) = self.resources_included
 
         all_combinations = list(product(*[self.seed] * 4))
 
         weight_scenarios = np.array(all_combinations)
-        y_resources = np.array(
-            [solar_inclusion, wind_inclusion, hydro_inclusion, biomass_inclusion]
-        )
+        y_resources = np.array(self.resources_included)
 
         scenario_matrix = weight_scenarios * y_resources
         scenario_array = list()
@@ -151,7 +143,11 @@ class Alternatives:
         scenario_matrix.field_names = ["solar", "wind", "hydro", "biomass"]
         scenario_matrix.title = "ALTERNATIVES"
         for scenario in self.scenarios:
-            scenario = list(map(lambda scenario_value: "{} %".format(scenario_value * 100), scenario))
+            scenario = list(
+                map(
+                    lambda scenario_value: "{} %".format(scenario_value * 100), scenario
+                )
+            )
             scenario_matrix.add_row(scenario)
 
         return f"\n{info}\n{scenario_matrix}"
