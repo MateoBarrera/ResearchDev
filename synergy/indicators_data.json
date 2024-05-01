@@ -1,0 +1,70 @@
+[
+	{
+		"id": 101,
+		"name": "Reducción de emisiones de CO2",
+		"dimension": "environmental",
+		"description": "Reducción en las emisiones CO2 para una capacidad determinada de generación mediante recursos limpios en comparación con el equivalente de generación con gas natural.",
+		"source": "",
+		"data": {
+			"solar": 0,
+			"wind": 0,
+			"hydro": 0,
+			"biomass": 0
+		},
+		"year": "",
+		"unit": "tC02",
+		"type_indicator": "benefit",
+		"formula": "0.367 * (solar_generation * 0.20 + wind_generation * 0.25 + hydro_generation * 0.35 + biomass_generation * 0.70)"
+	},
+	{
+		"id": 102,
+		"name": "Ocupación del terreno",
+		"dimension": "environmental",
+		"description": "Área ocupada por el sistema de energía durante su vida útil, comparando la cantidad de metros cuadrados necesarios para producir un MWh de electricidad.",
+		"source": "",
+		"data": {
+			"solar": 0.33,
+			"wind": 1.57,
+			"hydro": 0.02,
+			"biomass": 12.65
+		},
+		"year": "2013",
+		"unit": "m2/MW",
+		"type_indicator": "cost",
+		"formula": "0.001 * ((solar * 0.33) + (wind * 1.57) + (hydro * 0.02) + (biomass_generation * 12.65))"
+	},
+	{
+		"id": 103,
+		"name": "Consumo de agua",
+		"dimension": "environmental",
+		"description": "Se considera para cuantificar el volumen de agua consumida por la tecnología para producir un solo MW de electricidad durante toda su cadena de producción, teniendo en cuenta los procesos secundarios, como la refrigeración y el uso de agua para construcción de los componentes.",
+		"source": "biomasa articulo Rio Carrillo, demas - 5-15",
+		"data": {
+			"solar": "0.001",
+			"wind": "5.4e-5",
+			"hydro": "8.9e-6",
+			"biomass": "1"
+		},
+		"year": "2013",
+		"unit": "m3/MWh",
+		"type_indicator": "cost",
+		"formula": "(solar_generation * 0.001 + wind_generation * 5.4e-5 + hydro_generation * 8.9e-6 + biomass_generation * 1.55) / (solar_generation + wind_generation + hydro_generation + biomass_generation)"
+	},
+	{
+		"id": 302,
+		"name": "Autonomía del recurso primario",
+		"dimension": "technical",
+		"description": "Se evalúan las horas por año que puede suministrar energía eléctrica las alternativas renovables, de acuerdo con las características del entorno y el recurso primario disponible.",
+		"source": "",
+		"data": {
+			"solar": 0,
+			"wind": 0,
+			"hydro": 0,
+			"biomass": 0
+		},
+		"year": "2020",
+		"unit": "%",
+		"type_indicator": "benefit",
+		"formula": "(solar * 1 + wind * 0.667 + hydro * 0.75 + biomass * 0.35)/(solar + wind + hydro + biomass)"
+	}
+]
