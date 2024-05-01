@@ -6,10 +6,10 @@
 		"description": "Reducción en las emisiones CO2 para una capacidad determinada de generación mediante recursos limpios en comparación con el equivalente de generación con gas natural.",
 		"source": "",
 		"data": {
-			"solar": 0,
-			"wind": 0,
-			"hydro": 0,
-			"biomass": 0
+			"solar": 0.2,
+			"wind": 0.25,
+			"hydro": 0.35,
+			"biomass": 0.7
 		},
 		"year": "",
 		"unit": "tC02",
@@ -40,10 +40,10 @@
 		"description": "Se considera para cuantificar el volumen de agua consumida por la tecnología para producir un solo MW de electricidad durante toda su cadena de producción, teniendo en cuenta los procesos secundarios, como la refrigeración y el uso de agua para construcción de los componentes.",
 		"source": "biomasa articulo Rio Carrillo, demas - 5-15",
 		"data": {
-			"solar": "0.001",
-			"wind": "5.4e-5",
-			"hydro": "8.9e-6",
-			"biomass": "1"
+			"solar": 0.001,
+			"wind": 5.4e-5,
+			"hydro": 8.9e-6,
+			"biomass": 1
 		},
 		"year": "2013",
 		"unit": "m3/MWh",
@@ -57,10 +57,10 @@
 		"description": "Se evalúan las horas por año que puede suministrar energía eléctrica las alternativas renovables, de acuerdo con las características del entorno y el recurso primario disponible.",
 		"source": "",
 		"data": {
-			"solar": 0,
-			"wind": 0,
-			"hydro": 0,
-			"biomass": 0
+			"solar": 1,
+			"wind": 0.667,
+			"hydro": 0.75,
+			"biomass": 0.35
 		},
 		"year": "2020",
 		"unit": "%",
