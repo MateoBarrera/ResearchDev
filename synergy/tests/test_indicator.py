@@ -1,5 +1,4 @@
 from operator import index
-import pytest
 import json
 from synergy.indicator import Indicator, Indicators
 
