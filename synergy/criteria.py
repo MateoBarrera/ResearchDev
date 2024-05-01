@@ -3,7 +3,7 @@ import resource
 from numpy import source
 from pydantic import BaseModel
 from typing import Optional, List
-from .enums import Unit, Dimension, CriteriaType
+from .resource.enums import Unit, Dimension, CriteriaType
 
 
 class Criteria(BaseModel):
