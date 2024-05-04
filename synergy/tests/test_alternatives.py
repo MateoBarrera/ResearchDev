@@ -1,4 +1,3 @@
-import resource
 from synergy.alternative import Alternatives, ResourceEnum
 
 

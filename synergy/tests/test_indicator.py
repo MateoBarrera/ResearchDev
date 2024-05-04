@@ -1,4 +1,3 @@
-from operator import index
 import json
 from synergy.indicator import Indicator, Indicators
 
