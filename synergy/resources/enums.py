@@ -4,7 +4,8 @@ from enum import Enum
 class Unit(Enum):
     METER_PER_SECOND = "m/s"
     CUBIT_METER = "m³"
-    CUBIT_METER_PER_SECOND = "m³/s"
+    CUBIT_METERS_PER_SECOND = "m³/s"
+    CUBIT_METERS_PER_DAY = "m³/day"
     CELSIUS = "Celsius"
     FAHRENHEIT = "Fahrenheit"
     KW = "kW"
@@ -21,6 +22,7 @@ class ResourceType(Enum):
 class VariableEnum(Enum):
     FLOW_RIVER = "Flow river"
     WIND_SPEED = "Wind speed"
+    BIOGAS = "Biogas"
     SOLAR_IRRADIANCE = "Solar irradiance"
     TEMPERATURE = "Solar temperature"
 

@@ -1,3 +1,4 @@
+from ctypes.wintypes import PINT
 from multiprocessing import process
 from django.urls import include
 import pandas as pd
@@ -30,6 +31,7 @@ NASA_COLUMNS = [
     "MO",
     "DY",
 ]
+BIOMASS_COLUMNS = ["Fuente", "Recomendado", "Factor", "Total"]
 
 
 def __transform_frequency(frequency):
@@ -47,7 +49,9 @@ def __transform_frequency(frequency):
 
 
 def process_csv_nasa(file):
-    # Leer el archivo CSV en un DataFrame
+    file = file.rename(columns={"YEAR": "year", "MO": "month", "DY": "day"})
+    file["Fecha"] = pd.to_datetime(file[["year", "month", "day"]])
+    file["Fecha"] = file["Fecha"].dt.strftime("%Y-%m-%d")
     resource = {}
     if "ALLSKY_SFC_SW_DWN" in file.columns:
 
@@ -56,14 +60,23 @@ def process_csv_nasa(file):
             "type_resource": "Solar",
             "source": "NASA",
             "unit": "kW-hr/m^2/day",
-            "frequency": "Daily",  # Asumiendo que los datos de la NASA son diarios
+            "frequency": "Daily",
         }
-        # Construir la columna de fecha a partir de las columnas 'YEAR', 'MO' y 'DY'
-        file = file.rename(columns={"YEAR": "year", "MO": "month", "DY": "day"})
-        file["Fecha"] = pd.to_datetime(file[["year", "month", "day"]])
-        file["Fecha"] = file["Fecha"].dt.strftime("%Y-%m-%d")
         file = file.filter(items=["Fecha", "ALLSKY_SFC_SW_DWN"]).set_index("Fecha")
         resource["data"] = file["ALLSKY_SFC_SW_DWN"].to_dict()
+
+    if "WS10M" in file.columns:
+
+        resource = {
+            "name": "Wind speed",
+            "type_resource": "Wind",
+            "source": "NASA",
+            "unit": "m/s",
+            "frequency": "Daily",
+        }
+        # Construir la columna de fecha a partir de las columnas 'YEAR', 'MO' y 'DY'
+        file = file.filter(items=["Fecha", "WS10M"]).set_index("Fecha")
+        resource["data"] = file["WS10M"].to_dict()
 
     # Devolver los datos en el formato necesario
     return resource
@@ -88,6 +101,21 @@ def process_csv_ideam(file):
     return resource
 
 
+def process_biomass_data(file):
+    resource = {
+        "name": "Biogas",
+        "type_resource": "Biomass",
+        "source": "ICA",
+        "unit": "m³/day",
+        "frequency": "Monthly",
+    }
+    print(file)
+    file["result"] = file[0.1] * file["Factor"]
+    file = file.filter(items=["Fuente", "result"]).set_index("Fuente")
+    resource["data"] = file["result"].to_dict()
+    return resource
+
+
 def load_csv(file_path):
     df = pd.read_csv(file_path)
     columns_extracted = df.columns.to_list()
@@ -95,5 +123,14 @@ def load_csv(file_path):
         return process_csv_ideam(df)
     elif set(NASA_COLUMNS).issubset(set(columns_extracted)):
         return process_csv_nasa(df)
+    else:
+        raise ValueError("Invalid CSV file format")
+
+
+def load_excel(file_path):
+    df = pd.read_excel(file_path, sheet_name="Recursos")
+    columns_extracted = df.columns.to_list()
+    if set(BIOMASS_COLUMNS).issubset(set(columns_extracted)):
+        return process_biomass_data(df)
     else:
         raise ValueError("Invalid CSV file format")

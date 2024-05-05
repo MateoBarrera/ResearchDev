@@ -118,7 +118,7 @@ from json import load
 from pydantic import BaseModel
 from typing import Dict, List
 from .enums import ResourceType, Unit, Frequency, VariableEnum
-from .utils.csv_readers import load_csv
+from .utils.csv_readers import load_csv, load_excel
 
 
 class ResourceVariable(BaseModel):
@@ -132,17 +132,14 @@ class ResourceVariable(BaseModel):
     def __init__(
         self,
         file_csv: str = None,
+        file_excel: str = None,
         **data,
     ):
         if file_csv:
-            data = self.from_csv(file_csv)
+            data = load_csv(file_csv)
+        elif file_excel:
+            data = load_excel(file_excel)
         super().__init__(**data)
-
-    def from_csv(self, file_path: str):
-        return load_csv(file_path)
-
-    def from_excel(self, file_path: str):
-        print(f"Loading data from Excel file: {file_path}")
 
     @property
     def data(self):
