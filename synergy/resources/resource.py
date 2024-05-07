@@ -114,8 +114,10 @@ if __name__ == "__main__":
         )
 """
 
-from json import load
-from pydantic import BaseModel
+import numpy as np
+import pandas as pd
+import statistics
+from pydantic import BaseModel, validator
 from typing import Dict, List
 from .enums import ResourceType, Unit, Frequency, VariableEnum
 from .utils.csv_readers import load_csv, load_excel
@@ -144,3 +146,99 @@ class ResourceVariable(BaseModel):
     @property
     def data(self):
         return self.data
+
+
+class Resource(BaseModel):
+    name: str
+    type_resource: ResourceType
+    variables: List[ResourceVariable] = []
+
+    @validator("variables")
+    def validate_variables(cls, v):
+        for variable in v:
+            if variable.type_resource != cls.type_resource:
+                raise ValueError("The variable type does not match the resource type")
+        return v
+
+    def __init__(self, **data):
+        super().__init__(**data)
+
+    def add_variable(self, variable: ResourceVariable):
+        if variable.type_resource != self.type_resource:
+            raise ValueError("The variable type does not match the resource type")
+        self.variables.append(variable)
+
+    def set_viability(self, value):
+        self.__viability = value
+
+    def set_variability(self, value):
+        self.__variability = value
+
+    def set_autonomy(self, value):
+        self.__autonomy = value
+
+    @property
+    def viability(self):
+        return self.__viability
+
+    @property
+    def variability(self):
+        return self.__variability
+
+    @property
+    def autonomy(self):
+        return self.__autonomy
+
+
+class Hydro(Resource):
+    def __init__(self, **data):
+        super().__init__(type_resource=ResourceType.HYDRO, **data)
+
+    def evaluate(self, installed_capacity: float):
+        primary_variable = next(
+            (v for v in self.variables if v.name == VariableEnum.FLOW_RIVER), None
+        )
+        if not primary_variable:
+            raise ValueError("Primary variable not found")
+
+        self.set_variability(
+            statistics.stdev(primary_variable.data.values())
+            / statistics.mean(primary_variable.data.values())
+        )
+        return installed_capacity * 0.8
+
+
+class Solar(Resource):
+    def __init__(self, **data):
+        super().__init__(type_resource=ResourceType.SOLAR, **data)
+
+    def evaluate(self, installed_capacity: float):
+        primary_variable = next(
+            (v for v in self.variables if v.name == VariableEnum.SOLAR_IRRADIANCE), None
+        )
+        if not primary_variable:
+            raise ValueError("Primary variable not found")
+
+        self.set_variability(
+            statistics.stdev(primary_variable.data.values())
+            / statistics.mean(primary_variable.data.values())
+        )
+        return installed_capacity * 0.8
+
+
+class Wind(Resource):
+    def __init__(self, **data):
+        super().__init__(type_resource=ResourceType.WIND, **data)
+
+    def evaluate(self, installed_capacity: float):
+        primary_variable = next(
+            (v for v in self.variables if v.name == VariableEnum.WIND_SPEED), None
+        )
+        if not primary_variable:
+            raise ValueError("Primary variable not found")
+
+        self.set_variability(
+            statistics.stdev(primary_variable.data.values())
+            / statistics.mean(primary_variable.data.values())
+        )
+        return installed_capacity * 0.8

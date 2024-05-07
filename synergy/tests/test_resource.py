@@ -1,4 +1,5 @@
-from synergy.resources.resource import ResourceVariable
+from os import name
+from synergy.resources.resource import ResourceVariable, Hydro, Solar, Wind
 from synergy.resources.enums import ResourceType, Unit, Frequency, VariableEnum
 
 
@@ -49,7 +50,7 @@ def test_resource_variable_from_csv():
 def test_resource_variable_from_csv_2():
     # Crear una instancia de ResourceVariable con datos específicos
     resource = ResourceVariable(file_csv="data/wind/Wind-Jamundi-D-Nasa.csv")
-
+    print(resource.data)
     # Verificar que los atributos de la instancia son correctos
     assert resource.name == VariableEnum.WIND_SPEED
     assert resource.type_resource == ResourceType.WIND
@@ -68,3 +69,30 @@ def test_resource_variable_from_excel():
     assert resource.source == "ICA"
     assert resource.unit == Unit.CUBIT_METERS_PER_DAY
     assert resource.frequency == Frequency.MONTHLY
+
+
+def test_hydro_resource():
+    hydro = Hydro(name="Hydro Jamundi")
+    hydro.add_variable(ResourceVariable(file_csv="data/hydro/Jamundi.min.csv"))
+    result = hydro.evaluate(100)
+    print(hydro.variability)
+    assert result == 80, "Should be 80"
+    assert hydro.variability == 52.96
+
+
+def test_solar_resource():
+    hydro = Solar(name="Solar Jamundi")
+    hydro.add_variable(ResourceVariable(file_csv="data/pv/PV-Jamundi-H.csv"))
+    result = hydro.evaluate(100)
+    print(hydro.variability)
+    assert result == 80, "Should be 80"
+    assert hydro.variability == 52.96
+
+
+def test_wind_resource():
+    hydro = Wind(name="Wind Jamundi")
+    hydro.add_variable(ResourceVariable(file_csv="data/wind/Wind-Jamundi-D-Nasa.csv"))
+    result = hydro.evaluate(100)
+    print(hydro.variability)
+    assert result == 80, "Should be 80"
+    assert hydro.variability == 52.96
