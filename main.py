@@ -73,7 +73,7 @@ alternatives_kw["solar_generation"] = solar_array
 alternatives_kw["hydro_generation"] = hydro_array
 alternatives_kw["wind_generation"] = wind_array
 alternatives_kw["biomass_generation"] = biomass_array
-# print(alternatives_kw.to_markdown(floatfmt=".1f"))
+print(alternatives_kw.to_markdown(floatfmt=".1f"))
 
 
 # indicators = Indicators()

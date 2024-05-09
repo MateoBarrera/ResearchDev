@@ -114,6 +114,7 @@ if __name__ == "__main__":
         )
 """
 
+from bdb import effective
 import numpy as np
 import pandas as pd
 import statistics
@@ -121,6 +122,8 @@ from pydantic import BaseModel, validator
 from typing import Dict, List
 from .enums import ResourceType, Unit, Frequency, VariableEnum
 from .utils.csv_readers import load_csv, load_excel, format_values
+
+DAYS_PER_MONTH: List[int] = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
 
 
 class ResourceVariable(BaseModel):
@@ -263,6 +266,11 @@ class Solar(Resource):
 
     """
 
+    name: str
+    _efficiency: float = 0.90
+    _temperature_factor: float = 0.95
+    _weather_factor: float = 1.0
+
     def __init__(self, **data):
         """
         Initializes a Resource object.
@@ -281,24 +289,28 @@ class Solar(Resource):
         """
         super().__init__(type_resource=ResourceType.SOLAR, **data)
 
-    def potential(self, values_per_month, installed_capacity):
-        # pp = 0.200 Peak power of the panel [kW year]
-        n = 0.90  # Typical conditions
+    def get_potential(self, values_per_month, installed_capacity) -> float:
         df = pd.DataFrame(index=values_per_month.index)
         df["PSH"] = values_per_month.mean(axis=1)
-        df["days"] = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
+        df["days"] = DAYS_PER_MONTH
 
-        df["monthly energy"] = df["PSH"] * installed_capacity * n * df["days"]
+        df["monthly energy"] = (
+            df["PSH"]
+            * installed_capacity
+            * self._efficiency
+            * df["days"]
+            * self._temperature_factor
+            * self._weather_factor
+        )
 
-        power_generation = df["PSH"].mean() * installed_capacity * n
-        # df = df.rename(index=lambda x: x.strftime("%B"))
+        power_generation = df["monthly energy"].sum()
         df = df.drop(columns=["days"])
         if True:
-            capacity_factor = power_generation / (installed_capacity * 24)
+            capacity_factor = power_generation / (installed_capacity * 365 * 24)
             print("\n:: Solar ::")
             print(df.to_markdown(floatfmt=".1f"))
             print(
-                f"Generation {round(power_generation, 2)}[kW year]; Capacity Factor {round(capacity_factor * 100, 2)}%"
+                f"Generation {round(power_generation, 2)}[kWh year]; Capacity Factor {round(capacity_factor * 100, 2)}%"
             )
         return power_generation
 
@@ -329,7 +341,14 @@ class Solar(Resource):
             / statistics.mean(primary_variable.data.values())
         )
         values_per_date, values_per_month = format_values(primary_variable.data)
-        print(values_per_month)
-        result = self.potential(values_per_month, installed_capacity)
+        result = self.get_potential(values_per_month, installed_capacity)
 
         return result
+
+    @property
+    def solar_params(self):
+        return {
+            "efficiency": self._efficiency,
+            "temperature_factor": self._temperature_factor,
+            "weather_factor": self._weather_factor,
+        }
