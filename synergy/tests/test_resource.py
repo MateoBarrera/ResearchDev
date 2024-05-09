@@ -81,18 +81,18 @@ def test_hydro_resource():
 
 
 def test_solar_resource():
-    hydro = Solar(name="Solar Jamundi")
-    hydro.add_variable(ResourceVariable(file_csv="data/pv/PV-Jamundi-H.csv"))
-    result = hydro.evaluate(100)
-    print(hydro.variability)
+    solar = Solar(name="Solar Jamundi")
+    solar.add_variable(ResourceVariable(file_csv="data/pv/PV-Jamundi-H.csv"))
+    result = solar.evaluate(100)
+    print(solar.variability)
     assert result == 80, "Should be 80"
-    assert hydro.variability == 52.96
+    assert solar.variability == 52.96
 
 
 def test_wind_resource():
-    hydro = Wind(name="Wind Jamundi")
-    hydro.add_variable(ResourceVariable(file_csv="data/wind/Wind-Jamundi-D-Nasa.csv"))
-    result = hydro.evaluate(100)
-    print(hydro.variability)
+    wind = Wind(name="Wind Jamundi")
+    wind.add_variable(ResourceVariable(file_csv="data/wind/Wind-Jamundi-D-Nasa.csv"))
+    result = wind.evaluate(100)
+    print(wind.variability)
     assert result == 80, "Should be 80"
-    assert hydro.variability == 52.96
+    assert wind.variability == 52.96

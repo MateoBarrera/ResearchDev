@@ -120,10 +120,26 @@ import statistics
 from pydantic import BaseModel, validator
 from typing import Dict, List
 from .enums import ResourceType, Unit, Frequency, VariableEnum
-from .utils.csv_readers import load_csv, load_excel
+from .utils.csv_readers import load_csv, load_excel, format_values
 
 
 class ResourceVariable(BaseModel):
+    """
+    Represents a resource variable.
+
+    Attributes:
+        name (VariableEnum): The name of the variable.
+        type_resource (ResourceType): The type of the resource.
+        source (str): The source of the resource.
+        unit (Unit): The unit of measurement for the resource.
+        frequency (Frequency): The frequency at which the resource is measured.
+        data (Dict[str, float]): The data associated with the resource.
+
+    Methods:
+        data: Returns the data associated with the resource.
+
+    """
+
     name: VariableEnum = None
     type_resource: ResourceType = None
     source: str = None
@@ -137,6 +153,15 @@ class ResourceVariable(BaseModel):
         file_excel: str = None,
         **data,
     ):
+        """
+        Initializes a new instance of the ResourceVariable class.
+
+        Args:
+            file_csv (str): The path to a CSV file containing data for the resource.
+            file_excel (str): The path to an Excel file containing data for the resource.
+            **data: Additional data for the resource.
+
+        """
         if file_csv:
             data = load_csv(file_csv)
         elif file_excel:
@@ -145,10 +170,45 @@ class ResourceVariable(BaseModel):
 
     @property
     def data(self):
+        """
+        Returns the data associated with the resource.
+
+        Returns:
+            Dict[str, float]: The data associated with the resource.
+
+        """
         return self.data
 
 
 class Resource(BaseModel):
+    """
+    Represents a resource.
+
+    Attributes:
+        name (str): The name of the resource.
+        type_resource (ResourceType): The type of the resource.
+        variables (List[ResourceVariable]): The list of variables associated with the resource.
+
+    Methods:
+        add_variable(variable: ResourceVariable): Adds a variable to the resource.
+        set_viability(value): Sets the viability of the resource.
+        set_variability(value): Sets the variability of the resource.
+        set_autonomy(value): Sets the autonomy of the resource.
+        viability: Gets the viability of the resource.
+        variability: Gets the variability of the resource.
+        autonomy: Gets the autonomy of the resource.
+
+
+    The `data` argument in the constructor should be a dictionary containing the necessary information for a Resource instance. The keys should be the attribute names and the values should be the corresponding values. For example:
+
+    data = {
+        'name': 'Solar',
+        'type_resource': ResourceType.SOLAR,
+        'variables': [ResourceVariable(...), ...]
+    }
+    resource = Resource(**data)
+    """
+
     name: str
     type_resource: ResourceType
     variables: List[ResourceVariable] = []
@@ -190,55 +250,86 @@ class Resource(BaseModel):
         return self.__autonomy
 
 
-class Hydro(Resource):
-    def __init__(self, **data):
-        super().__init__(type_resource=ResourceType.HYDRO, **data)
-
-    def evaluate(self, installed_capacity: float):
-        primary_variable = next(
-            (v for v in self.variables if v.name == VariableEnum.FLOW_RIVER), None
-        )
-        if not primary_variable:
-            raise ValueError("Primary variable not found")
-
-        self.set_variability(
-            statistics.stdev(primary_variable.data.values())
-            / statistics.mean(primary_variable.data.values())
-        )
-        return installed_capacity * 0.8
-
-
 class Solar(Resource):
+    """
+    A class representing a solar resource.
+
+    Attributes:
+        type_resource (ResourceType): The type of the resource.
+        data (dict): Additional data for the resource.
+
+    Methods:
+        evaluate(self, installed_capacity: float): Evaluates the solar resource.
+
+    """
+
     def __init__(self, **data):
+        """
+        Initializes a Resource object.
+
+        Args:
+            data (dict): A dictionary containing the data for the resource.
+
+        The `data` argument in the constructor should be a dictionary containing the necessary information for a Resource instance. The keys should be the attribute names and the values should be the corresponding values. For example:
+
+        data = {
+            'name': 'Solar',
+            'type_resource': ResourceType.SOLAR,
+            'variables': [ResourceVariable(...), ...]
+        }
+        resource = Resource(**data)
+        """
         super().__init__(type_resource=ResourceType.SOLAR, **data)
 
+    def potential(self, values_per_month, installed_capacity):
+        # pp = 0.200 Peak power of the panel [kW year]
+        n = 0.90  # Typical conditions
+        df = pd.DataFrame(index=values_per_month.index)
+        df["PSH"] = values_per_month.mean(axis=1)
+        df["days"] = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
+
+        df["monthly energy"] = df["PSH"] * installed_capacity * n * df["days"]
+
+        power_generation = df["PSH"].mean() * installed_capacity * n
+        # df = df.rename(index=lambda x: x.strftime("%B"))
+        df = df.drop(columns=["days"])
+        if True:
+            capacity_factor = power_generation / (installed_capacity * 24)
+            print("\n:: Solar ::")
+            print(df.to_markdown(floatfmt=".1f"))
+            print(
+                f"Generation {round(power_generation, 2)}[kW year]; Capacity Factor {round(capacity_factor * 100, 2)}%"
+            )
+        return power_generation
+
     def evaluate(self, installed_capacity: float):
+        """
+        Evaluates the solar resource.
+
+        Args:
+            installed_capacity (float): The installed capacity of the solar resource.
+
+        Returns:
+            float: The evaluated value based on the installed capacity.
+
+        Raises:
+            ValueError: If the primary variable is not found.
+
+        """
         primary_variable = next(
             (v for v in self.variables if v.name == VariableEnum.SOLAR_IRRADIANCE), None
         )
         if not primary_variable:
-            raise ValueError("Primary variable not found")
+            raise ValueError(
+                f"Primary variable {VariableEnum.SOLAR_IRRADIANCE} not found"
+            )
 
         self.set_variability(
             statistics.stdev(primary_variable.data.values())
             / statistics.mean(primary_variable.data.values())
         )
-        return installed_capacity * 0.8
+        values_per_date, values_per_month = format_values(primary_variable.data)
+        print(values_per_month)
+        result = self.potential(values_per_month, installed_capacity)
 
-
-class Wind(Resource):
-    def __init__(self, **data):
-        super().__init__(type_resource=ResourceType.WIND, **data)
-
-    def evaluate(self, installed_capacity: float):
-        primary_variable = next(
-            (v for v in self.variables if v.name == VariableEnum.WIND_SPEED), None
-        )
-        if not primary_variable:
-            raise ValueError("Primary variable not found")
-
-        self.set_variability(
-            statistics.stdev(primary_variable.data.values())
-            / statistics.mean(primary_variable.data.values())
-        )
-        return installed_capacity * 0.8
+        return result

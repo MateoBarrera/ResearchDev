@@ -1,6 +1,3 @@
-from ctypes.wintypes import PINT
-from multiprocessing import process
-from django.urls import include
 import pandas as pd
 
 IDEAM_COLUMNS = [
@@ -134,3 +131,20 @@ def load_excel(file_path):
         return process_biomass_data(df)
     else:
         raise ValueError("Invalid CSV file format")
+
+
+def format_values(data):
+    df = pd.DataFrame(list(data.items()), columns=["date", "value"])
+    df["date"] = pd.to_datetime(df["date"])
+    df.set_index("date", inplace=True)
+    data_month = df.asfreq("ME", method="ffill")
+    data_month["year"] = data_month.index.year
+    data_month["month"] = pd.to_datetime(data_month.index.month, format="%m")
+    data_month_piv = pd.pivot_table(
+        data_month, index=["month"], columns=["year"], values=["value"]
+    )
+    data_month_piv = data_month_piv.sort_index()
+    data_month_piv.index = data_month_piv.index.month_name()
+    data_month["month"] = data_month["month"].dt.month_name()
+    data_month_piv = data_month_piv.dropna(axis=1)
+    return data_month, data_month_piv
