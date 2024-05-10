@@ -303,7 +303,7 @@ class Solar(Resource):
             * self._weather_factor
         )
 
-        # Monthly Association
+        # Monthly temperature and weather association
         # df["monthly energy"] = (
         #    df["PSH"]
         #    * installed_capacity
@@ -368,3 +368,117 @@ class Solar(Resource):
         self._efficiency = values["efficiency"]
         self._temperature_factor = values["temperature_factor"]
         self._weather_factor = values["weather_factor"]
+
+
+class Wind(Resource):
+    """
+    A class representing a wind resource.
+
+    Attributes:
+        type_resource (ResourceType): The type of the resource.
+        data (dict): Additional data for the resource.
+
+    Methods:
+        evaluate(self, installed_capacity: float): Evaluates the Wind resource.
+
+    """
+
+    name: str
+    _swept_area = 100  # in square meters
+    _air_density = 1.225  # in kg/m^3 (typical value at sea level)
+    _average_wind_speed = 6  # in meters per second
+    _capacity_factor = 0.30  # in percentage
+    _rated_power = 1000  # in kilowatts (rated power of a single turbine)
+    _num_turbines = 50  # total number of turbines in the wind farm
+
+    def __init__(self, **data):
+        """
+        Initializes a Resource object.
+
+        Args:
+            data (dict): A dictionary containing the data for the resource.
+
+        The `data` argument in the constructor should be a dictionary containing the necessary information for a Resource instance. The keys should be the attribute names and the values should be the corresponding values. For example:
+
+        data = {
+            'name': 'Wind',
+            'type_resource': ResourceType.WIND,
+            'variables': [ResourceVariable(...), ...]
+        }
+        resource = Resource(**data)
+        """
+        super().__init__(type_resource=ResourceType.WIND, **data)
+
+    def get_potential(self, values_per_month, installed_capacity) -> float:
+
+        self._num_turbines = installed_capacity // self._rated_power
+
+        df = pd.DataFrame(index=values_per_month.index)
+        df["wind_sp"] = values_per_month.mean(axis=1)
+        df["days"] = DAYS_PER_MONTH
+
+        df["monthly energy"] = (
+            (0.5 * self._air_density * self._swept_area * df["wind_sp"] ** 3 / 1000)
+            * self._rated_power
+            * self._num_turbines
+            * self._capacity_factor
+            * df["days"]
+        )
+
+        # Monthly temperature and weather association
+        # df["monthly energy"] = (
+        #    df["PSH"]
+        #    * installed_capacity
+        #    * self._efficiency
+        #    * df["days"]
+        #    * df["temperature_factor"]
+        #    * df["weather_factor"]
+        # )
+
+        power_generation = df["monthly energy"].sum()
+        df = df.drop(columns=["days"])
+        if True:
+            capacity_factor = power_generation / (installed_capacity * 365 * 24)
+            print("\n:: Wind ::")
+            print(df.to_markdown(floatfmt=".1f"))
+            print(
+                f"Generation {round(power_generation, 2)}[kWh year]; Capacity Factor {round(capacity_factor * 100, 2)}%"
+            )
+        return power_generation
+
+    def evaluate(self, installed_capacity: float):
+        """
+        Evaluates the solar resource.
+
+        Args:
+            installed_capacity (float): The installed capacity of the solar resource.
+
+        Returns:
+            float: The evaluated value based on the installed capacity.
+
+        Raises:
+            ValueError: If the primary variable is not found.
+
+        """
+        primary_variable = next(
+            (v for v in self.variables if v.name == VariableEnum.WIND_SPEED), None
+        )
+        if not primary_variable:
+            raise ValueError(f"Primary variable {VariableEnum.WIND_SPEED} not found")
+
+        self.set_variability(
+            statistics.stdev(primary_variable.data.values())
+            / statistics.mean(primary_variable.data.values())
+        )
+        values_per_date, values_per_month = format_values(primary_variable.data)
+        result = self.get_potential(values_per_month, installed_capacity)
+
+        return result
+
+    @property
+    def wind_params(self):
+        return True
+
+    @wind_params.setter
+    def wind_params(self, values: dict):
+        pass

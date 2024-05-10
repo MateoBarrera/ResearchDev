@@ -1,1 +1,1 @@
-from .resource import Solar, ResourceVariable
+from .resource import Solar, Wind, ResourceVariable
