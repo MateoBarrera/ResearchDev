@@ -303,6 +303,16 @@ class Solar(Resource):
             * self._weather_factor
         )
 
+        # Monthly Association
+        # df["monthly energy"] = (
+        #    df["PSH"]
+        #    * installed_capacity
+        #    * self._efficiency
+        #    * df["days"]
+        #    * df["temperature_factor"]
+        #    * df["weather_factor"]
+        # )
+
         power_generation = df["monthly energy"].sum()
         df = df.drop(columns=["days"])
         if True:
@@ -352,3 +362,9 @@ class Solar(Resource):
             "temperature_factor": self._temperature_factor,
             "weather_factor": self._weather_factor,
         }
+
+    @solar_params.setter
+    def solar_params(self, values: dict):
+        self._efficiency = values["efficiency"]
+        self._temperature_factor = values["temperature_factor"]
+        self._weather_factor = values["weather_factor"]
