@@ -1,4 +1,4 @@
-from synergy.resources import Solar, Wind, ResourceVariable
+from synergy.resources import Solar, Wind, Hydro, ResourceVariable
 from synergy.alternative import Alternatives
 from synergy.indicator import Indicators
 
@@ -12,3 +12,7 @@ solar.evaluate(installed_capacity=INSTALLED_CAPACITY)
 wind = Wind(name="Wind Jamundí")
 wind.add_variable(ResourceVariable(file_csv="data/wind/Wind-Jamundi-D-Nasa.csv"))
 wind.evaluate(installed_capacity=INSTALLED_CAPACITY)
+
+hydro = Hydro(name="Hydro Jamundí")
+hydro.add_variable(ResourceVariable(file_csv="data/hydro/Jamundi.min.csv"))
+hydro.evaluate(installed_capacity=INSTALLED_CAPACITY)

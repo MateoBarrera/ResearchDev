@@ -114,10 +114,10 @@ if __name__ == "__main__":
         )
 """
 
-from bdb import effective
 import numpy as np
 import pandas as pd
 import statistics
+import math
 from pydantic import BaseModel, validator
 from typing import Dict, List
 from .enums import ResourceType, Unit, Frequency, VariableEnum
@@ -271,6 +271,9 @@ class Solar(Resource):
     _temperature_factor: float = 0.95
     _weather_factor: float = 1.0
 
+    _panel_capacity: float = 100  # in watts
+    _num_panels: int = 100
+
     def __init__(self, **data):
         """
         Initializes a Resource object.
@@ -290,13 +293,17 @@ class Solar(Resource):
         super().__init__(type_resource=ResourceType.SOLAR, **data)
 
     def get_potential(self, values_per_month, installed_capacity) -> float:
+
+        self._num_panels = math.ceil(installed_capacity / self._panel_capacity)
+
         df = pd.DataFrame(index=values_per_month.index)
         df["PSH"] = values_per_month.mean(axis=1)
         df["days"] = DAYS_PER_MONTH
 
         df["monthly energy"] = (
             df["PSH"]
-            * installed_capacity
+            * self._num_panels
+            * self._panel_capacity
             * self._efficiency
             * df["days"]
             * self._temperature_factor
@@ -365,9 +372,11 @@ class Solar(Resource):
 
     @solar_params.setter
     def solar_params(self, values: dict):
-        self._efficiency = values["efficiency"]
-        self._temperature_factor = values["temperature_factor"]
-        self._weather_factor = values["weather_factor"]
+        for key, value in values.items():
+            if hasattr(self, f"_{key}"):
+                setattr(self, f"_{key}", value)
+            else:
+                raise ValueError(f"Unknown attribute: {key}")
 
 
 class Wind(Resource):
@@ -411,7 +420,7 @@ class Wind(Resource):
 
     def get_potential(self, values_per_month, installed_capacity) -> float:
 
-        self._num_turbines = installed_capacity // self._rated_power
+        self._num_turbines = math.ceil(installed_capacity / self._rated_power)
 
         df = pd.DataFrame(index=values_per_month.index)
         df["wind_sp"] = values_per_month.mean(axis=1)
@@ -424,16 +433,6 @@ class Wind(Resource):
             * self._capacity_factor
             * df["days"]
         )
-
-        # Monthly temperature and weather association
-        # df["monthly energy"] = (
-        #    df["PSH"]
-        #    * installed_capacity
-        #    * self._efficiency
-        #    * df["days"]
-        #    * df["temperature_factor"]
-        #    * df["weather_factor"]
-        # )
 
         power_generation = df["monthly energy"].sum()
         df = df.drop(columns=["days"])
@@ -481,4 +480,131 @@ class Wind(Resource):
 
     @wind_params.setter
     def wind_params(self, values: dict):
-        pass
+        for key, value in values.items():
+            if hasattr(self, f"_{key}"):
+                setattr(self, f"_{key}", value)
+            else:
+                raise ValueError(f"Unknown attribute: {key}")
+
+
+class Hydro(Resource):
+    """
+    A class representing a Hydro resource.
+
+    Attributes:
+        type_resource (ResourceType): The type of the resource.
+        data (dict): Additional data for the resource.
+
+    Methods:
+        evaluate(self, installed_capacity: float): Evaluates the Wind resource.
+
+    """
+
+    name: str
+    _head = 2  # in meters
+    _turbine_efficiency = 0.80  # efficiency of the hydro power plant
+    _capacity_factor = 0.4  # in percentage
+    _rated_power = 100  # in kilowatts (rated power of a single turbine)
+    _num_turbines = 1  # total number of turbines
+
+    _design_flow_rate = 3  # in cubic meters per second
+    _ecological_flow = None  # in cubic meters per second
+    _q_sr = 0  # in cubic meters per second
+
+    def __init__(self, **data):
+        """
+        Initializes a Resource object.
+
+        Args:
+            data (dict): A dictionary containing the data for the resource.
+
+        The `data` argument in the constructor should be a dictionary containing the necessary information for a Resource instance. The keys should be the attribute names and the values should be the corresponding values. For example:
+
+        data = {
+            'name': 'Hydro',
+            'type_resource': ResourceType.HYDRO,
+            'variables': [ResourceVariable(...), ...]
+        }
+        resource = Resource(**data)
+        """
+        super().__init__(type_resource=ResourceType.HYDRO, **data)
+
+    def get_potential(self, values_per_month, installed_capacity) -> float:
+
+        self._num_turbines = math.ceil(installed_capacity / self._rated_power)
+
+        df = pd.DataFrame(index=values_per_month.index)
+        df["flow_rate"] = values_per_month.mean(axis=1)
+        df["flow_rate"] = df["flow_rate"] - self._ecological_flow
+        df.loc[df["flow_rate"] > self._design_flow_rate, "flow_rate"] = (
+            self._design_flow_rate
+        )
+        df.loc[df["flow_rate"] < 0, "flow_rate"] = 0
+
+        df["days"] = DAYS_PER_MONTH
+        df["monthly energy"] = (
+            9.81
+            * 0.997
+            * self._head
+            * self._turbine_efficiency
+            * df["flow_rate"]
+            * self._capacity_factor
+            * self._rated_power
+            * self._num_turbines
+            * df["days"]
+        )
+
+        power_generation = df["monthly energy"].sum()
+        df = df.drop(columns=["days"])
+        if True:
+            capacity_factor = power_generation / (installed_capacity * 365 * 24)
+            print("\n:: Hydro ::")
+            print(df.to_markdown(floatfmt=".1f"))
+            print(
+                f"Generation {round(power_generation, 2)}[kWh year]; Capacity Factor {round(capacity_factor * 100, 2)}%"
+            )
+        return power_generation
+
+    def evaluate(self, installed_capacity: float):
+        """
+        Evaluates the solar resource.
+
+        Args:
+            installed_capacity (float): The installed capacity of the solar resource.
+
+        Returns:
+            float: The evaluated value based on the installed capacity.
+
+        Raises:
+            ValueError: If the primary variable is not found.
+
+        """
+        primary_variable = next(
+            (v for v in self.variables if v.name == VariableEnum.FLOW_RIVER), None
+        )
+        if not primary_variable:
+            raise ValueError(f"Primary variable {VariableEnum.FLOW_RIVER} not found")
+
+        self.set_variability(
+            statistics.stdev(primary_variable.data.values())
+            / statistics.mean(primary_variable.data.values())
+        )
+        values_per_date, values_per_month = format_values(primary_variable.data)
+        data_sort = np.sort(values_per_date["value"])[::-1]
+        index_q_sr = int(len(data_sort) * 0.7)
+        self._ecological_flow = data_sort[index_q_sr]
+        result = self.get_potential(values_per_month, installed_capacity)
+
+        return result
+
+    @property
+    def hydro_params(self):
+        return True
+
+    @hydro_params.setter
+    def hydro_params(self, values: dict):
+        for key, value in values.items():
+            if hasattr(self, f"_{key}"):
+                setattr(self, f"_{key}", value)
+            else:
+                raise ValueError(f"Unknown attribute: {key}")
