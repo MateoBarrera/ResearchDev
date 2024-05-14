@@ -716,7 +716,7 @@ class Wind:
 
 class Biomass:
     """Analysis of the biomass resource through the biogas, resource variability and calculation of autonomy from
-    historical monthly average flow data.
+    historical monthly average usable biomass residues data.
 
     Returns:
         Object: Biomass object
