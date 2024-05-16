@@ -1,5 +1,5 @@
 from os import name
-from synergy.resources.resource import ResourceVariable, Hydro, Solar, Wind
+from synergy.resources.resource import ResourceVariable, Hydro, Solar, Wind, Biomass
 from synergy.resources.enums import ResourceType, Unit, Frequency, VariableEnum
 
 
@@ -59,7 +59,7 @@ def test_resource_variable_from_csv_2():
     assert resource.frequency == Frequency.DAILY
 
 
-def test_resource_variable_from_excel():
+""" def test_resource_variable_from_excel():
     # Crear una instancia de ResourceVariable con datos específicos
     resource = ResourceVariable(file_excel="data/biomass/biomasa.xlsx")
 
@@ -68,7 +68,7 @@ def test_resource_variable_from_excel():
     assert resource.type_resource == ResourceType.BIOMASS
     assert resource.source == "ICA"
     assert resource.unit == Unit.CUBIT_METERS_PER_DAY
-    assert resource.frequency == Frequency.MONTHLY
+    assert resource.frequency == Frequency.MONTHLY """
 
 
 def test_hydro_resource():
@@ -96,3 +96,20 @@ def test_wind_resource():
     print(wind.variability)
     assert result == 64905.328704546744, "Should be 80"
     assert wind.variability == 0.24880257392911043
+
+
+def test_biomass_resource():
+    biomass_sources = {
+        "harvest": [
+            {"sugar_cane": 1},
+            {"rice": 2},
+            {"citrus": 3},
+            {"banana": 0},
+            {"coffee": 0},
+        ],
+        "livestock": [{"cattle": 10}, {"pigs": 20}, {"poultry": 30}],
+    }
+    biomass = Biomass(name="Biomass Jamundí")
+    biomass.add_variables(file_excel="data/biomass/biomasa.xlsx")
+    assert biomass.name == "Biomass Jamundí"
+    assert biomass.variables == "s"

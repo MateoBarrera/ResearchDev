@@ -1,1 +1,1 @@
-from .resource import Solar, Wind, Hydro, ResourceVariable
+from .resource import Solar, Wind, Hydro, ResourceVariable, Biomass

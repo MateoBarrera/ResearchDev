@@ -1,4 +1,5 @@
 from enum import Enum
+from pickle import POP
 
 
 class Unit(Enum):
@@ -10,6 +11,8 @@ class Unit(Enum):
     FAHRENHEIT = "Fahrenheit"
     KW = "kW"
     IRRADIANCE = "kW-hr/m^2/day"
+    HECTARE = "ha"
+    POPULATION = "population"
 
 
 class ResourceType(Enum):
@@ -25,6 +28,13 @@ class VariableEnum(Enum):
     BIOGAS = "Biogas"
     SOLAR_IRRADIANCE = "Solar irradiance"
     TEMPERATURE = "Solar temperature"
+    RICE = "Arroz"
+    COFFEE = "Café"
+    BANANA = "Plátano"
+    CITRUS = "Cítricos"
+    SUGAR_CANE = "Caña"
+    CATTLE = "bovino"
+    PINEAPPLE = "Piña"
 
 
 class Frequency(Enum):

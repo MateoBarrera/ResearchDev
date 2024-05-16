@@ -1,119 +1,3 @@
-""" class Historical(BaseModel):
-    date: str
-    source: str
-
-
-class Resource(BaseModel):
-    name: str
-    capacity: float
-    ubication: str
-    is_viability: Optional[bool] = False
-    historical: List[Historical]
-
-from typing import List
-from datetime import datetime
-from pydantic import BaseModel
-from .enums import ResourceType, Unit
-
-
-# New clases definition
-class Resource(BaseModel):
-    resource_is: int
-    site_id: int
-    name: str
-    resource_type: ResourceType
-    description: str
-
-
-class ResourceVariable(BaseModel):
-    variable_id: int
-    name: str
-    unit: Unit
-    source: str
-    frequency: str
-    date_added: datetime
-    date_updated: datetime
-
-
-class TimeSerie(BaseModel):
-    variable_id: int
-    time_stamp: datetime
-    value: float
-
-
-class BaseHistoricalData(BaseModel):
-    timestamp: datetime
-    energy_production: float
-    capacity: float
-
-
-class SolarPanelHistoricalData(BaseHistoricalData):
-    temperature: float
-    efficiency: float
-
-
-class WindTurbineHistoricalData(BaseHistoricalData):
-    wind_speed: float
-    blade_length: float
-
-
-class RenewableResource(BaseModel):
-    name: str
-    description: str
-    location: str
-    current_capacity: float
-    historical_data: List[BaseHistoricalData] = []
-
-    def add_historical_data(
-        self, timestamp: datetime, energy_production: float, capacity: float
-    ):
-        historical_entry = BaseHistoricalData(
-            timestamp=timestamp, energy_production=energy_production, capacity=capacity
-        )
-        self.historical_data.append(historical_entry)
-
-
-# Example usage
-if __name__ == "__main__":
-    solar_panels = RenewableResource(
-        name="Solar Panels",
-        description="Photovoltaic solar panels",
-        location="Rooftop",
-        current_capacity=100.0,
-    )
-
-    # Add solar panel historical data
-    solar_panels.add_historical_data(
-        timestamp=datetime(2024, 3, 20, 12, 0), energy_production=80.0, capacity=100.0
-    )
-
-    # Create a wind turbine resource
-    wind_turbine = RenewableResource(
-        name="Wind Turbine",
-        description="Large wind turbine",
-        location="Open field",
-        current_capacity=500.0,
-    )
-
-    # Add wind turbine historical data
-    wind_turbine.add_historical_data(
-        timestamp=datetime(2024, 3, 20, 12, 0), energy_production=300.0, capacity=500.0
-    )
-
-    # Print historical data for both resources
-    print("Solar Panels Historical Data:")
-    for entry in solar_panels.historical_data:
-        print(
-            f"Timestamp: {entry.timestamp}, Energy Production: {entry.energy_production} kWh, Capacity: {entry.capacity} kW"
-        )
-
-    print("\nWind Turbine Historical Data:")
-    for entry in wind_turbine.historical_data:
-        print(
-            f"Timestamp: {entry.timestamp}, Energy Production: {entry.energy_production} kWh, Capacity: {entry.capacity} kW"
-        )
-"""
-
 import numpy as np
 import pandas as pd
 import statistics
@@ -230,6 +114,15 @@ class Resource(BaseModel):
         if variable.type_resource != self.type_resource:
             raise ValueError("The variable type does not match the resource type")
         self.variables.append(variable)
+
+    def add_variables(self, file_excel: str):
+        data_variables = load_excel(file_excel)
+        print("2" * 100)
+        for variable in data_variables:
+            print(type(variable))
+            variable_resource = ResourceVariable(**variable)
+            print(variable_resource)
+            self.add_variable(variable_resource)
 
     def set_viability(self, value):
         self.__viability = value
@@ -624,12 +517,12 @@ class Biomass(Resource):
     """
 
     name: str
-    _efficiency: float = 0.90
-    _temperature_factor: float = 0.95
-    _weather_factor: float = 1.0
-
-    _panel_capacity: float = 100  # in watts
-    _num_panels: int = 100
+    _biomass_sources: Dict[str, float] = {}
+    _collection_efficiency: float = 0.80
+    _cell_fuel_efficiency: float = 0.90
+    _cells_capacity: float = 100
+    _num_cells: int = 1
+    _pci: float = 4.77  # Lower caloric potential in kWh/m3
 
     def __init__(self, **data):
         """
@@ -641,21 +534,30 @@ class Biomass(Resource):
         The `data` argument in the constructor should be a dictionary containing the necessary information for a Resource instance. The keys should be the attribute names and the values should be the corresponding values. For example:
 
         data = {
-            'name': 'Solar',
-            'type_resource': ResourceType.SOLAR,
+            'name': 'Biomass',
+            'type_resource': ResourceType.BIOMASS,
             'variables': [ResourceVariable(...), ...]
         }
         resource = Resource(**data)
         """
         super().__init__(type_resource=ResourceType.BIOMASS, **data)
 
-    def get_potential(self, values_per_month, installed_capacity) -> float:
+    def get_useful_biomass(self, raw_biomass) -> dict:
+        factors_useful_biomass = {
+            "sugar_cane": 0.5,
+            "rice_husk": 0.3,
+            "rice_straw": 0.2,
+        }
+        useful_biomass = {}
+        for key, value in raw_biomass.items():
+            useful_biomass[key] = factors_useful_biomass[key] * value
+        return useful_biomass
 
-        self._num_panels = math.ceil(installed_capacity / self._panel_capacity)
+    def get_potential(self, useful_biomass, installed_capacity) -> float:
 
-        df = pd.DataFrame(index=values_per_month.index)
-        df["PSH"] = values_per_month.mean(axis=1)
-        df["days"] = DAYS_PER_MONTH
+        self._num_cells = math.ceil(installed_capacity / self._cells_capacity)
+
+        """df = pd.DataFrame(useful_biomass)
 
         df["monthly energy"] = (
             df["PSH"]
@@ -671,12 +573,12 @@ class Biomass(Resource):
         df = df.drop(columns=["days"])
         if True:
             capacity_factor = power_generation / (installed_capacity * 365 * 24)
-            print("\n:: Solar ::")
+            print("\n:: Biomass ::")
             print(df.to_markdown(floatfmt=".1f"))
             print(
                 f"Generation {round(power_generation, 2)}[kWh year]; Capacity Factor {round(capacity_factor * 100, 2)}%"
-            )
-        return power_generation
+            )"""
+        return self._num_cells
 
     def evaluate(self, installed_capacity: float):
         """
@@ -692,22 +594,20 @@ class Biomass(Resource):
             ValueError: If the primary variable is not found.
 
         """
-        primary_variable = next(
-            (v for v in self.variables if v.name == VariableEnum.SOLAR_IRRADIANCE), None
+        result = self.get_potential(
+            self.get_useful_biomass(self.raw_biomass),
+            installed_capacity=installed_capacity,
         )
-        if not primary_variable:
-            raise ValueError(
-                f"Primary variable {VariableEnum.SOLAR_IRRADIANCE} not found"
-            )
-
-        self.set_variability(
-            statistics.stdev(primary_variable.data.values())
-            / statistics.mean(primary_variable.data.values())
-        )
-        values_per_date, values_per_month = format_values(primary_variable.data)
-        result = self.get_potential(values_per_month, installed_capacity)
 
         return result
+
+    @property
+    def biomass_sources(self):
+        return self._biomass_sources
+
+    @biomass_sources.setter
+    def biomass_sources(self, values: dict):
+        self._biomass_sources = values
 
     @property
     def biomass_params(self):

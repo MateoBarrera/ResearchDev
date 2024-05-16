@@ -1,4 +1,8 @@
+import re
+from matplotlib import axis
 import pandas as pd
+
+from evaluation.MCDA.criteria import print_table
 
 IDEAM_COLUMNS = [
     "CodigoEstacion",
@@ -28,7 +32,25 @@ NASA_COLUMNS = [
     "MO",
     "DY",
 ]
-BIOMASS_COLUMNS = ["Fuente", "Recomendado", "Factor", "Total"]
+BIOMASS_COLUMNS = {
+    "harvest": [
+        "year",
+        "resource",
+        "production",
+        "yield_per_ha",
+        "planted_area",
+        "harvested_area",
+    ],
+    "livestock": [
+        "year",
+        "resource",
+        "population",
+        "small_farms",
+        "medium_farms",
+        "large_farms",
+        "total_farms",
+    ],
+}
 
 
 def __transform_frequency(frequency):
@@ -98,7 +120,7 @@ def process_csv_ideam(file):
     return resource
 
 
-def process_biomass_data(file):
+def process_biomass_data(file, data):
     resource = {
         "name": "Biogas",
         "type_resource": "Biomass",
@@ -107,10 +129,63 @@ def process_biomass_data(file):
         "frequency": "Monthly",
     }
     print(file)
-    file["result"] = file[0.1] * file["Factor"]
+    """ file["result"] = file[0.1] * file["Factor"]
     file = file.filter(items=["Fuente", "result"]).set_index("Fuente")
-    resource["data"] = file["result"].to_dict()
+    resource["data"] = file["result"].to_dict() """
     return resource
+
+
+def process_harvest_biomass(file):
+    harvest_data = []
+    resource = {
+        "name": "Biogas",
+        "type_resource": "Biomass",
+        "source": "ICA",
+        "unit": "ha",
+        "frequency": "Yearly",
+    }
+    file = file.drop(columns=["year"])
+    file = file.groupby(["resource"]).mean().reset_index()
+    file = file.fillna(0, axis=1)
+    for index, row in file.iterrows():
+        row_data = resource.copy()
+        row_data["name"] = row["resource"]
+        data = {
+            "production": row["production"],
+            "yield_per_ha": row["yield_per_ha"],
+            "planted_area": row["planted_area"],
+            "harvested_area": row["harvested_area"],
+        }
+        row_data["data"] = data
+        harvest_data.append(row_data)
+    return harvest_data
+
+
+def process_livestock_biomass(file):
+    livestock_data = []
+    resource = {
+        "name": "Biogas",
+        "type_resource": "Biomass",
+        "source": "ICA",
+        "unit": "population",
+        "frequency": "Yearly",
+    }
+    file = file.drop(columns=["year"])
+    file = file.groupby(["resource"]).mean().reset_index()
+    file = file.fillna(0, axis=1)
+    for index, row in file.iterrows():
+        row_data = resource.copy()
+        row_data["name"] = row["resource"]
+        data = {
+            "population": row["population"],
+            "small_farms": row["small_farms"],
+            "medium_farms": row["medium_farms"],
+            "large_farms": row["large_farms"],
+            "total_farms": row["total_farms"],
+        }
+        row_data["data"] = data
+        livestock_data.append(row_data)
+    return livestock_data
 
 
 def load_csv(file_path):
@@ -125,12 +200,27 @@ def load_csv(file_path):
 
 
 def load_excel(file_path):
-    df = pd.read_excel(file_path, sheet_name="Recursos")
-    columns_extracted = df.columns.to_list()
-    if set(BIOMASS_COLUMNS).issubset(set(columns_extracted)):
-        return process_biomass_data(df)
+    if file_path.endswith("biomasa.xlsx"):
+        try:
+            df_harvest = pd.read_excel(file_path, sheet_name="Historico Cultivos")
+            df_livestock = pd.read_excel(file_path, sheet_name="Historico Pecuario")
+            columns_extracted_hv = df_harvest.columns.to_list()
+            columns_extracted_lv = df_livestock.columns.to_list()
+            if not set(BIOMASS_COLUMNS["harvest"]).issubset(set(columns_extracted_hv)):
+                raise ValueError("Invalid Excel file format for harvest data")
+            if not set(BIOMASS_COLUMNS["livestock"]).issubset(
+                set(columns_extracted_lv)
+            ):
+                raise ValueError("Invalid Excel file format for livestock data")
+        except Exception as e:
+            raise ValueError("Invalid Excel file format")
+
+        data = process_harvest_biomass(df_harvest)
+        data.extend(process_livestock_biomass(df_livestock))
+        print(data)
+        return data
     else:
-        raise ValueError("Invalid CSV file format")
+        raise NotImplementedError("Excel file format not implemented")
 
 
 def format_values(data):
