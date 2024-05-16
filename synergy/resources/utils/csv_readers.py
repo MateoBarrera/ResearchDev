@@ -217,7 +217,6 @@ def load_excel(file_path):
 
         data = process_harvest_biomass(df_harvest)
         data.extend(process_livestock_biomass(df_livestock))
-        print(data)
         return data
     else:
         raise NotImplementedError("Excel file format not implemented")

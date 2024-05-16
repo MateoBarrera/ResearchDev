@@ -28,13 +28,13 @@ class VariableEnum(Enum):
     BIOGAS = "Biogas"
     SOLAR_IRRADIANCE = "Solar irradiance"
     TEMPERATURE = "Solar temperature"
-    RICE = "Arroz"
-    COFFEE = "Café"
-    BANANA = "Plátano"
-    CITRUS = "Cítricos"
-    SUGAR_CANE = "Caña"
-    CATTLE = "bovino"
-    PINEAPPLE = "Piña"
+    RICE = "rice"
+    COFFEE = "coffee"
+    BANANA = "banana"
+    CITRUS = "citrus"
+    SUGAR_CANE = "sugar cane"
+    CATTLE = "cattle"
+    PINEAPPLE = "pineapple"
 
 
 class Frequency(Enum):

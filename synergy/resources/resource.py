@@ -1,3 +1,5 @@
+from curses import raw
+from tabnanny import check
 import numpy as np
 import pandas as pd
 import statistics
@@ -117,11 +119,8 @@ class Resource(BaseModel):
 
     def add_variables(self, file_excel: str):
         data_variables = load_excel(file_excel)
-        print("2" * 100)
         for variable in data_variables:
-            print(type(variable))
             variable_resource = ResourceVariable(**variable)
-            print(variable_resource)
             self.add_variable(variable_resource)
 
     def set_viability(self, value):
@@ -524,6 +523,16 @@ class Biomass(Resource):
     _num_cells: int = 1
     _pci: float = 4.77  # Lower caloric potential in kWh/m3
 
+    factors_useful_biomass: Dict[str, float] = {
+        "sugar cane": 0.5,
+        "rice husk": 0.3,
+        "citrus": 0.2,
+        "banana": 0.1,
+        "coffee": 0.1,
+        "cattle": 0.1,
+        "pineapple": 0.1,
+    }
+
     def __init__(self, **data):
         """
         Initializes a Resource object.
@@ -542,15 +551,25 @@ class Biomass(Resource):
         """
         super().__init__(type_resource=ResourceType.BIOMASS, **data)
 
-    def get_useful_biomass(self, raw_biomass) -> dict:
-        factors_useful_biomass = {
-            "sugar_cane": 0.5,
-            "rice_husk": 0.3,
-            "rice_straw": 0.2,
-        }
-        useful_biomass = {}
-        for key, value in raw_biomass.items():
-            useful_biomass[key] = factors_useful_biomass[key] * value
+    def check_availability(self, raw_biomass) -> dict:
+        print(raw_biomass)
+        for source in raw_biomass:
+            if source == "harvest":
+                for key, value in raw_biomass[source].items():
+                    variable = [var for var in self.variables if var.name.value == key]
+                    if value > variable[0].data["harvested_area"]:
+                        print(f"Not enough biomass available for {key} demand")
+                        raw_biomass[source][key] = variable[0].data["harvested_area"]
+
+        useful_biomass = raw_biomass
+        print(useful_biomass)
+        """ for key, value in raw_biomass.items():
+            useful_biomass[key] = self.factors_useful_biomass[key] * value """
+        return useful_biomass
+
+    def get_useful_biogas(self, raw_biomass) -> dict:
+        useful_biomass = self.check_availability(raw_biomass)
+
         return useful_biomass
 
     def get_potential(self, useful_biomass, installed_capacity) -> float:
@@ -580,7 +599,7 @@ class Biomass(Resource):
             )"""
         return self._num_cells
 
-    def evaluate(self, installed_capacity: float):
+    def evaluate(self, installed_capacity: float, biomass_sources: dict):
         """
         Evaluates the solar resource.
 
@@ -594,12 +613,14 @@ class Biomass(Resource):
             ValueError: If the primary variable is not found.
 
         """
-        result = self.get_potential(
-            self.get_useful_biomass(self.raw_biomass),
+        useful_biomass = self.get_useful_biogas(biomass_sources)
+        print(useful_biomass)
+        """ result = self.get_potential(
+            self.get_useful_biogas(biomass_sources),
             installed_capacity=installed_capacity,
-        )
+        ) """
 
-        return result
+        return useful_biomass
 
     @property
     def biomass_sources(self):

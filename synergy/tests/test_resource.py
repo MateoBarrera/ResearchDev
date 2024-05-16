@@ -100,16 +100,18 @@ def test_wind_resource():
 
 def test_biomass_resource():
     biomass_sources = {
-        "harvest": [
-            {"sugar_cane": 1},
-            {"rice": 2},
-            {"citrus": 3},
-            {"banana": 0},
-            {"coffee": 0},
-        ],
-        "livestock": [{"cattle": 10}, {"pigs": 20}, {"poultry": 30}],
+        "harvest": {
+            "sugar cane": 100000,
+            "rice": 2,
+            "citrus": 3,
+            "banana": 0,
+            "coffee": 0,
+            "pineapple": 0,
+        },
+        "livestock": {"cattle": 10},
     }
     biomass = Biomass(name="Biomass Jamundí")
     biomass.add_variables(file_excel="data/biomass/biomasa.xlsx")
+    biomass.evaluate(100, biomass_sources)
     assert biomass.name == "Biomass Jamundí"
     assert biomass.variables == "s"
