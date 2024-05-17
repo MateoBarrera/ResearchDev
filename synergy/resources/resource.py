@@ -523,13 +523,26 @@ class Biomass(Resource):
     _num_cells: int = 1
     _pci: float = 4.77  # Lower caloric potential in kWh/m3
 
-    factors_useful_biomass: Dict[str, float] = {
-        "sugar cane": 0.5,
-        "rice husk": 0.3,
+    useful_biomass_factor: Dict[str, float] = {
+        "sugar cane": 0.63,
+        "rice": 0.3,
+        "citrus": 0.2,
+        "banana": 0.275,
+        "coffee": 0.65,
+        "cattle": 1,
+        "pig": 1,
+        "poultry": 1,
+        "pineapple": 0.1,
+    }
+    biogas_factors: Dict[str, float] = {
+        "sugar cane": 0.25,
+        "rice": 352,
         "citrus": 0.2,
         "banana": 0.1,
         "coffee": 0.1,
-        "cattle": 0.1,
+        "cattle": 0.40,
+        "pig": 0.135,
+        "poultry": 0.0144,
         "pineapple": 0.1,
     }
 
@@ -552,7 +565,7 @@ class Biomass(Resource):
         super().__init__(type_resource=ResourceType.BIOMASS, **data)
 
     def check_availability(self, raw_biomass) -> dict:
-        print(raw_biomass)
+        useful_biomass = {}
         for source in raw_biomass:
             if source == "harvest":
                 for key, value in raw_biomass[source].items():
@@ -560,11 +573,28 @@ class Biomass(Resource):
                     if value > variable[0].data["harvested_area"]:
                         print(f"Not enough biomass available for {key} demand")
                         raw_biomass[source][key] = variable[0].data["harvested_area"]
+                    useful_biomass[key] = (
+                        raw_biomass[source][key]
+                        * variable[0].data["yield_per_ha"]
+                        * self.useful_biomass_factor[key]
+                        * self._collection_efficiency
+                        / 365
+                        * self.biogas_factors[key]
+                    )
+            if source == "livestock":
+                for key, value in raw_biomass[source].items():
+                    variable = [var for var in self.variables if var.name.value == key]
+                    if value > variable[0].data["population"]:
+                        print(f"Not enough biomass available for {key} demand")
+                        raw_biomass[source][key] = variable[0].data["livestock"]
+                    useful_biomass[key] = (
+                        raw_biomass[source][key]
+                        * self.useful_biomass_factor[key]
+                        * self._collection_efficiency
+                        * self.biogas_factors[key]
+                    )
 
-        useful_biomass = raw_biomass
         print(useful_biomass)
-        """ for key, value in raw_biomass.items():
-            useful_biomass[key] = self.factors_useful_biomass[key] * value """
         return useful_biomass
 
     def get_useful_biogas(self, raw_biomass) -> dict:

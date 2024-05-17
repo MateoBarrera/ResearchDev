@@ -101,14 +101,14 @@ def test_wind_resource():
 def test_biomass_resource():
     biomass_sources = {
         "harvest": {
-            "sugar cane": 100000,
+            "sugar cane": 10,
             "rice": 2,
             "citrus": 3,
             "banana": 0,
             "coffee": 0,
             "pineapple": 0,
         },
-        "livestock": {"cattle": 10},
+        "livestock": {"cattle": 100},
     }
     biomass = Biomass(name="Biomass Jamundí")
     biomass.add_variables(file_excel="data/biomass/biomasa.xlsx")
