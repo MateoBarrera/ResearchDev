@@ -9,10 +9,10 @@ BIOMASS_RESOURCES = {
         "rice": 2,
         "citrus": 3,
         "banana": 0,
-        "coffee": 0,
+        "coffee": 5,
         "pineapple": 0,
     },
-    "livestock": {"cattle": 100, "pig": 200, "poultry": 2000},
+    "livestock": {"cattle": 150, "pig": 200, "poultry": 2000},
 }
 
 
@@ -30,6 +30,4 @@ hydro.evaluate(installed_capacity=INSTALLED_CAPACITY)
 
 biomass = Biomass(name="Biomass Jamundí")
 biomass.add_variables(file_excel="data/biomass/biomasa.xlsx")
-biomass.evaluate(
-    installed_capacity=INSTALLED_CAPACITY, biomass_sources=BIOMASS_RESOURCES
-)
+biomass.evaluate(INSTALLED_CAPACITY, BIOMASS_RESOURCES)

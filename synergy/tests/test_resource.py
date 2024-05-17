@@ -114,4 +114,4 @@ def test_biomass_resource():
     biomass.add_variables(file_excel="data/biomass/biomasa.xlsx")
     result = biomass.evaluate(1000, biomass_sources)
     assert biomass.name == "Biomass Jamundí"
-    assert result == 3066.327963920454, "Should be 3066.327963920454"
+    assert result == 183979.67783522725, "Should be 183979.67783522725"

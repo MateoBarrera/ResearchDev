@@ -522,7 +522,7 @@ class Biomass(Resource):
 
     _fuel_cell_efficiency: float = 0.5
     _fuel_cell_flow_rate: float = 85
-    _cell_capacity_factor: float = 0.4
+    _cell_capacity_factor: float = 1
     _cell_capacity: int = 100
     _num_cells: int = 1
     _pci: float = 4.77
@@ -613,12 +613,20 @@ class Biomass(Resource):
         self._num_cells = math.ceil(installed_capacity / self._cell_capacity)
 
         if (
-            self._num_cells * self._fuel_cell_flow_rate
+            self._num_cells * self._fuel_cell_flow_rate * self._cell_capacity_factor
             > df["total biogas per day"][0] / 24
         ):
+            print("Biogas demand is higher than the available biogas")
             q_design = df["total biogas per day"][0] / 24
         else:
+            print("Biogas demand is lower than the available biogas")
             q_design = self._num_cells * self._fuel_cell_flow_rate
+
+        print(f"Biogas demand {df['total biogas per day'][0]}[m³ day]")
+        print(
+            f"Biogas demand {self._pci}; {self._fuel_cell_efficiency}; {self._cell_capacity_factor}[m³ day]"
+        )
+        print(f"Biogas demand {q_design * 24}[m³ day]")
 
         power_generation = (
             self._pci
@@ -626,6 +634,7 @@ class Biomass(Resource):
             * q_design
             * self._cell_capacity_factor
             * 365
+            * 24
         )
         ## Temporal print section
         capacity_factor = power_generation / (installed_capacity * 365 * 24)
