@@ -35,6 +35,8 @@ class VariableEnum(Enum):
     SUGAR_CANE = "sugar cane"
     CATTLE = "cattle"
     PINEAPPLE = "pineapple"
+    PIG = "pig"
+    POULTRY = "poultry"
 
 
 class Frequency(Enum):
