@@ -860,7 +860,7 @@ class Biomass:
             q_design = self.data / 24
         else:
             q_design = n_turbine * q_turbine
-
+        print("Q design", q_design)
         power_generation = pci * n * q_design * operation_regime
         """ Llevas a dataframe y al cálculo por meses
         df["days"] = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]

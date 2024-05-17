@@ -448,13 +448,14 @@ class Hydro(Resource):
 
         power_generation = df["monthly energy"].sum()
         df = df.drop(columns=["days"])
-        if True:
-            capacity_factor = power_generation / (installed_capacity * 365 * 24)
-            print("\n:: Hydro ::")
-            print(df.to_markdown(floatfmt=".1f"))
-            print(
-                f"Generation {round(power_generation, 2)}[kWh year]; Capacity Factor {round(capacity_factor * 100, 2)}%"
-            )
+
+        ## Temporal print section
+        capacity_factor = power_generation / (installed_capacity * 365 * 24)
+        print("\n:: Hydro ::")
+        print(df.to_markdown(floatfmt=".1f"))
+        print(
+            f"Generation {round(power_generation, 2)}[kWh year]; Capacity Factor {round(capacity_factor * 100, 2)}%"
+        )
         return power_generation
 
     def evaluate(self, installed_capacity: float):
@@ -517,33 +518,42 @@ class Biomass(Resource):
 
     name: str
     _biomass_sources: Dict[str, float] = {}
-    _collection_efficiency: float = 0.80
-    _cell_fuel_efficiency: float = 0.90
-    _cells_capacity: float = 100
+    _collection_efficiency: float = 0.75
+
+    _fuel_cell_efficiency: float = 0.5
+    _fuel_cell_flow_rate: float = 85
+    _cell_capacity_factor: float = 0.4
+    _cell_capacity: int = 100
     _num_cells: int = 1
-    _pci: float = 4.77  # Lower caloric potential in kWh/m3
+    _pci: float = 4.77
 
     useful_biomass_factor: Dict[str, float] = {
-        "sugar cane": 0.63,
-        "rice": 0.3,
-        "citrus": 0.2,
-        "banana": 0.275,
-        "coffee": 0.65,
-        "cattle": 1,
-        "pig": 1,
-        "poultry": 1,
-        "pineapple": 0.1,
+        "sugar cane": 270,
+        "rice": 1350,
+        "citrus": 500,
+        "banana": 1000,
+        "coffee": 500,
+        "pineapple": 175,
+        "cattle": 10,
+        "pig": 2.25,
+        "poultry": 0.18,
+        "equine": 10,
+        "goat": 1.5,
+        "caprine": 2,
     }
     biogas_factors: Dict[str, float] = {
         "sugar cane": 0.25,
-        "rice": 352,
+        "rice": 0.30,
         "citrus": 0.2,
         "banana": 0.1,
-        "coffee": 0.1,
-        "cattle": 0.40,
-        "pig": 0.135,
-        "poultry": 0.0144,
-        "pineapple": 0.1,
+        "coffee": 0.3,
+        "pineapple": 0.25,
+        "cattle": 0.04,
+        "pig": 0.06,
+        "poultry": 0.08,
+        "equine": 0.04,
+        "goat": 0.06,
+        "caprine": 0.05,
     }
 
     def __init__(self, **data):
@@ -564,7 +574,7 @@ class Biomass(Resource):
         """
         super().__init__(type_resource=ResourceType.BIOMASS, **data)
 
-    def check_availability(self, raw_biomass) -> dict:
+    def get_useful_biogas(self, raw_biomass) -> dict:
         useful_biomass = {}
         for source in raw_biomass:
             if source == "harvest":
@@ -594,39 +604,37 @@ class Biomass(Resource):
                         * self.biogas_factors[key]
                     )
 
-        print(useful_biomass)
-        return useful_biomass
-
-    def get_useful_biogas(self, raw_biomass) -> dict:
-        useful_biomass = self.check_availability(raw_biomass)
-
         return useful_biomass
 
     def get_potential(self, useful_biomass, installed_capacity) -> float:
+        df = pd.DataFrame(useful_biomass, index=[0])
+        df["total_biogas_per_day"] = df.sum(axis=1)
+        print(df)
 
-        self._num_cells = math.ceil(installed_capacity / self._cells_capacity)
+        self._num_cells = math.ceil(installed_capacity / self._cell_capacity)
 
-        """df = pd.DataFrame(useful_biomass)
-
-        df["monthly energy"] = (
-            df["PSH"]
-            * self._num_panels
-            * self._panel_capacity
-            * self._efficiency
-            * df["days"]
-            * self._temperature_factor
-            * self._weather_factor
+        if (
+            self._num_cells * self._fuel_cell_flow_rate
+            > df["total_biogas_per_day"][0] / 24
+        ):
+            q_design = df["total_biogas_per_day"][0] / 24
+        else:
+            q_design = self._num_cells * self._fuel_cell_flow_rate
+        print("q_design", q_design)
+        power_generation = (
+            self._pci
+            * self._fuel_cell_efficiency
+            * q_design
+            * self._cell_capacity_factor
+            * 365
         )
-
-        power_generation = df["monthly energy"].sum()
-        df = df.drop(columns=["days"])
-        if True:
-            capacity_factor = power_generation / (installed_capacity * 365 * 24)
-            print("\n:: Biomass ::")
-            print(df.to_markdown(floatfmt=".1f"))
-            print(
-                f"Generation {round(power_generation, 2)}[kWh year]; Capacity Factor {round(capacity_factor * 100, 2)}%"
-            )"""
+        ## Temporal print section
+        capacity_factor = power_generation / (installed_capacity * 365 * 24)
+        print("\n:: Biomass ::")
+        print(df.to_markdown(floatfmt=".1f"))
+        print(
+            f"Generation {round(power_generation, 2)}[kWh year]; Capacity Factor {round(capacity_factor * 100, 2)}%"
+        )
         return self._num_cells
 
     def evaluate(self, installed_capacity: float, biomass_sources: dict):
@@ -644,6 +652,7 @@ class Biomass(Resource):
 
         """
         useful_biomass = self.get_useful_biogas(biomass_sources)
+        result = self.get_potential(useful_biomass, installed_capacity)
         print(useful_biomass)
         """ result = self.get_potential(
             self.get_useful_biogas(biomass_sources),
