@@ -1,3 +1,5 @@
+from ast import In
+from synergy import alternative
 from synergy.resources import Solar, Wind, Hydro, Biomass, ResourceVariable
 from synergy.alternative import Alternatives
 from synergy.indicator import Indicators
@@ -31,3 +33,29 @@ hydro.evaluate(installed_capacity=INSTALLED_CAPACITY)
 biomass = Biomass(name="Biomass Jamundí")
 biomass.add_variables(file_excel="data/biomass/biomasa.xlsx")
 biomass.evaluate(INSTALLED_CAPACITY, BIOMASS_RESOURCES)
+
+
+RESOURCES_INCLUDE = {
+    "solar": True,
+    "wind": True,
+    "hydro": True,
+    "biomass": True,
+}
+
+alternatives = Alternatives(
+    resources_included=RESOURCES_INCLUDE, seed=[1, 0.5, 0.25, 0]
+)
+
+print(alternatives.result_dataframe * INSTALLED_CAPACITY)
+print(alternatives.result_dict)
+
+solar_array = []
+hydro_array = []
+wind_array = []
+biomass_array = []
+
+for index, alternative in alternatives.result_dataframe.iterrows():
+    solar_array.append(solar.evaluate(alternative["solar"]))
+    hydro_array.append(hydro.evaluate(alternative["hydro"]))
+    wind_array.append(wind.evaluate(alternative["wind"]))
+    biomass_array.append(biomass.evaluate(alternative["biomass"], BIOMASS_RESOURCES))
