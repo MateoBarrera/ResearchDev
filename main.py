@@ -76,9 +76,10 @@ alternatives_kw["biomass_generation"] = biomass_array
 print(alternatives_kw.to_markdown(floatfmt=".1f"))
 
 
-# indicators = Indicators()
-# indicators.load("evaluation/Indicator/indicators.json")
-# alternative_matrix = indicators.evaluate_alternative(alternatives_kw)
+indicators = Indicators()
+indicators.load("evaluation/Indicator/indicators.json")
+alternative_matrix = indicators.evaluate_alternative(alternatives_kw)
+print(alternative_matrix.to_markdown(floatfmt=".1f"))
 # Escoge datos de evaluación de prueba
 # 0 - expertos
 # 1 - Igual importancia

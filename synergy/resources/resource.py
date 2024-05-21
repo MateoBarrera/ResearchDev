@@ -1,5 +1,4 @@
-from curses import raw
-from tabnanny import check
+import logging
 import numpy as np
 import pandas as pd
 import statistics
@@ -620,17 +619,12 @@ class Biomass(Resource):
             self._num_cells * self._fuel_cell_flow_rate * self._cell_capacity_factor
             > df["total biogas per day"][0] / 24
         ):
-            print("Biogas demand is higher than the available biogas")
+            logging.warning(
+                f"Biogas demand is higher than the daily rate production \n demand {self._num_cells * self._fuel_cell_flow_rate * self._cell_capacity_factor:.2f}; available {df['total biogas per day'][0] / 24:.2f} "
+            )
             q_design = df["total biogas per day"][0] / 24
         else:
-            print("Biogas demand is lower than the available biogas")
             q_design = self._num_cells * self._fuel_cell_flow_rate
-
-        print(f"Biogas demand {df['total biogas per day'][0]}[m³ day]")
-        print(
-            f"Biogas demand {self._pci}; {self._fuel_cell_efficiency}; {self._cell_capacity_factor}[m³ day]"
-        )
-        print(f"Biogas demand {q_design * 24}[m³ day]")
 
         power_generation = (
             self._pci

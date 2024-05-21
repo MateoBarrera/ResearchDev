@@ -51,6 +51,91 @@
 		"formula": "(solar_generation * 0.001 + wind_generation * 5.4e-5 + hydro_generation * 8.9e-6 + biomass_generation * 1.55) / (solar_generation + wind_generation + hydro_generation + biomass_generation)"
 	},
 	{
+		"id": 201,
+		"name": "LCOE",
+		"dimension": "economic",
+		"description": "Costo nivelado de la energía, es el costo promedio de la energía generada por una tecnología durante su vida útil, expresado en $/MWh.",
+		"source": "",
+		"data": {
+			"solar": 202.94,
+			"wind": 76.28,
+			"hydro": 124.97,
+			"biomass": 72
+		},
+		"year": "2015",
+		"unit": "USD/MWh",
+		"type_indicator": "cost",
+		"formula": "(solar_generation * 202.94 + wind_generation * 76.28 + hydro_generation * 124.97 + biomass_generation * 72) / (solar_generation + wind_generation + hydro_generation + biomass_generation)"
+	},
+	{
+		"id": 202,
+		"name": "CAPEX",
+		"dimension": "economic",
+		"description": "Costo de inversión inicial para la construcción de una planta de generación de energía renovable, expresado en $/MW.",
+		"source": "",
+		"data": {
+			"solar": 1100,
+			"wind": 1350,
+			"hydro": 29900,
+			"biomass": 2000
+		},
+		"year": "2015",
+		"unit": "USD/kW",
+		"type_indicator": "cost",
+		"formula": "(solar_generation * 1100 + wind_generation * 1350 + hydro_generation * 29900 + biomass_generation * 2000) / (solar_generation + wind_generation + hydro_generation + biomass_generation)"
+	},
+	{
+		"id": 203,
+		"name": "OPEX",
+		"dimension": "economic",
+		"description": "Costo de operación y mantenimiento de una planta de generación de energía renovable, expresado en $/kWh.",
+		"source": "",
+		"data": {
+			"solar": 6.5,
+			"wind": 40,
+			"hydro": 37,
+			"biomass": 21
+		},
+		"year": "2015",
+		"unit": "USD/kWh",
+		"type_indicator": "cost",
+		"formula": "(solar_generation * 6.5 + wind_generation * 40 + hydro_generation * 37 + biomass_generation * 21) / (solar_generation + wind_generation + hydro_generation + biomass_generation)"
+	},
+	{
+		"id": 301,
+		"name": "Eficiencia de la generación",
+		"dimension": "technical",
+		"description": "Se evalúa la eficiencia de la generación de energía eléctrica de las alternativas renovables, de acuerdo con las características del entorno y el recurso primario disponible.",
+		"source": "",
+		"data": {
+			"solar": 0.25,
+			"wind": 0.4,
+			"hydro": 0.89,
+			"biomass": 0.35
+		},
+		"year": "2020",
+		"unit": "%",
+		"type_indicator": "benefit",
+		"formula": "(solar * 0.25 + wind * 0.40 + hydro * 0.89 + biomass * 0.35)/(solar + wind + hydro + biomass)"
+	},
+	{
+		"id": 302,
+		"name": "Capacidad de responder a la demanda",
+		"dimension": "technical",
+		"description": "La capacidad de responder a los picos de demanda y asegurar la estabilidad general de la red a largo plazo en el contexto de una cuota creciente de generación intermitente a partir de algunas fuentes de energía renovables.",
+		"source": "",
+		"data": {
+			"solar": "no",
+			"wind": "si",
+			"hydro": "si",
+			"biomass": "si1"
+		},
+		"year": "2020",
+		"unit": "%",
+		"type_indicator": "benefit",
+		"formula": "(solar * 1 + wind * 0.667 + hydro * 0.75 + biomass * 0.35)/(solar + wind + hydro + biomass)"
+	},
+	{
 		"id": 302,
 		"name": "Autonomía del recurso primario",
 		"dimension": "technical",
