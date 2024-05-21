@@ -102,15 +102,17 @@ class Resource(BaseModel):
     type_resource: ResourceType
     variables: List[ResourceVariable] = []
 
+    _show_logs: bool = False
+
+    def __init__(self, **data):
+        super().__init__(**data)
+
     @validator("variables")
     def validate_variables(cls, v):
         for variable in v:
             if variable.type_resource != cls.type_resource:
                 raise ValueError("The variable type does not match the resource type")
         return v
-
-    def __init__(self, **data):
-        super().__init__(**data)
 
     def add_variable(self, variable: ResourceVariable):
         if variable.type_resource != self.type_resource:
@@ -214,7 +216,7 @@ class Solar(Resource):
 
         power_generation = df["monthly energy"].sum()
         df = df.drop(columns=["days"])
-        if True:
+        if self._show_logs:
             capacity_factor = power_generation / (installed_capacity * 365 * 24)
             print("\n:: Solar ::")
             print(df.to_markdown(floatfmt=".1f"))
@@ -223,7 +225,7 @@ class Solar(Resource):
             )
         return power_generation
 
-    def evaluate(self, installed_capacity: float):
+    def evaluate(self, installed_capacity: float, show_logs: bool = False):
         """
         Evaluates the solar resource.
 
@@ -237,6 +239,7 @@ class Solar(Resource):
             ValueError: If the primary variable is not found.
 
         """
+        self._show_logs = show_logs
         primary_variable = next(
             (v for v in self.variables if v.name == VariableEnum.SOLAR_IRRADIANCE), None
         )
@@ -328,7 +331,7 @@ class Wind(Resource):
 
         power_generation = df["monthly energy"].sum()
         df = df.drop(columns=["days"])
-        if True:
+        if self._show_logs:
             capacity_factor = power_generation / (installed_capacity * 365 * 24)
             print("\n:: Wind ::")
             print(df.to_markdown(floatfmt=".1f"))
@@ -450,12 +453,13 @@ class Hydro(Resource):
         df = df.drop(columns=["days"])
 
         ## Temporal print section
-        capacity_factor = power_generation / (installed_capacity * 365 * 24)
-        print("\n:: Hydro ::")
-        print(df.to_markdown(floatfmt=".1f"))
-        print(
-            f"Generation {round(power_generation, 2)}[kWh year]; Capacity Factor {round(capacity_factor * 100, 2)}%"
-        )
+        if self._show_logs:
+            capacity_factor = power_generation / (installed_capacity * 365 * 24)
+            print("\n:: Hydro ::")
+            print(df.to_markdown(floatfmt=".1f"))
+            print(
+                f"Generation {round(power_generation, 2)}[kWh year]; Capacity Factor {round(capacity_factor * 100, 2)}%"
+            )
         return power_generation
 
     def evaluate(self, installed_capacity: float):
@@ -637,13 +641,14 @@ class Biomass(Resource):
             * 24
         )
         ## Temporal print section
-        capacity_factor = power_generation / (installed_capacity * 365 * 24)
-        df = df.transpose().rename({0: "Biogas"}, axis="columns")
-        print("\n:: Biomass ::")
-        print(df.to_markdown(floatfmt=".1f"))
-        print(
-            f"Generation {round(power_generation, 2)}[kWh year]; Capacity Factor {round(capacity_factor * 100, 2)}%"
-        )
+        if self._show_logs:
+            capacity_factor = power_generation / (installed_capacity * 365 * 24)
+            df = df.transpose().rename({0: "Biogas"}, axis="columns")
+            print("\n:: Biomass ::")
+            print(df.to_markdown(floatfmt=".1f"))
+            print(
+                f"Generation {round(power_generation, 2)}[kWh year]; Capacity Factor {round(capacity_factor * 100, 2)}%"
+            )
         return power_generation
 
     def evaluate(self, installed_capacity: float, biomass_sources: dict):
