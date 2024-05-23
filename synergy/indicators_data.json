@@ -125,18 +125,18 @@
 		"description": "La capacidad de responder a los picos de demanda y asegurar la estabilidad general de la red a largo plazo en el contexto de una cuota creciente de generación intermitente a partir de algunas fuentes de energía renovables.",
 		"source": "",
 		"data": {
-			"solar": "no",
-			"wind": "si",
-			"hydro": "si",
-			"biomass": "si1"
+			"solar": 0,
+			"wind": 0,
+			"hydro": 0.25,
+			"biomass": 0.5
 		},
 		"year": "2020",
-		"unit": "%",
+		"unit": "qualitative",
 		"type_indicator": "benefit",
-		"formula": "(solar * 1 + wind * 0.667 + hydro * 0.75 + biomass * 0.35)/(solar + wind + hydro + biomass)"
+		"formula": "(solar * 0 + wind * 0 + hydro * 0 + biomass * 0.5)/(solar + wind + hydro + biomass)"
 	},
 	{
-		"id": 302,
+		"id": 303,
 		"name": "Autonomía del recurso primario",
 		"dimension": "technical",
 		"description": "Se evalúan las horas por año que puede suministrar energía eléctrica las alternativas renovables, de acuerdo con las características del entorno y el recurso primario disponible.",

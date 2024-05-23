@@ -222,7 +222,7 @@ class Solar(Resource):
             print(
                 f"Generation {round(power_generation, 2)}[kWh year]; Capacity Factor {round(capacity_factor * 100, 2)}%"
             )
-        return power_generation
+        return power_generation / 8760
 
     def evaluate(self, installed_capacity: float, show_logs: bool = False):
         """
@@ -337,9 +337,9 @@ class Wind(Resource):
             print(
                 f"Generation {round(power_generation, 2)}[kWh year]; Capacity Factor {round(capacity_factor * 100, 2)}%"
             )
-        return power_generation
+        return power_generation / 8760
 
-    def evaluate(self, installed_capacity: float):
+    def evaluate(self, installed_capacity: float, show_logs: bool = False):
         """
         Evaluates the solar resource.
 
@@ -353,6 +353,7 @@ class Wind(Resource):
             ValueError: If the primary variable is not found.
 
         """
+        self._show_logs = show_logs
         primary_variable = next(
             (v for v in self.variables if v.name == VariableEnum.WIND_SPEED), None
         )
@@ -459,9 +460,9 @@ class Hydro(Resource):
             print(
                 f"Generation {round(power_generation, 2)}[kWh year]; Capacity Factor {round(capacity_factor * 100, 2)}%"
             )
-        return power_generation
+        return power_generation / 8760
 
-    def evaluate(self, installed_capacity: float):
+    def evaluate(self, installed_capacity: float, show_logs: bool = False):
         """
         Evaluates the solar resource.
 
@@ -475,6 +476,7 @@ class Hydro(Resource):
             ValueError: If the primary variable is not found.
 
         """
+        self._show_logs = show_logs
         primary_variable = next(
             (v for v in self.variables if v.name == VariableEnum.FLOW_RIVER), None
         )
@@ -523,9 +525,11 @@ class Biomass(Resource):
     _biomass_sources: Dict[str, float] = {}
     _collection_efficiency: float = 0.75
 
-    _fuel_cell_efficiency: float = 0.5
-    _fuel_cell_flow_rate: float = 85
-    _cell_capacity_factor: float = 1
+    _fuel_cell_efficiency: float = 0.4
+    _fuel_cell_flow_rate: float = 44  # in cubic meters per hour
+    _cell_capacity_factor: float = (
+        8 / 24
+    )  # in percentage of total hours operating per day
     _cell_capacity: int = 100
     _num_cells: int = 1
     _pci: float = 4.77
@@ -616,27 +620,27 @@ class Biomass(Resource):
         self._num_cells = math.ceil(installed_capacity / self._cell_capacity)
 
         if (
-            self._num_cells * self._fuel_cell_flow_rate * self._cell_capacity_factor
+            self._num_cells * self._fuel_cell_flow_rate / self._fuel_cell_efficiency
             > df["total biogas per day"][0] / 24
         ):
             logging.warning(
-                f"Biogas demand is higher than the daily rate production \n demand {self._num_cells * self._fuel_cell_flow_rate * self._cell_capacity_factor:.2f}; available {df['total biogas per day'][0] / 24:.2f} "
+                f"Biogas demand is higher than the daily rate production \n demand {self._num_cells * self._fuel_cell_flow_rate / self._fuel_cell_efficiency:.2f}; available {df['total biogas per day'][0] / 24:.2f} "
             )
-            q_design = df["total biogas per day"][0] / 24
+            q_design = (df["total biogas per day"][0] / 24) / self._fuel_cell_efficiency
         else:
-            q_design = self._num_cells * self._fuel_cell_flow_rate
+            q_design = (
+                self._num_cells * self._fuel_cell_flow_rate / self._fuel_cell_efficiency
+            )
 
         power_generation = (
             self._pci
             * self._fuel_cell_efficiency
             * q_design
             * self._cell_capacity_factor
-            * 365
-            * 24
         )
         ## Temporal print section
         if self._show_logs:
-            capacity_factor = power_generation / (installed_capacity * 365 * 24)
+            capacity_factor = power_generation / (installed_capacity)
             df = df.transpose().rename({0: "Biogas"}, axis="columns")
             print("\n:: Biomass ::")
             print(df.to_markdown(floatfmt=".1f"))
@@ -645,7 +649,9 @@ class Biomass(Resource):
             )
         return power_generation
 
-    def evaluate(self, installed_capacity: float, biomass_sources: dict):
+    def evaluate(
+        self, installed_capacity: float, biomass_sources: dict, show_logs: bool = False
+    ):
         """
         Evaluates the solar resource.
 
@@ -659,6 +665,7 @@ class Biomass(Resource):
             ValueError: If the primary variable is not found.
 
         """
+        self._show_logs = show_logs
         useful_biomass = self.get_useful_biogas(biomass_sources)
         result = self.get_potential(useful_biomass, installed_capacity)
         return result

@@ -8,7 +8,7 @@ from synergy.evaluation.mcda import Topsis
 INSTALLED_CAPACITY = 1000
 BIOMASS_RESOURCES = {
     "harvest": {
-        "sugar cane": 50,
+        "sugar cane": 100,
         "rice": 2,
         "citrus": 3,
         "banana": 0,
@@ -21,19 +21,19 @@ BIOMASS_RESOURCES = {
 
 solar = Solar(name="Solar PV Jamundí")
 solar.add_variable(ResourceVariable(file_csv="data/pv/PV-Jamundi-H.csv"))
-solar.evaluate(installed_capacity=INSTALLED_CAPACITY)
+solar.evaluate(installed_capacity=INSTALLED_CAPACITY, show_logs=True)
 
 wind = Wind(name="Wind Jamundí")
 wind.add_variable(ResourceVariable(file_csv="data/wind/Wind-Jamundi-D-Nasa.csv"))
-wind.evaluate(installed_capacity=INSTALLED_CAPACITY)
+wind.evaluate(installed_capacity=INSTALLED_CAPACITY, show_logs=True)
 
 hydro = Hydro(name="Hydro Jamundí")
 hydro.add_variable(ResourceVariable(file_csv="data/hydro/Jamundi.min.csv"))
-hydro.evaluate(installed_capacity=INSTALLED_CAPACITY)
+hydro.evaluate(installed_capacity=INSTALLED_CAPACITY, show_logs=True)
 
 biomass = Biomass(name="Biomass Jamundí")
 biomass.add_variables(file_excel="data/biomass/biomasa.xlsx")
-biomass.evaluate(INSTALLED_CAPACITY, BIOMASS_RESOURCES)
+biomass.evaluate(INSTALLED_CAPACITY, BIOMASS_RESOURCES, show_logs=True)
 
 
 RESOURCES_INCLUDE = {
@@ -48,7 +48,7 @@ alternatives = Alternatives(
 )
 
 alternatives_df = alternatives.result_dataframe * INSTALLED_CAPACITY
-print(alternatives_df)
+# print(alternatives_df)
 
 solar_array = []
 hydro_array = []
@@ -66,7 +66,7 @@ alternatives_df["hydro_generation"] = hydro_array
 alternatives_df["wind_generation"] = wind_array
 alternatives_df["biomass_generation"] = biomass_array
 
-print(alternatives_df.to_markdown(floatfmt=".1f"))
+# print(alternatives_df)
 
 with open("synergy/indicators_data.json", "r") as f:
     data = json.load(f)
@@ -76,7 +76,7 @@ indicators_list = [Indicator(**item) for item in data]
 my_indicators = Indicators(indicators=indicators_list)
 my_indicators.evaluate_indicators(alternatives_df.to_dict(orient="records"))
 
-print(my_indicators.evaluation.to_markdown(floatfmt=".1f"))
+# print(my_indicators.evaluation)
 
 # Escoge datos de evaluación de prueba
 # 0 - expertos
