@@ -181,16 +181,17 @@ def topsis(
     :return: A dataframe with the similarity index
     :doc-author: Trelent
     """
-    print(alt_info)
     print("\n:: TOPSIS ::")
     topsis_criteria_obj = Criteria()
     topsis_criteria_obj.show_result_matrix = show_criteria_matrix
     topsis_criteria_obj.show_all = show_expert_matrix
     topsis_criteria_obj.fuzzy = fuzzy
 
+    if test == -1:
+        topsis_criteria_obj.from_excel(path=load_path_evaluation(test))
     topsis_criteria_obj.from_excel(path=load_path_evaluation(test))
     topsis_criteria_aggregation = topsis_criteria_obj.get_weighting_array()
-    print(topsis_criteria_aggregation)
+
     topsis_alternatives_array = __topsis_normalize(
         np.transpose(alternative_matrix.to_numpy())
     )

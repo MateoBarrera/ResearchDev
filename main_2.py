@@ -79,11 +79,12 @@ my_indicators.evaluate_indicators(alternatives_df.to_dict(orient="records"))
 # print(my_indicators.evaluation)
 
 # Escoge datos de evaluación de prueba
-# 0 - expertos
-# 1 - Igual importancia
-# 2 - Enfoque Ambiental
-# 3 - Enfoque Económico
-# 4 - Enfoque Técnico
+# -1 - Automático
+#  0 - expertos
+#  1 - Igual importancia
+#  2 - Enfoque Ambiental
+#  3 - Enfoque Económico
+#  4 - Enfoque Técnico
 test_criteria = 0
 Topsis(
     alternative_matrix=my_indicators.evaluation,

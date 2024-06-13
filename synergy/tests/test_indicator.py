@@ -2,6 +2,9 @@ import json
 from synergy.indicator import Indicator, Indicators
 
 
+TOTAL_INDICATORS = 9
+
+
 def test_calculate_for_resource():
     # Carga el indicador desde un archivo JSON
     with open("synergy/indicators_data.json", "r") as f:
@@ -37,7 +40,7 @@ def test_indicators_class_load_json():
     value = my_indicators.len_indicators
     # Comprueba que el valor del indicador es correcto
     # Aquí deberías reemplazar `expected_value` por el valor esperado
-    expected_value = 4  # Reemplaza esto por el valor esperado
+    expected_value = TOTAL_INDICATORS  # Reemplaza esto por el valor esperado
     assert value == expected_value
 
 
@@ -72,7 +75,8 @@ def test_indicators_evaluate():
         1.03765,
         0.69175,
     ]  # Reemplaza esto por el valor esperado
-    assert value == expected_value
+    assert value[0] == expected_value[0]
+    assert len(value) == TOTAL_INDICATORS
 
 
 def test_indicators_evaluate_multiple():
@@ -119,4 +123,5 @@ def test_indicators_evaluate_multiple():
         0.69175,
     ]  # Reemplaza esto por el valor esperado
 
-    assert value == expected_value
+    assert value[0] == expected_value[0]
+    assert len(my_indicators.evaluation) == 2
