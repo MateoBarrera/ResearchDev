@@ -33,6 +33,7 @@ def normalize_criteria(array: list, normalize_type: int):
 
 def load_path_evaluation(test=0):
     dict_paths = {
+        -1: "synergy/evaluation/mcda/weight_criteria.xlsx",
         0: "./Repo/Articulo1/Encuesta/Resultados-9-02-2023.xlsx",
         1: "./Repo/Articulo1/Test/test1.xlsx",
         2: "./Repo/Articulo1/Test/test2.xlsx",
@@ -125,7 +126,7 @@ def __topsis_print_norm(alternatives, info):
 
 
 def __topsis_ideal_solution(
-    alternatives_array, type_indicator=(1, 0, 0, 0, 0, 0, 1, 1, 1)
+    alternatives_array, type_indicator=(1, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1)
 ):
     ideal_positive = np.zeros(len(type_indicator))
     ideal_negative = np.zeros(len(type_indicator))
@@ -188,41 +189,53 @@ def topsis(
     topsis_criteria_obj.fuzzy = fuzzy
 
     if test == -1:
+        topsis_criteria_aggregation = pd.read_excel(
+            load_path_evaluation(test)
+        ).values.tolist()
+        print("\n:: Criteria Matrix ::")
+        # print(topsis_criteria_aggregation.to_markdown(floatfmt=".4f"))
+        # raise Exception("Test mode not implemented")
+    else:
         topsis_criteria_obj.from_excel(path=load_path_evaluation(test))
-    topsis_criteria_obj.from_excel(path=load_path_evaluation(test))
-    topsis_criteria_aggregation = topsis_criteria_obj.get_weighting_array()
+        topsis_criteria_aggregation = [topsis_criteria_obj.get_weighting_array()]
 
-    topsis_alternatives_array = __topsis_normalize(
-        np.transpose(alternative_matrix.to_numpy())
-    )
-    topsis_alternatives_array = np.where(
-        np.isnan(topsis_alternatives_array), 0, topsis_alternatives_array
-    )
-    topsis_alternatives_norm = __topsis_print_norm(
-        topsis_alternatives_array, alternative_matrix
-    )
+    for criteria_array in topsis_criteria_aggregation:
+        topsis_alternatives_array = __topsis_normalize(
+            np.transpose(alternative_matrix.to_numpy())
+        )
+        topsis_alternatives_array = np.where(
+            np.isnan(topsis_alternatives_array), 0, topsis_alternatives_array
+        )
+        topsis_alternatives_norm = __topsis_print_norm(
+            topsis_alternatives_array, alternative_matrix
+        )
+        print("Test array")
+        print(len(criteria_array))
+        print(alternative_matrix.shape)
+        print(topsis_alternatives_array.shape)
+        topsis_weighted_alternatives = topsis_alternatives_array * np.transpose(
+            [criteria_array]
+        )
 
-    topsis_weighted_alternatives = topsis_alternatives_array * np.transpose(
-        [topsis_criteria_aggregation]
-    )
-
-    ideal_positive, ideal_negative = __topsis_ideal_solution(
-        topsis_weighted_alternatives
-    )
-    positive_distance, negative_distance, similarity_index = __topsis_distance(
-        topsis_weighted_alternatives, ideal_positive, ideal_negative
-    )
-    topsis_result_df = pd.DataFrame({"Evaluation": similarity_index})
-    show_evaluation(topsis_result_df, alternative_kw=alt_info)
-    if save_as is not None:
-        model = {
-            "info": None,
-            "alternative_info": alt_info,
-            "alternatives_norm": topsis_alternatives_norm,
-            "criteria": pd.DataFrame(data=topsis_criteria_aggregation),
-            "result": topsis_result_df.sort_values(by="Evaluation", ascending=False),
-        }
-        save(save_as, model, fuzzy=str(fuzzy), test=test)
+        ideal_positive, ideal_negative = __topsis_ideal_solution(
+            topsis_weighted_alternatives
+        )
+        positive_distance, negative_distance, similarity_index = __topsis_distance(
+            topsis_weighted_alternatives, ideal_positive, ideal_negative
+        )
+        topsis_result_df = pd.DataFrame({"Evaluation": similarity_index})
+        show_evaluation(topsis_result_df, alternative_kw=alt_info)
+        if save_as is not None:
+            model = {
+                "info": None,
+                "alternative_info": alt_info,
+                "alternatives_norm": topsis_alternatives_norm,
+                "criteria": pd.DataFrame(data=criteria_array),
+                "result": topsis_result_df.sort_values(
+                    by="Evaluation", ascending=False
+                ),
+            }
+            save(save_as, model, fuzzy=str(fuzzy), test=test)
 
 
 def show_evaluation(result_df, alternative_kw=None, graph=True):

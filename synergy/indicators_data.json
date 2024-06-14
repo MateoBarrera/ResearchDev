@@ -151,5 +151,56 @@
 		"unit": "%",
 		"type_indicator": "benefit",
 		"formula": "(solar * 1 + wind * 0.667 + hydro * 0.75 + biomass * 0.35)/(solar + wind + hydro + biomass)"
+	},
+	{
+		"id": 401,
+		"name": "Generación de empleos",
+		"dimension": "social",
+		"description": "Se evalúa la eficiencia de la generación de energía eléctrica de las alternativas renovables, de acuerdo con las características del entorno y el recurso primario disponible.",
+		"source": "",
+		"data": {
+			"solar": 0.25,
+			"wind": 0.4,
+			"hydro": 0.89,
+			"biomass": 0.35
+		},
+		"year": "2020",
+		"unit": "%",
+		"type_indicator": "benefit",
+		"formula": "(solar * 0.25 + wind * 0.40 + hydro * 0.89 + biomass * 0.35)/(solar + wind + hydro + biomass)"
+	},
+	{
+		"id": 402,
+		"name": "Aceptación social",
+		"dimension": "social",
+		"description": "La capacidad de responder a los picos de demanda y asegurar la estabilidad general de la red a largo plazo en el contexto de una cuota creciente de generación intermitente a partir de algunas fuentes de energía renovables.",
+		"source": "",
+		"data": {
+			"solar": 0,
+			"wind": 0,
+			"hydro": 0.25,
+			"biomass": 0.5
+		},
+		"year": "2020",
+		"unit": "qualitative",
+		"type_indicator": "benefit",
+		"formula": "(solar * 0 + wind * 0 + hydro * 0 + biomass * 0.5)/(solar + wind + hydro + biomass)"
+	},
+	{
+		"id": 403,
+		"name": "Electrificación limpia",
+		"dimension": "social",
+		"description": "Se evalúan las horas por año que puede suministrar energía eléctrica las alternativas renovables, de acuerdo con las características del entorno y el recurso primario disponible.",
+		"source": "",
+		"data": {
+			"solar": 1,
+			"wind": 0.667,
+			"hydro": 0.75,
+			"biomass": 0.35
+		},
+		"year": "2020",
+		"unit": "%",
+		"type_indicator": "benefit",
+		"formula": "(solar * 1 + wind * 0.667 + hydro * 0.75 + biomass * 0.35)/(solar + wind + hydro + biomass)"
 	}
 ]

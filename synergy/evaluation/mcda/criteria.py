@@ -154,13 +154,15 @@ class Criteria:
             array_criteria += list(weights[index] * np.array(criteria[item]))
         return np.array(array_criteria)
 
-    def from_excel(self, path):
+    def from_excel(self, path, auto=False):
         """Extracts the pairwise comparison information contained in an Excel workbook
         in Google Forms results format.
 
         Args:
             path (str): relative path of the Excel file.
         """
+        if auto:
+            self.automatic_evaluation(path)
         __file = open_excel(path=path)
         print(__file)
         self.__expert_mail(__file)
@@ -169,7 +171,8 @@ class Criteria:
         if self.__show_result_matrix:
             self.show_weighs()
 
-    def automatic_evaluation(self, matrix):
+    def automatic_evaluation(self, path):
+
         pass
 
     def show_weighs(self):

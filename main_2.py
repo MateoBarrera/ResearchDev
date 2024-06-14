@@ -74,9 +74,9 @@ with open("synergy/indicators_data.json", "r") as f:
 indicators_list = [Indicator(**item) for item in data]
 
 my_indicators = Indicators(indicators=indicators_list)
-my_indicators.evaluate_indicators(alternatives_df.to_dict(orient="records"))
 
-# print(my_indicators.evaluation)
+my_indicators.evaluate_indicators(alternatives_df.to_dict(orient="records"))
+print(my_indicators.evaluation.shape)
 
 # Escoge datos de evaluación de prueba
 # -1 - Automático
@@ -85,13 +85,12 @@ my_indicators.evaluate_indicators(alternatives_df.to_dict(orient="records"))
 #  2 - Enfoque Ambiental
 #  3 - Enfoque Económico
 #  4 - Enfoque Técnico
-test_criteria = 0
+test_criteria = -1
 Topsis(
     alternative_matrix=my_indicators.evaluation,
     show_criteria_matrix=True,
     show_expert_matrix=False,
     test=test_criteria,
     fuzzy=True,
-    save_as="TOPSIS",
     alt_info=alternatives_df,
 )
