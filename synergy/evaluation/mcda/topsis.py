@@ -245,7 +245,8 @@ def topsis(
     ranking_result_df.to_excel(
         "lista_de_resultados.xlsx", index=False, engine="openpyxl"
     )
-    print(ranking_result_df)
+    print(ranking_result_df.info())
+    print(ranking_result_df.head())
 
 
 def show_evaluation(result_df, alternative_kw=None, graph=True):
