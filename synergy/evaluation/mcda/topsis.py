@@ -200,7 +200,8 @@ def topsis(
         topsis_criteria_aggregation = [topsis_criteria_obj.get_weighting_array()]
 
     ranking_result = {}
-    index = 0
+    CI_result = {}
+    index = 1
     for criteria_array in topsis_criteria_aggregation:
         topsis_alternatives_array = __topsis_normalize(
             np.transpose(alternative_matrix.to_numpy())
@@ -235,17 +236,18 @@ def topsis(
                 ),
             }
             save(save_as, model, fuzzy=str(fuzzy), test=test)
-        ranking_result["Scenario " + str(index)] = similarity_index
+
+        topsis_result_df["position"] = topsis_result_df["Evaluation"].rank(
+            ascending=False
+        )
+        ranking_result["Scenario " + str(index)] = topsis_result_df["position"]
+        CI_result["Scenario " + str(index)] = similarity_index
         index += 1
 
-    print("\n:: Ranking Results::")
-    print(ranking_result)
     ranking_result_df = pd.DataFrame(ranking_result)
-    ranking_result_df.to_excel(
-        "lista_de_resultados.xlsx", index=False, engine="openpyxl"
-    )
-    print(ranking_result_df.info())
-    print(ranking_result_df.head())
+    CIndex_result_df = pd.DataFrame(CI_result)
+    ranking_result_df.to_excel("lista_de_resultados.xlsx", engine="openpyxl")
+    CIndex_result_df.to_excel("lista_de_resultados_CI.xlsx", engine="openpyxl")
 
 
 def show_evaluation(result_df, alternative_kw=None, graph=True):
