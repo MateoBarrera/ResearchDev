@@ -3506,5 +3506,5 @@ wiC = np.array(
     ]
 )
 
-pd.DataFrame(wiC).to_excel("weight_criteria.xlsx", index=False)
-#pd.DataFrame(wiC).to_csv("pesosC.csv", index=False)
+pd.DataFrame(wiC).to_excel("synergy/evaluation/mcda/weight_criteria.xlsx", index=False)
+# pd.DataFrame(wiC).to_csv("pesosC.csv", index=False)
