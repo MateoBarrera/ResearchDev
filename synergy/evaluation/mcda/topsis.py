@@ -246,8 +246,10 @@ def topsis(
 
     ranking_result_df = pd.DataFrame(ranking_result)
     CIndex_result_df = pd.DataFrame(CI_result)
-    ranking_result_df.to_excel("lista_de_resultados.xlsx", engine="openpyxl")
-    CIndex_result_df.to_excel("lista_de_resultados_CI.xlsx", engine="openpyxl")
+    ranking_result_df.to_excel(f"lista_de_resultados{save_as}.xlsx", engine="openpyxl")
+    CIndex_result_df.to_excel(
+        f"lista_de_resultados_CI{save_as}.xlsx", engine="openpyxl"
+    )
 
 
 def show_evaluation(result_df, alternative_kw=None, graph=True):
