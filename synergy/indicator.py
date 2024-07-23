@@ -168,7 +168,9 @@ class Indicators(BaseModel):
                 evaluation_values[indicator.name] = format(
                     indicator.calculate_for_resource(resources), f"{5}g"
                 )
-                self.single_evaluation = Evaluation(evaluation=evaluation_values)
+            print("200" * 10)
+            print(evaluation_values)
+            self.single_evaluation = Evaluation(evaluation=evaluation_values)
         else:
             raise ValueError("Resources must be a dictionary or a list")
 

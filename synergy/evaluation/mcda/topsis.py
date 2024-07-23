@@ -4,6 +4,9 @@ import matplotlib.pyplot as plt
 from .criteria import Criteria  # pylint: disable=import-error
 from evaluation.save import save
 
+TYPE_INDICATORS = (1, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0)
+
+
 plt.style.use(["seaborn-v0_8-colorblind", "evaluation/resource/graph.mplstyle"])
 months_ticks_labels = (
     pd.date_range("2014-01-01", "2014-12-31", freq="MS").strftime("%b").tolist()
@@ -43,6 +46,7 @@ def load_path_evaluation(test=0):
     return dict_paths[test]
 
 
+# TODO Deprecated
 def normalize_alternatives(alternative_matrix):
     type_indicator = [1, 0, 0, 0, 0, 0, 1, 1, 1]
     for column in alternative_matrix:
@@ -125,9 +129,7 @@ def __topsis_print_norm(alternatives, info):
     # save_xls("TOP-Criteria N", alternatives)
 
 
-def __topsis_ideal_solution(
-    alternatives_array, type_indicator=(1, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1)
-):
+def __topsis_ideal_solution(alternatives_array, type_indicator=TYPE_INDICATORS):
     ideal_positive = np.zeros(len(type_indicator))
     ideal_negative = np.zeros(len(type_indicator))
 

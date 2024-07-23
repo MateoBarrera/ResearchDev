@@ -127,7 +127,7 @@
 		"data": {
 			"solar": 0,
 			"wind": 0,
-			"hydro": 0.25,
+			"hydro": 0,
 			"biomass": 0.5
 		},
 		"year": "2020",
@@ -156,51 +156,51 @@
 		"id": 401,
 		"name": "Generación de empleos",
 		"dimension": "social",
-		"description": "Se evalúa la eficiencia de la generación de energía eléctrica de las alternativas renovables, de acuerdo con las características del entorno y el recurso primario disponible.",
+		"description": "Este indicador mide la cantidad de empleos directos e indirectos generados durante la puesta en marcha, operación y mantenimiento por cada MW instalado de las centrales o sistemas energéticos, considerando el futuro inducido en las oportunidades laborales.",
 		"source": "",
 		"data": {
-			"solar": 0.25,
-			"wind": 0.4,
-			"hydro": 0.89,
-			"biomass": 0.35
+			"solar": 13,
+			"wind": 3,
+			"hydro": 5.5,
+			"biomass": 15
 		},
 		"year": "2020",
 		"unit": "%",
 		"type_indicator": "benefit",
-		"formula": "(solar * 0.25 + wind * 0.40 + hydro * 0.89 + biomass * 0.35)/(solar + wind + hydro + biomass)"
+		"formula": "(solar * 13 + wind * 3 + hydro * 5.5 + biomass * 15)"
 	},
 	{
 		"id": 402,
-		"name": "Aceptación social",
+		"name": "Aceptación social/Contribución a la economía local",
 		"dimension": "social",
-		"description": "La capacidad de responder a los picos de demanda y asegurar la estabilidad general de la red a largo plazo en el contexto de una cuota creciente de generación intermitente a partir de algunas fuentes de energía renovables.",
+		"description": "Este indicador tiene carácter cualitativo y puede evaluarse en tres opciones: “alto”, “medio” y “bajo”. La atribución de beneficios de este indicador es positiva; cuanto mayor sea la aceptabilidad social, mejor será la puntuación. Por este motivo, las tecnologías con puntuaciones altas de aceptabilidad tienen la puntuación más alta, 1; mientras que las tecnologías con baja aceptabilidad tienen una puntuación de cero.",
 		"source": "",
 		"data": {
-			"solar": 0,
-			"wind": 0,
+			"solar": 1,
+			"wind": 1,
 			"hydro": 0.25,
 			"biomass": 0.5
 		},
 		"year": "2020",
 		"unit": "qualitative",
 		"type_indicator": "benefit",
-		"formula": "(solar * 0 + wind * 0 + hydro * 0 + biomass * 0.5)/(solar + wind + hydro + biomass)"
+		"formula": "(solar * 1 + wind * 1 + hydro * 0.25 + biomass * 0.5)/(solar + wind + hydro + biomass)"
 	},
 	{
 		"id": 403,
-		"name": "Electrificación limpia",
+		"name": "Daño a la salud humana",
 		"dimension": "social",
-		"description": "Se evalúan las horas por año que puede suministrar energía eléctrica las alternativas renovables, de acuerdo con las características del entorno y el recurso primario disponible.",
+		"description": "Mide el impacto de las tecnologías en la vida “saludable” humana (AVAD) por kWh de energía producida, las emisiones que se consideraron para este factor son la formación de material particulado, el agotamiento de la capa de ozono, la toxicidad humana, las radiaciones ionizantes y la oxidación fotoquímica.",
 		"source": "",
 		"data": {
-			"solar": 1,
-			"wind": 0.667,
-			"hydro": 0.75,
-			"biomass": 0.35
+			"solar": 0,
+			"wind": 40,
+			"hydro": 10,
+			"biomass": 10
 		},
-		"year": "2020",
-		"unit": "%",
-		"type_indicator": "benefit",
-		"formula": "(solar * 1 + wind * 0.667 + hydro * 0.75 + biomass * 0.35)/(solar + wind + hydro + biomass)"
+		"year": "2015",
+		"unit": "nanoDALY/kWh",
+		"type_indicator": "cost",
+		"formula": "(solar_generation * 0 + wind_generation * 40 + hydro_generation * 10 + biomass_generation * 10)/(solar + wind + hydro + biomass)"
 	}
 ]
