@@ -1,0 +1,27 @@
+CASE_STUDY: "jamundi"
+INSTALLED_CAPACITY: 1000
+BIOMASS_REQUIREMENTS:
+  harvest:
+    sugar cane: 100
+    rice: 2
+    citrus: 3
+    banana: 0
+    coffee: 5
+    pineapple: 0
+  livestock:
+    cattle: 150
+    pig: 200
+    poultry: 2000
+RESOURCES:
+  solar:
+    name: "Solar PV Jamundí"
+    file_csv: "data/pv/PV-Jamundi-H.csv"
+  wind:
+    name: "Wind Jamundí"
+    file_csv: "data/wind/Wind-Jamundi-D-Nasa.csv"
+  hydro:
+    name: "Hydro Jamundí"
+    file_csv: "data/hydro/Jamundi.min.csv"
+  biomass:
+    name: "Biomass Jamundí"
+    file_excel: "data/biomass/biomasa.xlsx"
