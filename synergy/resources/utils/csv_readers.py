@@ -120,6 +120,24 @@ def process_csv_ideam(file):
     return resource
 
 
+def process_data_ideam(file):
+    # Leer el archivo data en un DataFrame
+    resource = {
+        "name": "Flow river",
+        "type_resource": "Hydro",
+        "source": "IDEAM",
+        "unit": "m³/s",
+        "frequency": "Daily",
+    }
+    print("FILEEEE")
+    print(file)
+    file = file.filter(items=["Fecha", "Valor"]).set_index("Fecha")
+    resource["data"] = file["Valor"].to_dict()
+    print(resource)
+    # Devolver los datos en el formato necesario
+    return resource
+
+
 def process_biomass_data(file, data):
     resource = {
         "name": "Biogas",
@@ -220,6 +238,17 @@ def load_excel(file_path):
         return data
     else:
         raise NotImplementedError("Excel file format not implemented")
+
+
+def load_data(file_path):
+    print("Start debuging")
+    df = pd.read_csv(file_path, sep="|")
+    print(df)
+    columns_extracted = df.columns.to_list()
+    if columns_extracted == ["Fecha", "Valor"]:
+        return process_data_ideam(df)
+    else:
+        raise ValueError("Invalid data file format")
 
 
 def format_values(data):

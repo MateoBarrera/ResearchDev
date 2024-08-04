@@ -6,7 +6,7 @@ import math
 from pydantic import BaseModel, validator
 from typing import Dict, List
 from .enums import ResourceType, Unit, Frequency, VariableEnum
-from .utils.csv_readers import load_csv, load_excel, format_values
+from .utils.csv_readers import load_csv, load_excel, load_data, format_values
 
 DAYS_PER_MONTH: List[int] = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
 
@@ -37,8 +37,7 @@ class ResourceVariable(BaseModel):
 
     def __init__(
         self,
-        file_csv: str = None,
-        file_excel: str = None,
+        file_name: str = None,
         **data,
     ):
         """
@@ -50,10 +49,15 @@ class ResourceVariable(BaseModel):
             **data: Additional data for the resource.
 
         """
-        if file_csv:
-            data = load_csv(file_csv)
-        elif file_excel:
-            data = load_excel(file_excel)
+        if file_name:
+            file_extension = file_name.split(".")[-1]
+            if file_extension == "csv":
+                data = load_csv(file_name)
+            elif file_extension == "xlsx":
+                data = load_excel(file_name)
+            elif file_extension == "data":
+                print("predebbuging")
+                data = load_data(file_name)
         super().__init__(**data)
 
     @property
@@ -114,12 +118,13 @@ class Resource(BaseModel):
         return v
 
     def add_variable(self, variable: ResourceVariable):
+        print(variable)
         if variable.type_resource != self.type_resource:
             raise ValueError("The variable type does not match the resource type")
         self.variables.append(variable)
 
-    def add_variables(self, file_excel: str):
-        data_variables = load_excel(file_excel)
+    def add_variables(self, file_name: str):
+        data_variables = load_excel(file_name)
         for variable in data_variables:
             variable_resource = ResourceVariable(**variable)
             self.add_variable(variable_resource)

@@ -9,7 +9,7 @@ from synergy.evaluation.mcda import Topsis
 
 TODAY = datetime.now().strftime("%Y-%m-%d")
 
-with open("case_studies/case_1.yaml", "r") as file:
+with open("case_studies/case_2.yaml", "r") as file:
     config = yaml.safe_load(file)
 
 CASE_STUDY = config["CASE_STUDY"]
@@ -21,28 +21,28 @@ RESOURCES_INCLUDE["solar"] = "solar" in config["RESOURCES"]
 if RESOURCES_INCLUDE["solar"]:
     solar_config = config["RESOURCES"]["solar"]
     solar = Solar(name=solar_config["name"])
-    solar.add_variable(ResourceVariable(file_csv=solar_config["file_csv"]))
+    solar.add_variable(ResourceVariable(file_name=solar_config["file_name"]))
     solar.evaluate(installed_capacity=INSTALLED_CAPACITY, show_logs=True)
 
 RESOURCES_INCLUDE["wind"] = "wind" in config["RESOURCES"]
 if RESOURCES_INCLUDE["wind"]:
     wind_config = config["RESOURCES"]["wind"]
     wind = Wind(name=wind_config["name"])
-    wind.add_variable(ResourceVariable(file_csv=wind_config["file_csv"]))
+    wind.add_variable(ResourceVariable(file_name=wind_config["file_name"]))
     wind.evaluate(installed_capacity=INSTALLED_CAPACITY, show_logs=True)
 
 RESOURCES_INCLUDE["hydro"] = "hydro" in config["RESOURCES"]
 if RESOURCES_INCLUDE["hydro"]:
     hydro_config = config["RESOURCES"]["hydro"]
     hydro = Hydro(name=hydro_config["name"])
-    hydro.add_variable(ResourceVariable(file_csv=hydro_config["file_csv"]))
+    hydro.add_variable(ResourceVariable(file_name=hydro_config["file_name"]))
     hydro.evaluate(installed_capacity=INSTALLED_CAPACITY, show_logs=True)
 
 RESOURCES_INCLUDE["biomass"] = "biomass" in config["RESOURCES"]
 if RESOURCES_INCLUDE["biomass"]:
     biomass_config = config["RESOURCES"]["biomass"]
     biomass = Biomass(name=biomass_config["name"])
-    biomass.add_variables(file_excel=biomass_config["file_excel"])
+    biomass.add_variables(file_name=biomass_config["file_name"])
     biomass.evaluate(INSTALLED_CAPACITY, BIOMASS_REQUIREMENTS, show_logs=True)
 
 
