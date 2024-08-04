@@ -1,0 +1,28 @@
+CASE_STUDY: "santa_barbara"
+INSTALLED_CAPACITY: 1000
+BIOMASS_REQUIREMENTS:
+  harvest:
+    sugar cane: 100
+    rice: 2
+    citrus: 3
+    banana: 0
+    coffee: 5
+    pineapple: 0
+  livestock:
+    cattle: 150
+    pig: 200
+    poultry: 2000
+RESOURCES:
+  solar:
+    name: "Solar PV Santa Barbara"
+    file_name: "data/pv/PV-SantaBarbara-D.csv"
+  wind:
+    name: "Wind Santa Barbara"
+    file_name: "data/wind/Wind-SantaBarbara-D-Nasa.csv"
+  hydro:
+    name: "Hydro Santa Barbara"
+    station: "SANTA MARIA [35267030]"
+    file_name: "data/hydro/NV_MEDIA_D@35267030.data"
+  biomass:
+    name: "Biomass Santa Barbara"
+    file_name: "data/biomass/biomasa.xlsx"

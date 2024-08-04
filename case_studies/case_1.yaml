@@ -15,13 +15,13 @@ BIOMASS_REQUIREMENTS:
 RESOURCES:
   solar:
     name: "Solar PV Jamundí"
-    file_csv: "data/pv/PV-Jamundi-H.csv"
+    file_name: "data/pv/PV-Jamundi-H.csv"
   wind:
     name: "Wind Jamundí"
-    file_csv: "data/wind/Wind-Jamundi-D-Nasa.csv"
+    file_name: "data/wind/Wind-Jamundi-D-Nasa.csv"
   hydro:
     name: "Hydro Jamundí"
-    file_csv: "data/hydro/Jamundi.min.csv"
+    file_name: "data/hydro/Jamundi.min.csv"
   biomass:
     name: "Biomass Jamundí"
-    file_excel: "data/biomass/biomasa.xlsx"
+    file_name: "data/biomass/biomasa.xlsx"
