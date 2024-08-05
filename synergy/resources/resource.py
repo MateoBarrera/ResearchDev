@@ -56,7 +56,6 @@ class ResourceVariable(BaseModel):
             elif file_extension == "xlsx":
                 data = load_excel(file_name)
             elif file_extension == "data":
-                print("predebbuging")
                 data = load_data(file_name)
         super().__init__(**data)
 
@@ -118,7 +117,6 @@ class Resource(BaseModel):
         return v
 
     def add_variable(self, variable: ResourceVariable):
-        print(variable)
         if variable.type_resource != self.type_resource:
             raise ValueError("The variable type does not match the resource type")
         self.variables.append(variable)
@@ -546,6 +544,8 @@ class Biomass(Resource):
         "banana": 1000,
         "coffee": 500,
         "pineapple": 175,
+        "cacao": 10000,
+        "corn": 175,
         "cattle": 10,
         "pig": 2.25,
         "poultry": 0.18,
@@ -559,6 +559,8 @@ class Biomass(Resource):
         "citrus": 0.2,
         "banana": 0.1,
         "coffee": 0.3,
+        "cacao": 0.3,
+        "corn": 0.3,
         "pineapple": 0.25,
         "cattle": 0.04,
         "pig": 0.06,

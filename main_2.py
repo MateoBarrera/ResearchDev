@@ -107,6 +107,6 @@ Topsis(
     test=test_criteria,
     fuzzy=True,
     alt_info=alternatives_df,
-    save_as=f"ranking_of_{save_as_a}_alternatives_{TODAY}",
+    save_as=f"ranking_of_{save_as_a}_alternatives",
     case_study=CASE_STUDY,
 )

@@ -32,6 +32,8 @@ class VariableEnum(Enum):
     COFFEE = "coffee"
     BANANA = "banana"
     CITRUS = "citrus"
+    CACAO = "cacao"
+    CORN = "corn"
     SUGAR_CANE = "sugar cane"
     CATTLE = "cattle"
     PINEAPPLE = "pineapple"

@@ -129,11 +129,8 @@ def process_data_ideam(file):
         "unit": "m³/s",
         "frequency": "Daily",
     }
-    print("FILEEEE")
-    print(file)
     file = file.filter(items=["Fecha", "Valor"]).set_index("Fecha")
     resource["data"] = file["Valor"].to_dict()
-    print(resource)
     # Devolver los datos en el formato necesario
     return resource
 
@@ -241,9 +238,7 @@ def load_excel(file_path):
 
 
 def load_data(file_path):
-    print("Start debuging")
     df = pd.read_csv(file_path, sep="|")
-    print(df)
     columns_extracted = df.columns.to_list()
     if columns_extracted == ["Fecha", "Valor"]:
         return process_data_ideam(df)

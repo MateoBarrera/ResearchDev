@@ -24,4 +24,4 @@ RESOURCES:
     file_name: "data/hydro/Jamundi.min.csv"
   biomass:
     name: "Biomass Jamundí"
-    file_name: "data/biomass/biomasa.xlsx"
+    file_name: "data/biomass/Jamundi-biomasa.xlsx"
