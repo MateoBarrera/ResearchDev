@@ -1,0 +1,26 @@
+CASE_STUDY: "villa_lobos"
+INSTALLED_CAPACITY: 1000
+BIOMASS_REQUIREMENTS:
+  harvest:
+    corn: 10
+    pineapple: 2
+    cacao: 10
+    banana: 3
+  livestock:
+    cattle: 4000
+    pig: 200
+    poultry: 0
+RESOURCES:
+  solar:
+    name: "Solar PV Villa Lobos, San Vicente Del Caguán"
+    file_name: "data/pv/PV-SantaRosalia-D.csv"
+  wind:
+    name: "Wind Villa Lobos, San Vicente Del Caguán"
+    file_name: "data/wind/Wind-SantaRosalia-D-Nasa.csv"
+  hydro:
+    name: "Hydro Villa Lobos, San Vicente Del Caguán"
+    station: "Villa lobos [46017010]"
+    file_name: "data/hydro/Villalobos.data"
+  biomass:
+    name: "Biomass Villa Lobos, San Vicente Del Caguán"
+    file_name: "data/biomass/SantaRosalia-biomasa.xlsx"

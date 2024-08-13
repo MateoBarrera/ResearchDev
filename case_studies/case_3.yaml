@@ -1,0 +1,26 @@
+CASE_STUDY: "casuarito"
+INSTALLED_CAPACITY: 1000
+BIOMASS_REQUIREMENTS:
+  harvest:
+    corn: 10
+    pineapple: 2
+    cacao: 10
+    banana: 3
+  livestock:
+    cattle: 4000
+    pig: 200
+    poultry: 0
+RESOURCES:
+  solar:
+    name: "Solar PV Santa Barbara"
+    file_name: "data/pv/PV-SantaRosalia-D.csv"
+  wind:
+    name: "Wind Santa Barbara"
+    file_name: "data/wind/Wind-SantaRosalia-D-Nasa.csv"
+  hydro:
+    name: "Hydro Santa Barbara"
+    station: "CASUARITO [38017040]"
+    file_name: "data/hydro/casuarito.data"
+  biomass:
+    name: "Biomass Santa Barbara"
+    file_name: "data/biomass/SantaRosalia-biomasa.xlsx"
