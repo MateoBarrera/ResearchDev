@@ -9,7 +9,7 @@ from synergy.evaluation.mcda import Topsis
 
 TODAY = datetime.now().strftime("%Y-%m-%d")
 
-with open("case_studies/case_1.yaml", "r") as file:
+with open("case_studies/case_2.yaml", "r") as file:
     config = yaml.safe_load(file)
 
 CASE_STUDY = config["CASE_STUDY"]
@@ -50,7 +50,7 @@ if RESOURCES_INCLUDE["biomass"]:
 
 alternatives = Alternatives(
     resources_included=RESOURCES_INCLUDE,
-    seed=[1, 0.5, 0.25, 0],
+    seed=[1, 0.9, 0.8, 0.7, 0.6, 0.5, 0.4, 0.3, 0.2, 0.1, 0],
 )
 
 ##
