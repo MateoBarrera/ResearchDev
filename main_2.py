@@ -46,8 +46,6 @@ if RESOURCES_INCLUDE["biomass"]:
     biomass.evaluate(INSTALLED_CAPACITY, BIOMASS_REQUIREMENTS, show_logs=True)
 
 
-# TODO For seed in seeds loop
-
 alternatives = Alternatives(
     resources_included=RESOURCES_INCLUDE,
     seed=[1, 0.9, 0.8, 0.7, 0.6, 0.5, 0.4, 0.3, 0.2, 0.1, 0],
@@ -61,7 +59,6 @@ alternatives = Alternatives(
 
 alternatives_df = alternatives.result_dataframe * INSTALLED_CAPACITY
 save_as_a = alternatives_df.shape[0]
-# print(alternatives_df)
 
 # ISSUE: The array initialization is not dynamic
 solar_array = []
@@ -90,7 +87,7 @@ indicators_list = [Indicator(**item) for item in data]
 my_indicators = Indicators(indicators=indicators_list)
 
 my_indicators.evaluate_indicators(alternatives_df.to_dict(orient="records"))
-print(my_indicators.evaluation.shape)
+# print(my_indicators.evaluation.shape)
 
 # Escoge datos de evaluación de prueba
 # -1 - Automático
@@ -100,6 +97,12 @@ print(my_indicators.evaluation.shape)
 #  3 - Enfoque Económico
 #  4 - Enfoque Técnico
 test_criteria = -1
+
+alternatives_df.to_excel(
+    f"case_studies/results/{CASE_STUDY}/alternatives_{save_as_a}.xlsx",
+    engine="openpyxl",
+)
+
 Topsis(
     alternative_matrix=my_indicators.evaluation,
     show_criteria_matrix=True,
