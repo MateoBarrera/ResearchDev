@@ -2,12 +2,15 @@ import numpy as np
 import pandas as pd  # pylint: disable=import-error
 import matplotlib.pyplot as plt
 from .criteria import Criteria  # pylint: disable=import-error
-from evaluation.save import save
+
+# from evaluation.save import save
+from ..save import save
 
 TYPE_INDICATORS = (1, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0)
 
 
-plt.style.use(["seaborn-v0_8-colorblind", "evaluation/resource/graph.mplstyle"])
+plt.style.use(["seaborn-v0_8-colorblind", "synergy/utils/graph.mplstyle"])
+
 months_ticks_labels = (
     pd.date_range("2014-01-01", "2014-12-31", freq="MS").strftime("%b").tolist()
 )

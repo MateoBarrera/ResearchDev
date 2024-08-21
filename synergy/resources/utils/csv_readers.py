@@ -2,7 +2,6 @@ import re
 from matplotlib import axis
 import pandas as pd
 
-from evaluation.MCDA.criteria import print_table
 
 IDEAM_COLUMNS = [
     "CodigoEstacion",
