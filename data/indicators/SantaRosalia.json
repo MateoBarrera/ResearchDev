@@ -1,0 +1,206 @@
+[
+	{
+		"id": 101,
+		"name": "Reducción de emisiones de CO2",
+		"dimension": "environmental",
+		"description": "Reducción en las emisiones CO2 para una capacidad determinada de generación mediante recursos limpios en comparación con el equivalente de generación con gas natural.",
+		"source": "",
+		"data": {
+			"solar": 0.2,
+			"wind": 0.25,
+			"hydro": 0.35,
+			"biomass": 0.7
+		},
+		"year": "",
+		"unit": "tC02",
+		"type_indicator": "benefit",
+		"formula": "0.367 * (solar_generation * 0.20 + wind_generation * 0.25 + hydro_generation * 0.35 + biomass_generation * 0.70)"
+	},
+	{
+		"id": 102,
+		"name": "Ocupación del terreno",
+		"dimension": "environmental",
+		"description": "Área ocupada por el sistema de energía durante su vida útil, comparando la cantidad de metros cuadrados necesarios para producir un MWh de electricidad.",
+		"source": "",
+		"data": {
+			"solar": 0.33,
+			"wind": 1.57,
+			"hydro": 0.02,
+			"biomass": 12.65
+		},
+		"year": "2013",
+		"unit": "m2/MW",
+		"type_indicator": "cost",
+		"formula": "0.001 * ((solar * 0.33) + (wind * 1.57) + (hydro * 0.02) + (biomass_generation * 12.65))"
+	},
+	{
+		"id": 103,
+		"name": "Consumo de agua",
+		"dimension": "environmental",
+		"description": "Se considera para cuantificar el volumen de agua consumida por la tecnología para producir un solo MW de electricidad durante toda su cadena de producción, teniendo en cuenta los procesos secundarios, como la refrigeración y el uso de agua para construcción de los componentes.",
+		"source": "biomasa articulo Rio Carrillo, demas - 5-15",
+		"data": {
+			"solar": 0.001,
+			"wind": 5.4e-5,
+			"hydro": 8.9e-6,
+			"biomass": 1
+		},
+		"year": "2013",
+		"unit": "m3/MWh",
+		"type_indicator": "cost",
+		"formula": "(solar_generation * 0.001 + wind_generation * 5.4e-5 + hydro_generation * 8.9e-6 + biomass_generation * 1.55) / (solar_generation + wind_generation + hydro_generation + biomass_generation)"
+	},
+	{
+		"id": 201,
+		"name": "LCOE",
+		"dimension": "economic",
+		"description": "Costo nivelado de la energía, es el costo promedio de la energía generada por una tecnología durante su vida útil, expresado en $/MWh.",
+		"source": "https://lcoev2.upme.gov.co/results/1",
+		"data": {
+			"solar": 408.65,
+			"wind": 516.74,
+			"hydro": 58.95,
+			"biomass": 190.98
+		},
+		"year": "2015",
+		"unit": "USD/MWh",
+		"type_indicator": "cost",
+		"formula": "(solar_generation * 408.65 + wind_generation * 516.74  + hydro_generation * 58.95 + biomass_generation * 190.98) / (solar_generation + wind_generation + hydro_generation + biomass_generation)"
+	},
+	{
+		"id": 202,
+		"name": "CAPEX",
+		"dimension": "economic",
+		"description": "Costo de inversión inicial para la construcción de una planta de generación de energía renovable, expresado en $/MW.",
+		"source": "https://lcoev2.upme.gov.co/results/1",
+		"data": {
+			"solar": 328.9,
+			"wind": 404.26,
+			"hydro": 41.96,
+			"biomass": 113.54
+		},
+		"year": "2015",
+		"unit": "USD/kW",
+		"type_indicator": "cost",
+		"formula": "(solar_generation * 328.9 + wind_generation * 404.26 + hydro_generation * 41.96 + biomass_generation * 113.54) / (solar_generation + wind_generation + hydro_generation + biomass_generation)"
+	},
+	{
+		"id": 203,
+		"name": "OPEX",
+		"dimension": "economic",
+		"description": "Costo de operación y mantenimiento de una planta de generación de energía renovable, expresado en $/kWh.",
+		"source": "https://lcoev2.upme.gov.co/results/1",
+		"data": {
+			"solar": 79.74,
+			"wind": 112.48,
+			"hydro": 16.97,
+			"biomass": 66.41
+		},
+		"year": "2015",
+		"unit": "USD/kWh",
+		"type_indicator": "cost",
+		"formula": "(solar_generation * 79.74 + wind_generation * 112.48  + hydro_generation * 16.97 + biomass_generation * 66.41) / (solar_generation + wind_generation + hydro_generation + biomass_generation)"
+	},
+	{
+		"id": 301,
+		"name": "Eficiencia de la generación",
+		"dimension": "technical",
+		"description": "Se evalúa la eficiencia de la generación de energía eléctrica de las alternativas renovables, de acuerdo con las características del entorno y el recurso primario disponible.",
+		"source": "",
+		"data": {
+			"solar": 0.25,
+			"wind": 0.4,
+			"hydro": 0.89,
+			"biomass": 0.35
+		},
+		"year": "2020",
+		"unit": "%",
+		"type_indicator": "benefit",
+		"formula": "(solar * 0.25 + wind * 0.40 + hydro * 0.89 + biomass * 0.35)/(solar + wind + hydro + biomass)"
+	},
+	{
+		"id": 302,
+		"name": "Capacidad de responder a la demanda",
+		"dimension": "technical",
+		"description": "La capacidad de responder a los picos de demanda y asegurar la estabilidad general de la red a largo plazo en el contexto de una cuota creciente de generación intermitente a partir de algunas fuentes de energía renovables.",
+		"source": "",
+		"data": {
+			"solar": 0,
+			"wind": 0,
+			"hydro": 0,
+			"biomass": 0.5
+		},
+		"year": "2020",
+		"unit": "qualitative",
+		"type_indicator": "benefit",
+		"formula": "(solar * 0 + wind * 0 + hydro * 0 + biomass * 0.5)/(solar + wind + hydro + biomass)"
+	},
+	{
+		"id": 303,
+		"name": "Autonomía del recurso primario",
+		"dimension": "technical",
+		"description": "Se evalúan las horas por año que puede suministrar energía eléctrica las alternativas renovables, de acuerdo con las características del entorno y el recurso primario disponible.",
+		"source": "",
+		"data": {
+			"solar": 1,
+			"wind": 0.667,
+			"hydro": 0.75,
+			"biomass": 0.35
+		},
+		"year": "2020",
+		"unit": "%",
+		"type_indicator": "benefit",
+		"formula": "(solar * 1 + wind * 0.667 + hydro * 0.75 + biomass * 0.35)/(solar + wind + hydro + biomass)"
+	},
+	{
+		"id": 401,
+		"name": "Generación de empleos",
+		"dimension": "social",
+		"description": "Este indicador mide la cantidad de empleos directos e indirectos generados durante la puesta en marcha, operación y mantenimiento por cada MW instalado de las centrales o sistemas energéticos, considerando el futuro inducido en las oportunidades laborales.",
+		"source": "",
+		"data": {
+			"solar": 13,
+			"wind": 3,
+			"hydro": 5.5,
+			"biomass": 15
+		},
+		"year": "2020",
+		"unit": "%",
+		"type_indicator": "benefit",
+		"formula": "(solar * 13 + wind * 3 + hydro * 5.5 + biomass * 15)"
+	},
+	{
+		"id": 402,
+		"name": "Aceptación social/Contribución a la economía local",
+		"dimension": "social",
+		"description": "Este indicador tiene carácter cualitativo y puede evaluarse en tres opciones: “alto”, “medio” y “bajo”. La atribución de beneficios de este indicador es positiva; cuanto mayor sea la aceptabilidad social, mejor será la puntuación. Por este motivo, las tecnologías con puntuaciones altas de aceptabilidad tienen la puntuación más alta, 1; mientras que las tecnologías con baja aceptabilidad tienen una puntuación de cero.",
+		"source": "",
+		"data": {
+			"solar": 1,
+			"wind": 1,
+			"hydro": 0.25,
+			"biomass": 0.5
+		},
+		"year": "2020",
+		"unit": "qualitative",
+		"type_indicator": "benefit",
+		"formula": "(solar * 1 + wind * 1 + hydro * 0.25 + biomass * 0.5)/(solar + wind + hydro + biomass)"
+	},
+	{
+		"id": 403,
+		"name": "Daño a la salud humana",
+		"dimension": "social",
+		"description": "Mide el impacto de las tecnologías en la vida “saludable” humana (AVAD) por kWh de energía producida, las emisiones que se consideraron para este factor son la formación de material particulado, el agotamiento de la capa de ozono, la toxicidad humana, las radiaciones ionizantes y la oxidación fotoquímica.",
+		"source": "",
+		"data": {
+			"solar": 0,
+			"wind": 40,
+			"hydro": 10,
+			"biomass": 10
+		},
+		"year": "2015",
+		"unit": "nanoDALY/kWh",
+		"type_indicator": "cost",
+		"formula": "(solar_generation * 0 + wind_generation * 40 + hydro_generation * 10 + biomass_generation * 10)/(solar + wind + hydro + biomass)"
+	}
+]

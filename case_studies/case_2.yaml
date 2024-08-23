@@ -1,14 +1,15 @@
 CASE_STUDY: "santa_rosalia"
-INSTALLED_CAPACITY: 1000
+INDICATORS: "data/indicators/SantaRosalia.json"
+INSTALLED_CAPACITY: 500
 BIOMASS_REQUIREMENTS:
   harvest:
-    corn: 10
+    corn: 20
     pineapple: 2
-    cacao: 10
+    cacao: 15
     banana: 3
   livestock:
-    cattle: 4000
-    pig: 200
+    cattle: 2000
+    pig: 250
     poultry: 0
 RESOURCES:
   solar:

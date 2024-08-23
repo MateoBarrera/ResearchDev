@@ -1,6 +1,7 @@
 import yaml
 import json
 from datetime import datetime
+from tqdm import tqdm
 from synergy import alternative
 from synergy.resources import Solar, Wind, Hydro, Biomass, ResourceVariable
 from synergy.alternative import Alternatives
@@ -78,11 +79,14 @@ alternatives_df["wind_generation"] = wind_array
 alternatives_df["biomass_generation"] = biomass_array
 
 # print(alternatives_df)
-
-with open("synergy/indicators_data.json", "r") as f:
+if config["INDICATORS"]:
+    indicators = config["INDICATORS"]
+else:
+    indicators = "synergy/indicators_data.json"
+with open(indicators, "r") as f:
     data = json.load(f)
 
-indicators_list = [Indicator(**item) for item in data]
+indicators_list = [Indicator(**item) for item in tqdm(data, desc="Loading Indicators")]
 
 my_indicators = Indicators(indicators=indicators_list)
 

@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd  # pylint: disable=import-error
 import matplotlib.pyplot as plt
+from tqdm import tqdm
 from .criteria import Criteria  # pylint: disable=import-error
 
 # from evaluation.save import save
@@ -126,10 +127,7 @@ def __topsis_print_norm(alternatives, info):
     alternatives = pd.DataFrame(
         data=np.transpose(alternatives), columns=list(info.columns)
     )
-    print("\n:: Criteria Normalized  ::")
-    print(alternatives.to_markdown(floatfmt=".4f"))
     return alternatives
-    # save_xls("TOP-Criteria N", alternatives)
 
 
 def __topsis_ideal_solution(alternatives_array, type_indicator=TYPE_INDICATORS):
@@ -198,7 +196,7 @@ def topsis(
         topsis_criteria_aggregation = pd.read_excel(
             load_path_evaluation(test)
         ).values.tolist()
-        print("\n:: Criteria Matrix ::")
+        # print("\n:: Criteria Matrix ::")
         # print(topsis_criteria_aggregation.to_markdown(floatfmt=".4f"))
         # raise Exception("Test mode not implemented")
     else:
@@ -208,7 +206,7 @@ def topsis(
     ranking_result = {}
     CI_result = {}
     index = 1
-    for criteria_array in topsis_criteria_aggregation:
+    for criteria_array in tqdm(topsis_criteria_aggregation, "Scenario Evaluation"):
         topsis_alternatives_array = __topsis_normalize(
             np.transpose(alternative_matrix.to_numpy())
         )
@@ -274,11 +272,11 @@ def show_evaluation(result_df, alternative_kw=None, graph=True):
     :doc-author: Trelent
     """
     print("\n:: Ranking of alternatives ::")
-    print(
+    """ print(
         result_df.sort_values(by="Evaluation", ascending=False).to_markdown(
             floatfmt=".3f"
         )
-    )
+    ) """
 
     if graph:
         alternative_kw = alternative_kw.filter(
