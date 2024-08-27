@@ -10,7 +10,7 @@ from synergy.evaluation.mcda import Topsis
 
 TODAY = datetime.now().strftime("%Y-%m-%d")
 
-with open("case_studies/case_2.yaml", "r") as file:
+with open("case_studies/jamundi/definition.yaml", "r") as file:
     config = yaml.safe_load(file)
 
 CASE_STUDY = config["CASE_STUDY"]
@@ -79,10 +79,11 @@ alternatives_df["wind_generation"] = wind_array
 alternatives_df["biomass_generation"] = biomass_array
 
 # print(alternatives_df)
-if config["INDICATORS"]:
+if "INDICATORS" in config:
     indicators = config["INDICATORS"]
 else:
     indicators = "synergy/indicators_data.json"
+
 with open(indicators, "r") as f:
     data = json.load(f)
 
@@ -103,7 +104,7 @@ my_indicators.evaluate_indicators(alternatives_df.to_dict(orient="records"))
 test_criteria = -1
 
 alternatives_df.to_excel(
-    f"case_studies/results/{CASE_STUDY}/alternatives_{save_as_a}.xlsx",
+    f"case_studies/{CASE_STUDY}/results/alternatives_{save_as_a}.xlsx",
     engine="openpyxl",
 )
 
