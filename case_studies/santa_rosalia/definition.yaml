@@ -1,0 +1,27 @@
+CASE_STUDY: "santa_rosalia"
+INDICATORS: "case_studies/santa_rosalia/indicators.json"
+INSTALLED_CAPACITY: 500
+BIOMASS_REQUIREMENTS:
+  harvest:
+    corn: 20
+    pineapple: 2
+    cacao: 15
+    banana: 3
+  livestock:
+    cattle: 2000
+    pig: 250
+    poultry: 0
+RESOURCES:
+  solar:
+    name: "Solar PV Santa Rosalia"
+    file_name: "case_studies/santa_rosalia/data/pv.csv"
+  wind:
+    name: "Wind Santa Rosalia"
+    file_name: "case_studies/santa_rosalia/data/wind.csv"
+  hydro:
+    name: "Hydro Santa Rosalia"
+    station: "SANTA MARIA [35267030]"
+    file_name: "case_studies/santa_rosalia/data/hydro.data"
+  biomass:
+    name: "Biomass Santa Rosalia"
+    file_name: "case_studies/santa_rosalia/data/biomass.xlsx"

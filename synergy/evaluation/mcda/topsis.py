@@ -251,7 +251,7 @@ def topsis(
     ranking_result_df = pd.DataFrame(ranking_result)
     CIndex_result_df = pd.DataFrame(CI_result)
     ranking_result_df.to_excel(
-        f"case_studies/results/{case_study}/{save_as}.xlsx", engine="openpyxl"
+        f"case_studies/{case_study}/results/{save_as}.xlsx", engine="openpyxl"
     )
     # CIndex_result_df.to_excel(
     #    f"results/{case_study}/lista_de_resultados_CI{save_as}.xlsx", engine="openpyxl"

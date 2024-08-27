@@ -214,7 +214,7 @@ def load_csv(file_path):
 
 
 def load_excel(file_path):
-    if file_path.endswith("biomasa.xlsx"):
+    if file_path.endswith("biomass.xlsx"):
         try:
             df_harvest = pd.read_excel(file_path, sheet_name="Historico Cultivos")
             df_livestock = pd.read_excel(file_path, sheet_name="Historico Pecuario")

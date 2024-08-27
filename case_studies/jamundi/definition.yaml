@@ -15,13 +15,14 @@ BIOMASS_REQUIREMENTS:
 RESOURCES:
   solar:
     name: "Solar PV Jamundí"
-    file_name: "data/pv/PV-Jamundi-H.csv"
+    file_name: "case_studies/jamundi/data/pv.csv"
   wind:
     name: "Wind Jamundí"
-    file_name: "data/wind/Wind-Jamundi-D-Nasa.csv"
+    file_name: "case_studies/jamundi/data/wind.csv"
   hydro:
     name: "Hydro Jamundí"
-    file_name: "data/hydro/Jamundi.min.csv"
+    station: "SANTA MARIA [35267030]"
+    file_name: "case_studies/jamundi/data/hydro.csv"
   biomass:
     name: "Biomass Jamundí"
-    file_name: "data/biomass/Jamundi-biomasa.xlsx"
+    file_name: "case_studies/jamundi/data/biomass.xlsx"
