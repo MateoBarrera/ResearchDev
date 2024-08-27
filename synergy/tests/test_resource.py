@@ -25,7 +25,7 @@ def test_resource_variable():
 
 def test_resource_hydro_from_csv():
     # Crear una instancia de ResourceVariable con datos específicos
-    resource = ResourceVariable(file_name="data/hydro/Jamundi.min.csv")
+    resource = ResourceVariable(file_name="case_studies/jamundi/data/hydro.csv")
     # Verificar que los atributos de la instancia son correctos
     assert resource.name == VariableEnum.FLOW_RIVER
     assert resource.type_resource == ResourceType.HYDRO
@@ -36,7 +36,7 @@ def test_resource_hydro_from_csv():
 
 def test_resource_solar_from_csv():
     # Crear una instancia de ResourceVariable con datos específicos
-    resource = ResourceVariable(file_name="data/pv/PV-Jamundi-H.csv")
+    resource = ResourceVariable(file_name="case_studies/jamundi/data/pv.csv")
 
     # Verificar que los atributos de la instancia son correctos
     assert resource.name == VariableEnum.SOLAR_IRRADIANCE
@@ -48,7 +48,7 @@ def test_resource_solar_from_csv():
 
 def test_resource_variable_from_csv_2():
     # Crear una instancia de ResourceVariable con datos específicos
-    resource = ResourceVariable(file_name="data/wind/Wind-Jamundi-D-Nasa.csv")
+    resource = ResourceVariable(file_name="case_studies/jamundi/data/wind.csv")
     print(resource.data)
     # Verificar que los atributos de la instancia son correctos
     assert resource.name == VariableEnum.WIND_SPEED
@@ -72,7 +72,9 @@ def test_resource_variable_from_csv_2():
 
 def test_hydro_resource():
     hydro = Hydro(name="Hydro Jamundi")
-    hydro.add_variable(ResourceVariable(file_name="data/hydro/Jamundi.min.csv"))
+    hydro.add_variable(
+        ResourceVariable(file_name="case_studies/jamundi/data/hydro.csv")
+    )
     result = hydro.evaluate(100)
     print(hydro.variability)
     assert result == 524048.46095700096 / (365 * 24), "Should be 80"
@@ -81,7 +83,7 @@ def test_hydro_resource():
 
 def test_solar_resource():
     solar = Solar(name="Solar Jamundi")
-    solar.add_variable(ResourceVariable(file_name="data/pv/PV-Jamundi-H.csv"))
+    solar.add_variable(ResourceVariable(file_name="case_studies/jamundi/data/pv.csv"))
     result = solar.evaluate(100)
     print(solar.variability)
     assert result == 132858.62099999998 / (365 * 24), "Should be 80"
@@ -90,7 +92,7 @@ def test_solar_resource():
 
 def test_wind_resource():
     wind = Wind(name="Wind Jamundi")
-    wind.add_variable(ResourceVariable(file_name="data/wind/Wind-Jamundi-D-Nasa.csv"))
+    wind.add_variable(ResourceVariable(file_name="case_studies/jamundi/data/wind.csv"))
     result = wind.evaluate(100)
     print(wind.variability)
     assert result == 64905.328704546744 / (365 * 24), "Should be 80"
@@ -110,7 +112,7 @@ def test_biomass_resource():
         "livestock": {"cattle": 100},
     }
     biomass = Biomass(name="Biomass Jamundí")
-    biomass.add_variables(file_name="data/biomass/Jamundi-biomasa.xlsx")
+    biomass.add_variables(file_name="case_studies/jamundi/data/biomass.xlsx")
     result = biomass.evaluate(1000, biomass_sources)
     assert biomass.name == "Biomass Jamundí"
     assert result == 14.00149755214819, "Should be 14.001497"

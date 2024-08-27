@@ -10,7 +10,7 @@ from synergy.evaluation.mcda import Topsis
 
 TODAY = datetime.now().strftime("%Y-%m-%d")
 
-with open("case_studies/jamundi/definition.yaml", "r") as file:
+with open("case_studies/santa_rosalia/definition.yaml", "r") as file:
     config = yaml.safe_load(file)
 
 CASE_STUDY = config["CASE_STUDY"]
