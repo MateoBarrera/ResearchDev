@@ -133,7 +133,7 @@
 		"year": "2020",
 		"unit": "qualitative",
 		"type_indicator": "benefit",
-		"formula": "(solar * 0 + wind * 0 + hydro * 0 + biomass * 0.5)/(solar + wind + hydro + biomass)"
+		"formula": "(solar * 0 + wind * 0 + hydro * 0.5 + biomass * 0.5)/(solar + wind + hydro + biomass)"
 	},
 	{
 		"id": 303,
@@ -193,7 +193,7 @@
 		"description": "Mide el impacto de las tecnologías en la vida “saludable” humana (AVAD) por kWh de energía producida, las emisiones que se consideraron para este factor son la formación de material particulado, el agotamiento de la capa de ozono, la toxicidad humana, las radiaciones ionizantes y la oxidación fotoquímica.",
 		"source": "",
 		"data": {
-			"solar": 0,
+			"solar": 5,
 			"wind": 40,
 			"hydro": 10,
 			"biomass": 10
@@ -201,6 +201,6 @@
 		"year": "2015",
 		"unit": "nanoDALY/kWh",
 		"type_indicator": "cost",
-		"formula": "(solar_generation * 0 + wind_generation * 40 + hydro_generation * 10 + biomass_generation * 10)/(solar + wind + hydro + biomass)"
+		"formula": "(solar_generation * 5 + wind_generation * 40 + hydro_generation * 10 + biomass_generation * 10)/(solar + wind + hydro + biomass)"
 	}
 ]
