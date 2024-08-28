@@ -224,6 +224,8 @@ def topsis(
         ideal_positive, ideal_negative = __topsis_ideal_solution(
             topsis_weighted_alternatives
         )
+        print(topsis_weighted_alternatives.shape)
+        print(ideal_negative.shape)
         positive_distance, negative_distance, similarity_index = __topsis_distance(
             topsis_weighted_alternatives, ideal_positive, ideal_negative
         )
@@ -250,7 +252,7 @@ def topsis(
 
     ranking_result_df = pd.DataFrame(ranking_result)
     CIndex_result_df = pd.DataFrame(CI_result)
-    ranking_result_df.to_excel(
+    CIndex_result_df.to_excel(
         f"case_studies/{case_study}/results/{save_as}.xlsx", engine="openpyxl"
     )
     # CIndex_result_df.to_excel(
