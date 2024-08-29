@@ -1,44 +1,44 @@
 [
 	{
 		"id": 101,
-		"name": "Generación de emisiones de CO2 - Life Cycle Emissions (LCE)",
+		"name": "Reducción de emisiones de CO2",
 		"dimension": "environmental",
 		"description": "Reducción en las emisiones CO2 para una capacidad determinada de generación mediante recursos limpios en comparación con el equivalente de generación con gas natural.",
-		"source": "https://data.nrel.gov/submissions/171",
+		"source": "",
 		"data": {
-			"solar": 43,
-			"wind": 13,
-			"hydro": 21,
-			"biomass": 52
+			"solar": 0.2,
+			"wind": 0.25,
+			"hydro": 0.35,
+			"biomass": 0.7
 		},
 		"year": "",
-		"unit": "g CO2e/kWh",
-		"type_indicator": "cost",
-		"formula": "(solar_generation * 43 + wind_generation * 13 + hydro_generation * 21 + biomass_generation * 52)/(solar_generation + wind_generation + hydro_generation + biomass_generation)"
+		"unit": "tC02",
+		"type_indicator": "benefit",
+		"formula": "0.367 * (solar_generation * 0.20 + wind_generation * 0.25 + hydro_generation * 0.35 + biomass_generation * 0.70)"
 	},
 	{
 		"id": 102,
-		"name": "Ocupación del terreno -  Land use intensity of electricity (LUIE)",
+		"name": "Ocupación del terreno - LUIE",
 		"dimension": "environmental",
 		"description": "Área ocupada por el sistema de energía durante su vida útil, comparando la cantidad de metros cuadrados necesarios para producir un MWh de electricidad.",
 		"source": "",
 		"data": {
-			"solar": 2000,
-			"wind": 12000,
-			"hydro": 650,
-			"biomass": 170
+			"solar": 0.33,
+			"wind": 1.57,
+			"hydro": 0.02,
+			"biomass": 12.65
 		},
-		"year": "2022",
-		"unit": "ha/TWh/y",
+		"year": "2013",
+		"unit": "m2/MWh",
 		"type_indicator": "cost",
-		"formula": "8760 * ((solar_generation * 2000) + (wind_generation * 12000) + (hydro_generation * 650) + (biomass_generation * 170)) * 1e-6"
+		"formula": "0.001 * ((solar * 0.33) + (wind * 1.57) + (hydro * 0.02) + (biomass * 12.65))"
 	},
 	{
 		"id": 103,
 		"name": "Consumo de agua",
 		"dimension": "environmental",
 		"description": "Se considera para cuantificar el volumen de agua consumida por la tecnología para producir un solo MW de electricidad durante toda su cadena de producción, teniendo en cuenta los procesos secundarios, como la refrigeración y el uso de agua para construcción de los componentes.",
-		"source": "biomasa articulo Rio Carrillo, demás - 5-15",
+		"source": "biomasa articulo Rio Carrillo, demas - 5-15",
 		"data": {
 			"solar": 0.001,
 			"wind": 5.4e-5,

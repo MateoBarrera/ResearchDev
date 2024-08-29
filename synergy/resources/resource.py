@@ -167,7 +167,7 @@ class Solar(Resource):
     _temperature_factor: float = 0.95
     _weather_factor: float = 1.0
 
-    _panel_capacity: float = 100  # in watts
+    _panel_capacity: float = 100  # in kilowatts
     _num_panels: int = 100
 
     def __init__(self, **data):
@@ -205,16 +205,6 @@ class Solar(Resource):
             * self._temperature_factor
             * self._weather_factor
         )
-
-        # Monthly temperature and weather association
-        # df["monthly energy"] = (
-        #    df["PSH"]
-        #    * installed_capacity
-        #    * self._efficiency
-        #    * df["days"]
-        #    * df["temperature_factor"]
-        #    * df["weather_factor"]
-        # )
 
         power_generation = df["monthly energy"].sum()
         df = df.drop(columns=["days"])
@@ -626,25 +616,19 @@ class Biomass(Resource):
 
         self._num_cells = math.ceil(installed_capacity / self._cell_capacity)
 
-        if (
+        optimal_q_design = (
             self._num_cells * self._fuel_cell_flow_rate / self._fuel_cell_efficiency
-            > df["total biogas per day"][0] / 24
-        ):
-            logging.warning(
-                f"Biogas demand is higher than the daily rate production \n demand {self._num_cells * self._fuel_cell_flow_rate / self._fuel_cell_efficiency:.2f}; available {df['total biogas per day'][0] / 24:.2f} "
-            )
-            q_design = (df["total biogas per day"][0] / 24) / self._fuel_cell_efficiency
-        else:
-            q_design = (
-                self._num_cells * self._fuel_cell_flow_rate / self._fuel_cell_efficiency
-            )
-
-        power_generation = (
-            self._pci
-            * self._fuel_cell_efficiency
-            * q_design
-            * self._cell_capacity_factor
         )
+
+        if optimal_q_design > (df["total biogas per day"][0] / 24):
+            logging.warning(
+                f"Biogas demand is higher than the daily rate production \n demand {optimal_q_design:.2f}; available {df['total biogas per day'][0] / 24:.2f} "
+            )
+            q_design = df["total biogas per day"][0] / 24
+        else:
+            q_design = optimal_q_design
+
+        power_generation = self._pci * q_design * self._cell_capacity_factor
         ## Temporal print section
         if self._show_logs:
             capacity_factor = power_generation / (installed_capacity)
