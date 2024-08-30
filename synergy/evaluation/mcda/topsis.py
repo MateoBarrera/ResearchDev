@@ -7,7 +7,7 @@ from .criteria import Criteria  # pylint: disable=import-error
 # from evaluation.save import save
 from ..save import save
 
-TYPE_INDICATORS = (1, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0)
+TYPE_INDICATORS = (0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0)  # 1 -> Benefit; 0 -> Cost
 
 
 plt.style.use(["seaborn-v0_8-colorblind", "synergy/utils/graph.mplstyle"])
