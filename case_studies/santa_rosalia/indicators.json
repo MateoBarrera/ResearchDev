@@ -38,17 +38,17 @@
 		"name": "Consumo de agua",
 		"dimension": "environmental",
 		"description": "Se considera para cuantificar el volumen de agua consumida por la tecnología para producir un solo MW de electricidad durante toda su cadena de producción, teniendo en cuenta los procesos secundarios, como la refrigeración y el uso de agua para construcción de los componentes.",
-		"source": "biomasa articulo Rio Carrillo, demás - 5-15",
+		"source": "Water use of electricity technologies: A global meta-analysis; Yi Jina",
 		"data": {
-			"solar": 0.001,
-			"wind": 5.4e-5,
-			"hydro": 8.9e-6,
-			"biomass": 1
+			"solar": 330,
+			"wind": 43,
+			"hydro": 4961,
+			"biomass": 85100
 		},
-		"year": "2013",
-		"unit": "m3/MWh",
+		"year": "2019",
+		"unit": "m3/kWh",
 		"type_indicator": "cost",
-		"formula": "(solar_generation * 0.001 + wind_generation * 5.4e-5 + hydro_generation * 8.9e-6 + biomass_generation * 1.55) / (solar_generation + wind_generation + hydro_generation + biomass_generation)"
+		"formula": "(solar_generation * 330 + wind_generation * 43 + hydro_generation * 4961 + biomass_generation * 85100) / (solar_generation + wind_generation + hydro_generation + biomass_generation)"
 	},
 	{
 		"id": 201,
@@ -120,20 +120,20 @@
 	},
 	{
 		"id": 302,
-		"name": "Capacidad de responder a la demanda",
+		"name": "Factor de capacidad",
 		"dimension": "technical",
-		"description": "La capacidad de responder a los picos de demanda y asegurar la estabilidad general de la red a largo plazo en el contexto de una cuota creciente de generación intermitente a partir de algunas fuentes de energía renovables.",
+		"description": "CF mide directamente cuánta energía eléctrica produce una planta en relación con la que podría producirse a su máxima capacidad.",
 		"source": "",
 		"data": {
-			"solar": 0,
-			"wind": 0,
-			"hydro": 0,
-			"biomass": 0.5
+			"solar": 0.1721,
+			"wind": 0.043,
+			"hydro": 0.523,
+			"biomass": 0.091
 		},
 		"year": "2020",
-		"unit": "qualitative",
+		"unit": "%",
 		"type_indicator": "benefit",
-		"formula": "(solar * 0 + wind * 0 + hydro * 0.5 + biomass * 0.5)/(solar + wind + hydro + biomass)"
+		"formula": "(solar * 0.1721 + wind * 0.043 + hydro * 0.523 + biomass * 0.091)/(solar + wind + hydro + biomass)"
 	},
 	{
 		"id": 303,
