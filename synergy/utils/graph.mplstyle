@@ -1,5 +1,5 @@
-font.size : 18
-legend.fontsize : 16
+font.size : 16
+legend.fontsize : 14
 xtick.direction : in
 ytick.direction : in
 xtick.major.size : 5.0
@@ -14,3 +14,13 @@ figure.dpi : 100
 figure.autolayout : True
 date.converter : concise
 savefig.dpi : 600
+axes.titlesize: large
+axes.labelsize: large
+xtick.labelsize: 14
+ytick.labelsize: 14
+legend.title_fontsize: medium
+lines.linewidth: 2.0
+lines.markersize: 8
+grid.alpha: 0.5
+grid.color: 'gray'
+grid.linestyle: dashed

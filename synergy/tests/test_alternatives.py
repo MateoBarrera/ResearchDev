@@ -4,16 +4,18 @@ from synergy.alternative import Alternatives, ResourceEnum
 def test_generate_alternatives():
     # Crear una instancia de Alternatives con recursos y semillas específicas
     resources_included = {
-        ResourceEnum.SOLAR: True,
-        ResourceEnum.WIND: True,
-        ResourceEnum.HYDRO: True,
-        ResourceEnum.BIOMASS: True,
+        ResourceEnum.SOLAR: True, #Tech
+        ResourceEnum.WIND: True, #Eco
+        ResourceEnum.HYDRO: True, #Soc
+        ResourceEnum.BIOMASS: False, 
     }
 
     alternatives = Alternatives(
-        resources_included=resources_included, seed=[1, 0.5, 0.25, 0]
+        resources_included=resources_included, seed=[0.8, 0.6, 0.4, 0.2]
     )
 
+    print("Alternatives seed:", alternatives.seed)
+    print(alternatives.result_dataframe)
     # Generar las alternativas
     alternatives_df = alternatives.result_dataframe
     # Verificar que el DataFrame de alternativas tiene la forma correcta
