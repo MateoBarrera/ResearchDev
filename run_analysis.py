@@ -1,6 +1,16 @@
 import argparse
 from pathlib import Path
 
+from synergy.console import (
+    console,
+    show_hashes,
+    show_outputs,
+    show_rank_chart,
+    show_resource_mix,
+    show_resource_termgraph,
+    show_summary,
+    show_termgraph,
+)
 from synergy.runner import run_case
 from synergy.validation import validate_case
 
@@ -34,6 +44,11 @@ def main() -> None:
         action="store_true",
         help="Validate the case configuration without running the analysis",
     )
+    parser.add_argument(
+        "--termgraph",
+        action="store_true",
+        help="Show the robustness profile with termgraph after the run",
+    )
     args = parser.parse_args()
 
     if bool(args.case) == bool(args.config):
@@ -42,26 +57,17 @@ def main() -> None:
     config_path = CASES[args.case] if args.case else args.config
     if args.validate:
         validate_case(config_path, Path.cwd())
-        print(f"Valid configuration: {config_path}")
+        console.print(f"[bold green]Configuración válida:[/bold green] {config_path}")
         return
     result = run_case(config_path=config_path, seed=args.seed)
-    print(f"Case study: {result['case_study']}")
-    print(f"Alternatives: {result['alternative_count']}")
-    print(f"Alternatives file: {result['alternatives_path']}")
-    print(f"Ranking file: {result['ranking_path']}")
-    print(f"Sensitivity file: {result['sensitivity_path']}")
-    robust = result["manifest"]["robust_alternative"]
-    print(
-        "Robust alternative: "
-        f"{robust['alternative']} "
-        f"(top_5_rate={robust['top_5_rate']:.2f}, "
-        f"mean_rank={robust['mean_rank']:.2f}, "
-        f"rank_std={robust['rank_std']:.2f})"
-    )
-    print(f"Manifest file: {result['manifest_path']}")
-    print("Hashes SHA-256:")
-    for name, digest in result["manifest"]["hashes"].items():
-        print(f"  {name}: {digest}")
+    show_summary(result)
+    show_resource_mix(result)
+    show_rank_chart(result)
+    if args.termgraph:
+        show_termgraph(result)
+        show_resource_termgraph(result)
+    show_outputs(result)
+    show_hashes(result["manifest"])
 
 
 if __name__ == "__main__":

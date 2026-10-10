@@ -18,10 +18,10 @@ Por tanto, las diferencias observadas se atribuyen principalmente a los datos de
 
 ## Resultados de robustez
 
-| Caso | Alternativa robusta | Top 5 en escenarios | Puesto medio | Desviación del puesto | Mejor puesto | Peor puesto |
-| --- | ---: | ---: | ---: | ---: | ---: | ---: |
-| Jamundí | 2921 | 20% | 871.8 | 790.31 | 3 | 2022 |
-| Santa Rosalía | 3250 | 60% | 492.2 | 976.41 | 1 | 2445 |
+| Caso          | Alternativa robusta | Top 5 en escenarios | Puesto medio | Desviación del puesto | Mejor puesto | Peor puesto |
+| ------------- | ------------------: | ------------------: | -----------: | --------------------: | -----------: | ----------: |
+| Jamundí       |                2921 |                 20% |        871.8 |                790.31 |            3 |        2022 |
+| Santa Rosalía |                3250 |                 60% |        492.2 |                976.41 |            1 |        2445 |
 
 La alternativa robusta se selecciona priorizando `top_5_rate`, después menor `rank_std` y finalmente menor `mean_rank`.
 

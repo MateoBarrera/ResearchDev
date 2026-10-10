@@ -43,6 +43,8 @@ ptyprocess==0.7.0
 pure-eval==0.2.2
 pydantic==2.6.4
 pydantic_core==2.16.3
+rich==13.7.1
+termgraph==0.5.3
 Pygments==2.18.0
 pyparsing==3.0.9
 pytest==8.2.0

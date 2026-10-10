@@ -91,6 +91,14 @@ python run_analysis.py --config case_studies/santa_rosalia/definition.yaml --see
 python run_analysis.py --case santa_rosalia --validate
 ```
 
+La ejecución usa una consola Rich con panel inicial, progreso por etapas, resumen tabular, perfil de la alternativa robusta, artefactos generados y hashes de reproducibilidad. `termgraph` queda instalado como herramienta opcional para visualizaciones de series o reportes de terminal posteriores; el pipeline no depende de que se invoque manualmente.
+
+Para mostrar además un gráfico de barras de `termgraph` al final:
+
+```bash
+python run_analysis.py --case santa_rosalia --termgraph
+```
+
 El runner reutilizable está en `synergy/runner.py`. `main_2.py` se conserva como referencia compatible con ejecuciones anteriores.
 
 ### API: `resource_synergy/`
@@ -196,6 +204,8 @@ Al finalizar, la consola muestra un resumen reproducible con hashes SHA-256 de l
 El archivo de sensibilidad compara un escenario equilibrado con escenarios que asignan mayor peso a cada dimensión. La hoja `rank_stability` incluye `mean_rank`, `rank_std`, `best_rank`, `worst_rank` y `top_5_rate`; una desviación estándar baja indica mayor estabilidad frente a cambios de pesos.
 
 La consola identifica una alternativa robusta priorizando `top_5_rate`, después `rank_std` y finalmente `mean_rank`. Esta selección es una recomendación de estabilidad, no sustituye la revisión de los indicadores ni demuestra superioridad científica por sí sola.
+
+La consola también muestra la composición de la alternativa robusta por recurso, con capacidad en kW, porcentaje y barras ASCII. Esa mezcla queda persistida en `run_manifest.json` bajo `robust_alternative.resource_mix_kw` y `robust_alternative.resource_mix_percent`.
 
 `<n>` depende de la cantidad de recursos activos y de los valores contenidos en `seed`. No se debe asumir que siempre habrá 256, 1.680 o 3.126 alternativas.
 

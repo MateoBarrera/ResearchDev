@@ -128,6 +128,8 @@ La consola presenta cuatro hashes SHA-256:
 
 El archivo `run_manifest.json` guarda estos hashes, la semilla, capacidad instalada, número de alternativas, número de escenarios y rutas de salida. Así se puede comparar dos ejecuciones y saber si cambió una entrada o el código antes de interpretar un cambio en el ranking.
 
+La consola presenta además la composición de la alternativa robusta: capacidad y porcentaje de solar, viento, hidro y biomasa. Esta composición se guarda en `robust_alternative.resource_mix_kw` y `robust_alternative.resource_mix_percent` dentro del manifiesto.
+
 El archivo `sensitivity_<n>_alternatives.xlsx` contiene `scenario_results` y `rank_stability`. El análisis compara pesos equilibrados con énfasis ambiental, económico, técnico y social. `rank_std` mide la variabilidad del puesto, mientras `top_5_rate` indica en qué proporción de escenarios una alternativa permanece entre las cinco primeras. La consola identifica como robusta la alternativa con mayor `top_5_rate`, menor `rank_std` y menor `mean_rank` en ese orden.
 
 Para comparar Jamundí y Santa Rosalía, usar la misma semilla y el mismo número de alternativas:
@@ -168,6 +170,14 @@ python run_analysis.py --case santa_rosalia --seed 1 0.5 0
 ```
 
 El runner está implementado en `synergy/runner.py`; `main_2.py` se conserva como entrada histórica.
+
+La salida de ejecución usa Rich para presentar progreso, resultados, robustez, rutas y hashes en consola. `termgraph` está disponible como dependencia opcional para gráficos de terminal adicionales, pero no es necesario para completar el análisis.
+
+Para activar el gráfico adicional de robustez:
+
+```bash
+python run_analysis.py --case santa_rosalia --termgraph
+```
 
 La validación previa también puede ejecutarse con una definición propia:
 

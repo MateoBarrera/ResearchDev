@@ -7,8 +7,8 @@ from pathlib import Path
 from typing import Iterable
 
 import pandas as pd
-from tqdm import tqdm
 
+from .console import console, pipeline_progress, show_run_header
 from .enums import ResourceEnum
 from .alternative import Alternatives
 from .evaluation.mcda import Topsis
@@ -116,6 +116,10 @@ def run_case(
     biomass_requirements = config.get("BIOMASS_REQUIREMENTS", {})
     resources_config = config["RESOURCES"]
     resource_models = {}
+    seed_values = list(seed) if seed is not None else DEFAULT_SEED
+    show_run_header(config["CASE_STUDY"], capacity, len(seed_values))
+    progress = pipeline_progress().__enter__()
+    progress_task = progress.add_task("Validación y preparación", total=4 + len(resources_config))
 
     for resource_name, resource_config in resources_config.items():
         if resource_name not in RESOURCE_CLASSES:
@@ -125,19 +129,23 @@ def run_case(
         )
         if resource_name == "biomass":
             resource_models[resource_name].evaluate(
-                capacity, biomass_requirements, show_logs=True
+                capacity, biomass_requirements, show_logs=False
             )
         else:
-            resource_models[resource_name].evaluate(capacity, show_logs=True)
+            resource_models[resource_name].evaluate(capacity, show_logs=False)
+        progress.advance(progress_task)
+        progress.update(progress_task, description=f"Recurso evaluado: {resource_name}")
 
     resources_included = {
         ResourceEnum(resource_name): True for resource_name in resource_models
     }
     alternatives = Alternatives(
         resources_included=resources_included,
-        seed=list(seed) if seed is not None else DEFAULT_SEED,
+        seed=seed_values,
     )
     alternatives_df = alternatives.result_dataframe * capacity
+    progress.advance(progress_task)
+    progress.update(progress_task, description="Alternativas generadas")
 
     for resource_name, resource_model in resource_models.items():
         generation = []
@@ -158,7 +166,8 @@ def run_case(
     with indicator_path.open("r", encoding="utf-8") as file:
         indicator_data = json.load(file)
 
-    indicators = [Indicator(**item) for item in tqdm(indicator_data, desc="Loading Indicators")]
+    console.print(f"[cyan]Cargando {len(indicator_data)} indicadores...[/cyan]")
+    indicators = [Indicator(**item) for item in indicator_data]
     type_indicators = [int(item.type_indicator == "benefit") for item in indicators]
     weight_scenarios = pd.read_excel(weights_path, header=None)
     if (
@@ -171,6 +180,8 @@ def run_case(
     indicator_model = Indicators(indicators=indicators)
     indicator_model.evaluate_indicators(alternatives_df.to_dict(orient="records"))
     indicator_dimensions = [indicator.dimension.value for indicator in indicators]
+    progress.advance(progress_task)
+    progress.update(progress_task, description="Indicadores evaluados")
 
     case_study = config["CASE_STUDY"]
     output_dir = root / "case_studies" / case_study / "results"
@@ -191,6 +202,8 @@ def run_case(
         case_study=case_study,
         type_indicators=type_indicators,
     )
+    progress.advance(progress_task)
+    progress.update(progress_task, description="Ranking TOPSIS calculado")
 
     sensitivity_detail, sensitivity_summary = analyze_weight_sensitivity(
         indicator_model.evaluation,
@@ -203,12 +216,24 @@ def run_case(
         sensitivity_detail.to_excel(writer, sheet_name="scenario_results", index=False)
         sensitivity_summary.to_excel(writer, sheet_name="rank_stability")
     robust_alternative = select_robust_alternative(sensitivity_summary)
+    robust_index = int(robust_alternative["alternative"])
+    resource_mix = {
+        resource_name: float(alternatives_df.loc[robust_index, resource_name])
+        for resource_name in resource_models
+    }
+    robust_alternative["resource_mix_kw"] = resource_mix
+    robust_alternative["resource_mix_percent"] = {
+        resource_name: value / capacity * 100
+        for resource_name, value in resource_mix.items()
+    }
+    progress.advance(progress_task)
+    progress.update(progress_task, description="Sensibilidad calculada")
 
     manifest = {
         "created_at_utc": datetime.now(timezone.utc).isoformat(),
         "case_study": case_study,
         "installed_capacity": capacity,
-        "seed": list(seed) if seed is not None else DEFAULT_SEED,
+        "seed": seed_values,
         "alternative_count": alternative_count,
         "indicator_count": len(indicators),
         "topsis_scenario_count": topsis_scenario_count,
@@ -230,6 +255,7 @@ def run_case(
         json.dumps(manifest, indent=2, ensure_ascii=False) + "\n",
         encoding="utf-8",
     )
+    progress.stop()
 
     return {
         "case_study": case_study,
