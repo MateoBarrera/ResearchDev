@@ -23,14 +23,18 @@ console = Console()
 
 
 @contextmanager
-def pipeline_progress() -> Iterator[Progress]:
+def pipeline_progress(spinner_name: str = "dots12") -> Iterator[Progress]:
     progress = Progress(
-        SpinnerColumn(),
+        SpinnerColumn(spinner_name=spinner_name, style="bold cyan"),
         TextColumn("[progress.description]{task.description}"),
         BarColumn(),
         TextColumn("{task.completed}/{task.total}"),
         TimeElapsedColumn(),
         console=console,
+        auto_refresh=True,
+        refresh_per_second=10,
+        transient=False,
+        disable=False,
     )
     with progress:
         yield progress
@@ -46,6 +50,15 @@ def show_run_header(case_study: str, capacity: float, seed_size: int) -> None:
         (str(seed_size), "white"),
     )
     console.print(Panel(body, title="ResearchDev / MCDA", border_style="cyan"))
+    if console.is_terminal:
+        console.print(
+            "[dim]Animación Rich activa. Cambia el estilo con --spinner.[/dim]"
+        )
+    else:
+        console.print(
+            "[dim]Salida no interactiva: se muestran etapas persistentes "
+            "en lugar de animación.[/dim]"
+        )
 
 
 def show_summary(result: dict) -> None:

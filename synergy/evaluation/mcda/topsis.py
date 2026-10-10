@@ -1,7 +1,6 @@
 import numpy as np
 import pandas as pd  # pylint: disable=import-error
 import matplotlib.pyplot as plt
-from tqdm import tqdm
 from .criteria import Criteria  # pylint: disable=import-error
 
 # from evaluation.save import save
@@ -178,6 +177,7 @@ def topsis(
     alt_info=None,
     case_study="default",
     type_indicators=None,
+    progress_callback=None,
 ):
     """
     The topsis function takes in a matrix of alternatives and criteria,
@@ -197,7 +197,6 @@ def topsis(
     :return: A dataframe with the similarity index
     :doc-author: Trelent
     """
-    print("\n:: TOPSIS ::")
     if type_indicators is None:
         type_indicators = TYPE_INDICATORS
     if len(type_indicators) != alternative_matrix.shape[1]:
@@ -230,7 +229,10 @@ def topsis(
     ranking_result = {}
     CI_result = {}
     index = 1
-    for criteria_array in tqdm(topsis_criteria_aggregation, "Scenario Evaluation"):
+    scenario_count = len(topsis_criteria_aggregation)
+    for scenario_index, criteria_array in enumerate(topsis_criteria_aggregation, start=1):
+        if progress_callback:
+            progress_callback(scenario_index, scenario_count)
         if len(criteria_array) != alternative_matrix.shape[1]:
             raise ValueError(
                 "The number of weights must match the alternative matrix"

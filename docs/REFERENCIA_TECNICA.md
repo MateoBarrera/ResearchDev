@@ -173,6 +173,21 @@ El runner está implementado en `synergy/runner.py`; `main_2.py` se conserva com
 
 La salida de ejecución usa Rich para presentar progreso, resultados, robustez, rutas y hashes en consola. `termgraph` está disponible como dependencia opcional para gráficos de terminal adicionales, pero no es necesario para completar el análisis.
 
+El spinner se puede elegir desde el CLI:
+
+```bash
+python run_analysis.py --case jamundi --spinner dots12
+python run_analysis.py --case jamundi --spinner bouncingBar
+python run_analysis.py --case jamundi --spinner clock
+python run_analysis.py --case jamundi --spinner moon
+python run_analysis.py --case jamundi --spinner arc
+python run_analysis.py --case jamundi --spinner pipe
+```
+
+Rich solo anima cuando detecta una TTY interactiva. En logs, CI o capturas no interactivas se muestran las etapas persistentes `▶`, para que el proceso siga siendo informativo.
+
+Todas las etapas usan una única instancia de progreso Rich. La tarea principal cubre preparación, recursos, alternativas, indicadores y exportación; la tarea secundaria de TOPSIS avanza escenario por escenario. En terminales sin soporte para secuencias ANSI, los mensajes persistentes `▶` funcionan como fallback y permiten seguir el proceso en logs.
+
 Para activar el gráfico adicional de robustez:
 
 ```bash

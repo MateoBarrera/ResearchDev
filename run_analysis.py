@@ -19,6 +19,7 @@ CASES = {
     "jamundi": "case_studies/jamundi/definition.yaml",
     "santa_rosalia": "case_studies/santa_rosalia/definition.yaml",
 }
+SPINNERS = ["dots", "dots12", "bouncingBar", "clock", "moon", "arc", "pipe"]
 
 
 def main() -> None:
@@ -49,6 +50,12 @@ def main() -> None:
         action="store_true",
         help="Show the robustness profile with termgraph after the run",
     )
+    parser.add_argument(
+        "--spinner",
+        choices=SPINNERS,
+        default="dots12",
+        help="Rich spinner animation used while processing",
+    )
     args = parser.parse_args()
 
     if bool(args.case) == bool(args.config):
@@ -59,7 +66,11 @@ def main() -> None:
         validate_case(config_path, Path.cwd())
         console.print(f"[bold green]Configuración válida:[/bold green] {config_path}")
         return
-    result = run_case(config_path=config_path, seed=args.seed)
+    result = run_case(
+        config_path=config_path,
+        seed=args.seed,
+        spinner_name=args.spinner,
+    )
     show_summary(result)
     show_resource_mix(result)
     show_rank_chart(result)

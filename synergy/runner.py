@@ -107,6 +107,7 @@ def run_case(
     config_path: str | Path,
     seed: Iterable[float] | None = None,
     project_root: str | Path | None = None,
+    spinner_name: str = "dots12",
 ) -> dict:
     """Run one configured case and return its generated data and metadata."""
     root = Path(project_root).resolve() if project_root else _project_root()
@@ -118,10 +119,22 @@ def run_case(
     resource_models = {}
     seed_values = list(seed) if seed is not None else DEFAULT_SEED
     show_run_header(config["CASE_STUDY"], capacity, len(seed_values))
-    progress = pipeline_progress().__enter__()
+    progress_context = pipeline_progress(spinner_name=spinner_name)
+    progress = progress_context.__enter__()
     progress_task = progress.add_task("Validación y preparación", total=4 + len(resources_config))
+    console.print("[bold cyan]▶ Configuración validada; preparando recursos[/bold cyan]")
+    progress.update(progress_task, description="Configuración validada; preparando recursos")
+    progress.refresh()
 
     for resource_name, resource_config in resources_config.items():
+        console.print(
+            f"[cyan]▶ Cargando y evaluando recurso:[/cyan] {resource_name}"
+        )
+        progress.update(
+            progress_task,
+            description=f"Cargando y evaluando recurso: {resource_name}",
+        )
+        progress.refresh()
         if resource_name not in RESOURCE_CLASSES:
             raise ValueError(f"Unsupported resource: {resource_name}")
         resource_models[resource_name] = _load_resource(
@@ -144,8 +157,13 @@ def run_case(
         seed=seed_values,
     )
     alternatives_df = alternatives.result_dataframe * capacity
+    console.print(
+        f"[cyan]▶ Alternativas generadas:[/cyan] {len(alternatives_df):,}; "
+        "evaluando generaciones"
+    )
     progress.advance(progress_task)
-    progress.update(progress_task, description="Alternativas generadas")
+    progress.update(progress_task, description="Alternativas generadas; evaluando generaciones")
+    progress.refresh()
 
     for resource_name, resource_model in resource_models.items():
         generation = []
@@ -166,7 +184,12 @@ def run_case(
     with indicator_path.open("r", encoding="utf-8") as file:
         indicator_data = json.load(file)
 
-    console.print(f"[cyan]Cargando {len(indicator_data)} indicadores...[/cyan]")
+    console.print(f"[cyan]▶ Cargando indicadores:[/cyan] {len(indicator_data)}")
+    progress.update(
+        progress_task,
+        description=f"Cargando {len(indicator_data)} indicadores",
+    )
+    progress.refresh()
     indicators = [Indicator(**item) for item in indicator_data]
     type_indicators = [int(item.type_indicator == "benefit") for item in indicators]
     weight_scenarios = pd.read_excel(weights_path, header=None)
@@ -180,8 +203,11 @@ def run_case(
     indicator_model = Indicators(indicators=indicators)
     indicator_model.evaluate_indicators(alternatives_df.to_dict(orient="records"))
     indicator_dimensions = [indicator.dimension.value for indicator in indicators]
+    console.print("[cyan]▶ Indicadores evaluados; calculando ranking TOPSIS[/cyan]")
+    topsis_task = progress.add_task("TOPSIS: preparando escenarios", total=topsis_scenario_count)
     progress.advance(progress_task)
-    progress.update(progress_task, description="Indicadores evaluados")
+    progress.update(progress_task, description="Indicadores evaluados; calculando TOPSIS")
+    progress.refresh()
 
     case_study = config["CASE_STUDY"]
     output_dir = root / "case_studies" / case_study / "results"
@@ -201,9 +227,21 @@ def run_case(
         save_as=ranking_name,
         case_study=case_study,
         type_indicators=type_indicators,
+        progress_callback=lambda completed, total: (
+            progress.update(
+                topsis_task,
+                description=f"TOPSIS: escenario {completed}/{total}",
+                completed=completed,
+            ),
+            progress.refresh(),
+        ),
     )
+    console.print("[cyan]▶ Ranking TOPSIS calculado; analizando sensibilidad[/cyan]")
+    progress.update(progress_task, description="Analizando sensibilidad de pesos")
+    progress.refresh()
     progress.advance(progress_task)
-    progress.update(progress_task, description="Ranking TOPSIS calculado")
+    progress.update(progress_task, description="Ranking TOPSIS calculado; analizando sensibilidad")
+    progress.refresh()
 
     sensitivity_detail, sensitivity_summary = analyze_weight_sensitivity(
         indicator_model.evaluation,
@@ -216,6 +254,9 @@ def run_case(
         sensitivity_detail.to_excel(writer, sheet_name="scenario_results", index=False)
         sensitivity_summary.to_excel(writer, sheet_name="rank_stability")
     robust_alternative = select_robust_alternative(sensitivity_summary)
+    console.print("[cyan]▶ Sensibilidad calculada; exportando resultados[/cyan]")
+    progress.update(progress_task, description="Exportando Excel y manifiesto")
+    progress.refresh()
     robust_index = int(robust_alternative["alternative"])
     resource_mix = {
         resource_name: float(alternatives_df.loc[robust_index, resource_name])
@@ -227,7 +268,8 @@ def run_case(
         for resource_name, value in resource_mix.items()
     }
     progress.advance(progress_task)
-    progress.update(progress_task, description="Sensibilidad calculada")
+    progress.update(progress_task, description="Sensibilidad calculada; exportando resultados")
+    progress.refresh()
 
     manifest = {
         "created_at_utc": datetime.now(timezone.utc).isoformat(),
@@ -255,7 +297,7 @@ def run_case(
         json.dumps(manifest, indent=2, ensure_ascii=False) + "\n",
         encoding="utf-8",
     )
-    progress.stop()
+    progress_context.__exit__(None, None, None)
 
     return {
         "case_study": case_study,

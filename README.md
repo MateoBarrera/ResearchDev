@@ -93,6 +93,18 @@ python run_analysis.py --case santa_rosalia --validate
 
 La ejecución usa una consola Rich con panel inicial, progreso por etapas, resumen tabular, perfil de la alternativa robusta, artefactos generados y hashes de reproducibilidad. `termgraph` queda instalado como herramienta opcional para visualizaciones de series o reportes de terminal posteriores; el pipeline no depende de que se invoque manualmente.
 
+El spinner predeterminado es `dots12`. Se puede cambiar por otros estilos de Rich:
+
+```bash
+python run_analysis.py --case jamundi --spinner bouncingBar
+python run_analysis.py --case jamundi --spinner clock
+python run_analysis.py --case jamundi --spinner moon
+python run_analysis.py --case jamundi --spinner arc
+python run_analysis.py --case jamundi --spinner pipe
+```
+
+Las animaciones requieren una terminal interactiva compatible con ANSI. Al redirigir la salida a un archivo, VS Code capturarla sin TTY o ejecutar en CI, Rich desactiva la animación y se conservan los mensajes persistentes `▶`.
+
 Para mostrar además un gráfico de barras de `termgraph` al final:
 
 ```bash
