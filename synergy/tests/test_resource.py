@@ -1,4 +1,6 @@
 from os import name
+import pytest
+
 from synergy.resources.resource import ResourceVariable, Hydro, Solar, Wind, Biomass
 from synergy.resources.enums import ResourceType, Unit, Frequency, VariableEnum
 
@@ -9,8 +11,8 @@ def test_resource_variable():
         name=VariableEnum.SOLAR_IRRADIANCE,
         type_resource=ResourceType.SOLAR,
         source="TestSource",
-        unit=Unit.KW,
-        frequency=Frequency.HOURLY,
+        unit=Unit.IRRADIANCE,
+        frequency=Frequency.DAILY,
         data={"2021-01-01": 100.0, "2021-01-02": 200.0},
     )
 
@@ -18,8 +20,8 @@ def test_resource_variable():
     assert resource.name == VariableEnum.SOLAR_IRRADIANCE
     assert resource.type_resource == ResourceType.SOLAR
     assert resource.source == "TestSource"
-    assert resource.unit == Unit.KW
-    assert resource.frequency == Frequency.HOURLY
+    assert resource.unit == Unit.IRRADIANCE
+    assert resource.frequency == Frequency.DAILY
     assert resource.data == {"2021-01-01": 100.0, "2021-01-02": 200.0}
 
 
@@ -56,6 +58,28 @@ def test_resource_variable_from_csv_2():
     assert resource.source == "NASA"
     assert resource.unit == Unit.METER_PER_SECOND
     assert resource.frequency == Frequency.DAILY
+
+
+def test_solar_resource_rejects_incompatible_unit_and_frequency():
+    with pytest.raises(ValueError, match="Invalid unit"):
+        ResourceVariable(
+            name=VariableEnum.SOLAR_IRRADIANCE,
+            type_resource=ResourceType.SOLAR,
+            source="TestSource",
+            unit=Unit.KW,
+            frequency=Frequency.DAILY,
+            data={"2021-01-01": 100.0},
+        )
+
+    with pytest.raises(ValueError, match="Invalid frequency"):
+        ResourceVariable(
+            name=VariableEnum.SOLAR_IRRADIANCE,
+            type_resource=ResourceType.SOLAR,
+            source="TestSource",
+            unit=Unit.IRRADIANCE,
+            frequency=Frequency.HOURLY,
+            data={"2021-01-01": 100.0},
+        )
 
 
 """ def test_resource_biomass_from_excel():

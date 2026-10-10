@@ -1,17 +1,24 @@
 from __future__ import annotations
 
 import json
+import hashlib
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Iterable
 
-import yaml
+import pandas as pd
 from tqdm import tqdm
 
 from .enums import ResourceEnum
 from .alternative import Alternatives
 from .evaluation.mcda import Topsis
+from .evaluation.mcda.sensitivity import (
+    analyze_weight_sensitivity,
+    select_robust_alternative,
+)
 from .indicator import Indicator, Indicators
 from .resources import Biomass, Hydro, ResourceVariable, Solar, Wind
+from .validation import load_case_config, resolve_path, validate_case_config
 
 DEFAULT_SEED = [
     1.0,
@@ -49,30 +56,40 @@ RESOURCE_CLASSES = {
     "biomass": Biomass,
 }
 
+HASHED_CODE_FILES = (
+    "synergy/runner.py",
+    "synergy/validation.py",
+    "synergy/alternative.py",
+    "synergy/indicator.py",
+    "synergy/evaluation/mcda/topsis.py",
+    "synergy/resources/resource.py",
+)
+
 
 def _project_root() -> Path:
     return Path(__file__).resolve().parents[1]
 
 
-def _resolve_path(path: str | Path, project_root: Path) -> Path:
-    candidate = Path(path)
-    if not candidate.is_absolute():
-        candidate = project_root / candidate
-    return candidate
+def _sha256_file(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as file:
+        for chunk in iter(lambda: file.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
+
+
+def _code_hash(project_root: Path) -> str:
+    digest = hashlib.sha256()
+    for relative_path in HASHED_CODE_FILES:
+        path = project_root / relative_path
+        digest.update(relative_path.encode("utf-8"))
+        digest.update(path.read_bytes())
+    return digest.hexdigest()
 
 
 def _load_config(config_path: str | Path, project_root: Path) -> dict:
-    path = _resolve_path(config_path, project_root)
-    if not path.is_file():
-        raise FileNotFoundError(f"Case configuration not found: {path}")
-    with path.open("r", encoding="utf-8") as file:
-        config = yaml.safe_load(file)
-    if not isinstance(config, dict):
-        raise ValueError("Case configuration must contain a mapping")
-    for required_key in ("CASE_STUDY", "INSTALLED_CAPACITY", "RESOURCES"):
-        if required_key not in config:
-            raise ValueError(f"Missing configuration key: {required_key}")
-    return config
+    config = load_case_config(config_path, project_root)
+    return validate_case_config(config, project_root)
 
 
 def _load_resource(resource_name: str, resource_config: dict, capacity: float):
@@ -94,6 +111,7 @@ def run_case(
     """Run one configured case and return its generated data and metadata."""
     root = Path(project_root).resolve() if project_root else _project_root()
     config = _load_config(config_path, root)
+    config_path = resolve_path(config_path, root)
     capacity = config["INSTALLED_CAPACITY"]
     biomass_requirements = config.get("BIOMASS_REQUIREMENTS", {})
     resources_config = config["RESOURCES"]
@@ -135,14 +153,24 @@ def run_case(
         alternatives_df[f"{resource_name}_generation"] = generation
 
     indicator_path = config.get("INDICATORS", "synergy/indicators_data.json")
-    indicator_path = _resolve_path(indicator_path, root)
+    indicator_path = resolve_path(indicator_path, root)
+    weights_path = root / "synergy/evaluation/mcda/weight_criteria.xlsx"
     with indicator_path.open("r", encoding="utf-8") as file:
         indicator_data = json.load(file)
 
     indicators = [Indicator(**item) for item in tqdm(indicator_data, desc="Loading Indicators")]
     type_indicators = [int(item.type_indicator == "benefit") for item in indicators]
+    weight_scenarios = pd.read_excel(weights_path, header=None)
+    if (
+        len(weight_scenarios) > 1
+        and list(weight_scenarios.iloc[0])
+        == list(range(weight_scenarios.shape[1]))
+    ):
+        weight_scenarios = weight_scenarios.iloc[1:]
+    topsis_scenario_count = len(weight_scenarios)
     indicator_model = Indicators(indicators=indicators)
     indicator_model.evaluate_indicators(alternatives_df.to_dict(orient="records"))
+    indicator_dimensions = [indicator.dimension.value for indicator in indicators]
 
     case_study = config["CASE_STUDY"]
     output_dir = root / "case_studies" / case_study / "results"
@@ -164,10 +192,52 @@ def run_case(
         type_indicators=type_indicators,
     )
 
+    sensitivity_detail, sensitivity_summary = analyze_weight_sensitivity(
+        indicator_model.evaluation,
+        indicator_dimensions,
+        type_indicators,
+        alternatives=alternatives_df.index.astype(str),
+    )
+    sensitivity_path = output_dir / f"sensitivity_{alternative_count}_alternatives.xlsx"
+    with pd.ExcelWriter(sensitivity_path, engine="openpyxl") as writer:
+        sensitivity_detail.to_excel(writer, sheet_name="scenario_results", index=False)
+        sensitivity_summary.to_excel(writer, sheet_name="rank_stability")
+    robust_alternative = select_robust_alternative(sensitivity_summary)
+
+    manifest = {
+        "created_at_utc": datetime.now(timezone.utc).isoformat(),
+        "case_study": case_study,
+        "installed_capacity": capacity,
+        "seed": list(seed) if seed is not None else DEFAULT_SEED,
+        "alternative_count": alternative_count,
+        "indicator_count": len(indicators),
+        "topsis_scenario_count": topsis_scenario_count,
+        "robust_alternative": robust_alternative,
+        "hashes": {
+            "config_sha256": _sha256_file(config_path),
+            "indicators_sha256": _sha256_file(indicator_path),
+            "weights_sha256": _sha256_file(weights_path),
+            "code_sha256": _code_hash(root),
+        },
+        "outputs": {
+            "alternatives": str(alternatives_path),
+            "ranking": str(output_dir / f"{ranking_name}.xlsx"),
+            "sensitivity": str(sensitivity_path),
+        },
+    }
+    manifest_path = output_dir / "run_manifest.json"
+    manifest_path.write_text(
+        json.dumps(manifest, indent=2, ensure_ascii=False) + "\n",
+        encoding="utf-8",
+    )
+
     return {
         "case_study": case_study,
         "alternative_count": alternative_count,
         "alternatives_path": alternatives_path,
         "ranking_path": output_dir / f"{ranking_name}.xlsx",
+        "manifest_path": manifest_path,
+        "manifest": manifest,
+        "sensitivity_path": sensitivity_path,
         "dataframe": alternatives_df,
     }

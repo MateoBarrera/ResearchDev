@@ -212,7 +212,14 @@ def topsis(
     if test == -1:
         topsis_criteria_aggregation = pd.read_excel(
             load_path_evaluation(test)
-        ).values.tolist()
+        , header=None)
+        if (
+            len(topsis_criteria_aggregation) > 1
+            and list(topsis_criteria_aggregation.iloc[0])
+            == list(range(topsis_criteria_aggregation.shape[1]))
+        ):
+            topsis_criteria_aggregation = topsis_criteria_aggregation.iloc[1:]
+        topsis_criteria_aggregation = topsis_criteria_aggregation.values.tolist()
         # print("\n:: Criteria Matrix ::")
         # print(topsis_criteria_aggregation.to_markdown(floatfmt=".4f"))
         # raise Exception("Test mode not implemented")

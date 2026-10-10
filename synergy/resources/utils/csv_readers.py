@@ -61,7 +61,7 @@ def __transform_frequency(frequency):
     elif frequency == "Mensual":
         return "Monthly"
     elif frequency == "Anual":
-        return "annual"
+        return "Yearly"
     else:
         raise ValueError("Invalid frequency value")
 
@@ -102,20 +102,18 @@ def process_csv_nasa(file):
 
 def process_csv_ideam(file):
     # Leer el archivo CSV en un DataFrame
-    resource = {}
-    if file["IdParametro"].unique() == "CAUDAL":
+    if not (file["IdParametro"] == "CAUDAL").all():
+        raise ValueError("IDEAM CSV must contain only CAUDAL records")
 
-        resource = {
-            "name": "Flow river",
-            "type_resource": "Hydro",
-            "source": "IDEAM",
-            "unit": "m³/s",
-            "frequency": __transform_frequency(file.iloc[0]["Frecuencia"]),
-        }
-        file = file.filter(items=["Fecha", "Valor"]).set_index("Fecha")
-        resource["data"] = file["Valor"].to_dict()
-
-    # Devolver los datos en el formato necesario
+    resource = {
+        "name": "Flow river",
+        "type_resource": "Hydro",
+        "source": "IDEAM",
+        "unit": "m³/s",
+        "frequency": __transform_frequency(file.iloc[0]["Frecuencia"]),
+    }
+    file = file.filter(items=["Fecha", "Valor"]).set_index("Fecha")
+    resource["data"] = file["Valor"].to_dict()
     return resource
 
 
@@ -130,9 +128,7 @@ def process_data_ideam(file):
     }
     file = file.filter(items=["Fecha", "Valor"]).set_index("Fecha")
     resource["data"] = file["Valor"].to_dict()
-    # Devolver los datos en el formato necesario
     return resource
-
 
 def process_biomass_data(file, data):
     resource = {

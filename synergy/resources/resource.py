@@ -3,7 +3,7 @@ import numpy as np
 import pandas as pd
 import statistics
 import math
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, Field, model_validator, validator
 from typing import Dict, List
 from .enums import ResourceType, Unit, Frequency, VariableEnum
 from .utils.csv_readers import load_csv, load_excel, load_data, format_values
@@ -58,6 +58,37 @@ class ResourceVariable(BaseModel):
             elif file_extension == "data":
                 data = load_data(file_name)
         super().__init__(**data)
+
+    @model_validator(mode="after")
+    def validate_contract(self):
+        expected_contracts = {
+            (VariableEnum.SOLAR_IRRADIANCE, ResourceType.SOLAR): {
+                "units": {Unit.IRRADIANCE},
+                "frequencies": {Frequency.DAILY},
+            },
+            (VariableEnum.WIND_SPEED, ResourceType.WIND): {
+                "units": {Unit.METER_PER_SECOND},
+                "frequencies": {Frequency.DAILY},
+            },
+            (VariableEnum.FLOW_RIVER, ResourceType.HYDRO): {
+                "units": {Unit.CUBIT_METERS_PER_SECOND},
+                "frequencies": {Frequency.DAILY, Frequency.MONTHLY},
+            },
+        }
+        contract = expected_contracts.get((self.name, self.type_resource))
+        if contract and self.unit not in contract["units"]:
+            raise ValueError(
+                f"Invalid unit {self.unit} for {self.name}: "
+                f"expected {contract['units']}"
+            )
+        if contract and self.frequency not in contract["frequencies"]:
+            raise ValueError(
+                f"Invalid frequency {self.frequency} for {self.name}: "
+                f"expected {contract['frequencies']}"
+            )
+        if self.type_resource == ResourceType.BIOMASS and self.frequency != Frequency.YEARLY:
+            raise ValueError("Biomass variables must have yearly frequency")
+        return self
 
 class Resource(BaseModel):
     """

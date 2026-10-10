@@ -92,6 +92,7 @@ Las rutas declaradas en los YAML son relativas a la raíz del repositorio. No ej
 El runner recomendado permite seleccionar el caso sin editar código:
 
 ```bash
+python run_analysis.py --case santa_rosalia --validate
 python run_analysis.py --case santa_rosalia
 ```
 
@@ -110,15 +111,40 @@ Los archivos principales de salida son:
 ```text
 case_studies/santa_rosalia/results/alternatives_<n>.xlsx
 case_studies/santa_rosalia/results/ranking_of_<n>_alternatives.xlsx
+case_studies/santa_rosalia/results/sensitivity_<n>_alternatives.xlsx
+case_studies/santa_rosalia/results/run_manifest.json
 ```
 
 El valor `<n>` depende del número de combinaciones válidas generadas.
+
+La consola presenta cuatro hashes SHA-256:
+
+| Hash                | Contenido identificado              |
+| ------------------- | ----------------------------------- |
+| `config_sha256`     | Definición YAML del caso            |
+| `indicators_sha256` | Catálogo JSON de indicadores        |
+| `weights_sha256`    | Libro de pesos TOPSIS               |
+| `code_sha256`       | Módulos centrales del runner y MCDA |
+
+El archivo `run_manifest.json` guarda estos hashes, la semilla, capacidad instalada, número de alternativas, número de escenarios y rutas de salida. Así se puede comparar dos ejecuciones y saber si cambió una entrada o el código antes de interpretar un cambio en el ranking.
+
+El archivo `sensitivity_<n>_alternatives.xlsx` contiene `scenario_results` y `rank_stability`. El análisis compara pesos equilibrados con énfasis ambiental, económico, técnico y social. `rank_std` mide la variabilidad del puesto, mientras `top_5_rate` indica en qué proporción de escenarios una alternativa permanece entre las cinco primeras. La consola identifica como robusta la alternativa con mayor `top_5_rate`, menor `rank_std` y menor `mean_rank` en ese orden.
+
+Para comparar Jamundí y Santa Rosalía, usar la misma semilla y el mismo número de alternativas:
+
+```bash
+python run_analysis.py --case jamundi --seed 1 0.5 0
+python run_analysis.py --case santa_rosalia --seed 1 0.5 0
+```
+
+Una prueba controlada con esa semilla genera 10 alternativas por caso. No debe compararse directamente con ejecuciones históricas de 256, 1.680, 3.276 o 21.999 alternativas.
 
 ## 7. Ejecutar Jamundí
 
 Jamundí se ejecuta con el mismo runner:
 
 ```bash
+python run_analysis.py --case jamundi --validate
 python run_analysis.py --case jamundi
 ```
 
@@ -143,6 +169,14 @@ python run_analysis.py --case santa_rosalia --seed 1 0.5 0
 
 El runner está implementado en `synergy/runner.py`; `main_2.py` se conserva como entrada histórica.
 
+La validación previa también puede ejecutarse con una definición propia:
+
+```bash
+python run_analysis.py --config ruta/al/caso.yaml --validate
+```
+
+El comando verifica las rutas de datos, que las series no estén vacías y no contengan valores negativos o no finitos, los recursos declarados, el catálogo de indicadores, sus metadatos, las dimensiones, los tipos de criterio, la unicidad de identificadores y nombres, las variables presentes en cada fórmula y los pesos TOPSIS.
+
 ## 8. Interpretar la configuración
 
 Cada definición YAML contiene:
@@ -154,6 +188,19 @@ Cada definición YAML contiene:
 - `INDICATORS`: ruta opcional a un catálogo de indicadores específico.
 
 El catálogo de indicadores JSON define, para cada indicador, su dimensión, unidad, fuente, tipo (`cost` o `benefit`) y fórmula. Las variables de las fórmulas deben existir en las alternativas, por ejemplo `solar_generation`, `wind_generation`, `hydro_generation` y `biomass_generation`.
+
+### Contrato de unidades y frecuencias
+
+El motor valida el contrato de cada variable antes de evaluarla:
+
+| Tecnología | Variable             | Unidad esperada     | Frecuencia aceptada |
+| ---------- | -------------------- | ------------------- | ------------------- |
+| Solar      | Irradiancia          | `kW-hr/m^2/day`     | `Daily`             |
+| Eólica     | Velocidad del viento | `m/s`               | `Daily`             |
+| Hidráulica | Caudal               | `m³/s`              | `Daily` o `Monthly` |
+| Biomasa    | Cultivos y ganado    | `ha` o `population` | `Yearly`            |
+
+Las estimaciones convierten las series a promedios mensuales, usan 365 días por año y 8.760 horas por año, y expresan la capacidad instalada en kW. Estas conversiones son supuestos del modelo, no conversiones generales del sistema de unidades; cualquier cambio debe quedar registrado en los parámetros y en las fuentes del caso.
 
 ## 9. Ejecutar la API opcional
 
@@ -229,3 +276,15 @@ Revisar el YAML, el catálogo de indicadores, los valores `seed` de `main_2.py` 
 - [ ] Indicadores y pesos disponibles.
 - [ ] Carpeta `case_studies/<caso>/results/` disponible.
 - [ ] Archivos `alternatives_<n>.xlsx` y `ranking_of_<n>_alternatives.xlsx` revisados.
+
+## 13. Comparar casos
+
+Después de ejecutar ambos casos con el mismo seed, generar el resumen:
+
+```bash
+python compare_cases.py --output case_comparison.xlsx
+```
+
+El reporte incluye la alternativa robusta, su permanencia en el top 5, puesto medio, desviación del ranking y contexto de ejecución. La comparación solo es válida si coinciden seed, número de alternativas, escenarios TOPSIS, pesos y hash del código. Las corridas históricas con diferente número de alternativas deben analizarse por separado.
+
+La interpretación de la corrida completa está documentada en [docs/COMPARACION_CASOS.md](COMPARACION_CASOS.md).

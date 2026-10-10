@@ -20,6 +20,7 @@ El objetivo de la propuesta es responder una pregunta de planificación: **dada 
 - [Notebook y exploración](#notebook-y-exploración)
 - [Pruebas](#pruebas)
 - [Salidas](#salidas)
+- [Comparación de casos](docs/COMPARACION_CASOS.md)
 - [Limitaciones y trabajo pendiente](#limitaciones-y-trabajo-pendiente)
 
 ## Propuesta y alcance
@@ -87,6 +88,7 @@ Es el punto de entrada histórico del flujo de investigación. Para nuevas ejecu
 python run_analysis.py --case santa_rosalia
 python run_analysis.py --case jamundi
 python run_analysis.py --config case_studies/santa_rosalia/definition.yaml --seed 1 0.5 0
+python run_analysis.py --case santa_rosalia --validate
 ```
 
 El runner reutilizable está en `synergy/runner.py`. `main_2.py` se conserva como referencia compatible con ejecuciones anteriores.
@@ -161,6 +163,15 @@ También se puede pasar una definición YAML propia:
 python run_analysis.py --config case_studies/santa_rosalia/definition.yaml
 ```
 
+Antes de una corrida completa se puede validar el caso sin generar resultados:
+
+```bash
+python run_analysis.py --case santa_rosalia --validate
+python run_analysis.py --case jamundi --validate
+```
+
+La validación comprueba claves YAML, recursos soportados, archivos de entrada y que las series no estén vacías ni contengan valores negativos o no finitos. También valida el catálogo de indicadores, dimensiones, tipos `cost`/`benefit`, metadatos, datos numéricos, identificadores/nombres únicos y variables usadas por las fórmulas. Finalmente verifica que los pesos TOPSIS sean finitos y no negativos.
+
 El seed de participaciones puede sustituirse desde la línea de comandos:
 
 ```bash
@@ -176,7 +187,15 @@ El proceso genera, entre otros, los siguientes archivos:
 ```text
 case_studies/<caso>/results/alternatives_<n>.xlsx
 case_studies/<caso>/results/ranking_of_<n>_alternatives.xlsx
+case_studies/<caso>/results/sensitivity_<n>_alternatives.xlsx
+case_studies/<caso>/results/run_manifest.json
 ```
+
+Al finalizar, la consola muestra un resumen reproducible con hashes SHA-256 de la configuración YAML, el catálogo de indicadores, los pesos TOPSIS y el código del motor. El manifiesto JSON conserva esos hashes junto con la semilla, el número de alternativas, el número de escenarios y las rutas de salida. Estos hashes identifican las entradas y la lógica de cálculo; no son un hash del contenido numérico del ranking.
+
+El archivo de sensibilidad compara un escenario equilibrado con escenarios que asignan mayor peso a cada dimensión. La hoja `rank_stability` incluye `mean_rank`, `rank_std`, `best_rank`, `worst_rank` y `top_5_rate`; una desviación estándar baja indica mayor estabilidad frente a cambios de pesos.
+
+La consola identifica una alternativa robusta priorizando `top_5_rate`, después `rank_std` y finalmente `mean_rank`. Esta selección es una recomendación de estabilidad, no sustituye la revisión de los indicadores ni demuestra superioridad científica por sí sola.
 
 `<n>` depende de la cantidad de recursos activos y de los valores contenidos en `seed`. No se debe asumir que siempre habrá 256, 1.680 o 3.126 alternativas.
 
@@ -272,6 +291,14 @@ Las salidas de investigación se distribuyen en tres grupos:
 - `analysis_result/`: notebook y archivos derivados de exploración.
 
 Los archivos Excel de resultados pueden contener diferentes números de alternativas porque corresponden a ejecuciones con distintos `seed`, casos o configuraciones. No deben confundirse con una única corrida canónica.
+
+Para comparar la robustez de dos casos a partir de sus manifiestos:
+
+```bash
+python compare_cases.py --output case_comparison.xlsx
+```
+
+El comparador solo marca las corridas como comparables cuando coinciden la semilla, el número de alternativas, los escenarios TOPSIS, el libro de pesos y el hash del código. Si alguno difiere, conserva los resultados separados y marca `comparable_run` como `False`.
 
 ## Limitaciones y trabajo pendiente
 
