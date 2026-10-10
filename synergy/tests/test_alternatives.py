@@ -1,3 +1,6 @@
+import pytest
+import numpy as np
+
 from synergy.alternative import Alternatives, ResourceEnum
 
 
@@ -19,7 +22,7 @@ def test_generate_alternatives():
     # Generar las alternativas
     alternatives_df = alternatives.result_dataframe
     # Verificar que el DataFrame de alternativas tiene la forma correcta
-    assert alternatives_df.shape == (23, 4)
+    assert alternatives_df.shape == (6, 4)
 
     # Verificar que las columnas del DataFrame son correctas
     assert list(alternatives_df.columns) == [
@@ -33,4 +36,22 @@ def test_generate_alternatives():
     assert all(alternatives_df.sum(axis=1) == 1)
 
     # Verificar que todos los valores del DataFrame están en la semilla
-    assert all(value in alternatives.seed for value in alternatives_df.values.flatten())
+    assert all(
+        value == 0 or value in alternatives.seed
+        for value in alternatives_df.values.flatten()
+    )
+
+
+def test_generate_alternatives_accepts_integer_seed_values():
+    alternatives = Alternatives(
+        resources_included={ResourceEnum.SOLAR: True, ResourceEnum.WIND: True},
+        seed=[1, 0],
+    )
+
+    assert len(alternatives.result_dataframe) == 2
+    assert np.allclose(alternatives.result_dataframe.sum(axis=1), 1.0)
+
+
+def test_generate_alternatives_rejects_empty_resources():
+    with pytest.raises(ValueError, match="At least one resource"):
+        Alternatives(resources_included={}, seed=[1.0, 0.0])

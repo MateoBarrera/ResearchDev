@@ -1,6 +1,6 @@
 CASE_STUDY: "santa_rosalia"
 INDICATORS: "case_studies/santa_rosalia/indicators.json"
-INSTALLED_CAPACITY: 500
+INSTALLED_CAPACITY: 1000
 BIOMASS_REQUIREMENTS:
   harvest:
     corn: 20

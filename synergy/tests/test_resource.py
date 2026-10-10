@@ -116,3 +116,19 @@ def test_biomass_resource():
     result = biomass.evaluate(1000, biomass_sources)
     assert biomass.name == "Biomass Jamundí"
     assert result == 14.00149755214819, "Should be 14.001497"
+
+
+def test_biomass_evaluation_does_not_mutate_requirements():
+    biomass_sources = {
+        "harvest": {"sugar cane": 1000},
+        "livestock": {"cattle": 10000},
+    }
+    original_sources = {
+        source: values.copy() for source, values in biomass_sources.items()
+    }
+    biomass = Biomass(name="Biomass Jamundí")
+    biomass.add_variables(file_name="case_studies/jamundi/data/biomass.xlsx")
+
+    biomass.evaluate(1000, biomass_sources)
+
+    assert biomass_sources == original_sources

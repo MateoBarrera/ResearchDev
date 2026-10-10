@@ -35,7 +35,7 @@
 	},
 	{
 		"id": 103,
-		"name": "Consumo de agua",
+		"name": "Consumo de agua - Blue Water consumption - Life Cycle Water Consumption (LCWC)",
 		"dimension": "environmental",
 		"description": "Se considera para cuantificar el volumen de agua consumida por la tecnología para producir un solo MW de electricidad durante toda su cadena de producción, teniendo en cuenta los procesos secundarios, como la refrigeración y el uso de agua para construcción de los componentes.",
 		"source": "Water use of electricity technologies: A global meta-analysis; Yi Jina",
@@ -157,17 +157,17 @@
 		"name": "Generación de empleos",
 		"dimension": "social",
 		"description": "Este indicador mide la cantidad de empleos directos e indirectos generados durante la puesta en marcha, operación y mantenimiento por cada MW instalado de las centrales o sistemas energéticos, considerando el futuro inducido en las oportunidades laborales.",
-		"source": "",
+		"source": "Eric W. Stein, 2013",
 		"data": {
-			"solar": 13,
-			"wind": 3,
-			"hydro": 5.5,
-			"biomass": 15
+			"solar": 0.87,
+			"wind": 0.17,
+			"hydro": 0.27,
+			"biomass": 0.21
 		},
-		"year": "2020",
-		"unit": "%",
+		"year": "2013",
+		"unit": "job-years/GW",
 		"type_indicator": "benefit",
-		"formula": "(solar * 13 + wind * 3 + hydro * 5.5 + biomass * 15)"
+		"formula": "(solar_generation * 0.87 + wind_generation * 0.17 + hydro_generation * 0.27 + biomass_generation * 0.21)*1000"
 	},
 	{
 		"id": 402,
@@ -178,20 +178,20 @@
 		"data": {
 			"solar": 1,
 			"wind": 1,
-			"hydro": 0.25,
-			"biomass": 0.5
+			"hydro": 0.5,
+			"biomass": 0.25
 		},
 		"year": "2020",
 		"unit": "qualitative",
 		"type_indicator": "benefit",
-		"formula": "(solar * 1 + wind * 1 + hydro * 0.25 + biomass * 0.5)/(solar + wind + hydro + biomass)"
+		"formula": "(solar * 1 + wind * 0.5 + hydro * 0.5 + biomass * 0.25)/(solar + wind + hydro + biomass)"
 	},
 	{
 		"id": 403,
 		"name": "Daño a la salud humana",
 		"dimension": "social",
 		"description": "Mide el impacto de las tecnologías en la vida “saludable” humana (AVAD) por kWh de energía producida, las emisiones que se consideraron para este factor son la formación de material particulado, el agotamiento de la capa de ozono, la toxicidad humana, las radiaciones ionizantes y la oxidación fotoquímica.",
-		"source": "",
+		"source": "Bhandari et al. 2021",
 		"data": {
 			"solar": 5,
 			"wind": 40,

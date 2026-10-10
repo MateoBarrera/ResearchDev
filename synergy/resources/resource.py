@@ -3,7 +3,7 @@ import numpy as np
 import pandas as pd
 import statistics
 import math
-from pydantic import BaseModel, validator
+from pydantic import BaseModel, Field, validator
 from typing import Dict, List
 from .enums import ResourceType, Unit, Frequency, VariableEnum
 from .utils.csv_readers import load_csv, load_excel, load_data, format_values
@@ -33,7 +33,7 @@ class ResourceVariable(BaseModel):
     source: str = None
     unit: Unit = None
     frequency: Frequency = None
-    data: Dict[str, float] = {}
+    data: Dict[str, float] = Field(default_factory=dict)
 
     def __init__(
         self,
@@ -58,18 +58,6 @@ class ResourceVariable(BaseModel):
             elif file_extension == "data":
                 data = load_data(file_name)
         super().__init__(**data)
-
-    @property
-    def data(self):
-        """
-        Returns the data associated with the resource.
-
-        Returns:
-            Dict[str, float]: The data associated with the resource.
-
-        """
-        return self.data
-
 
 class Resource(BaseModel):
     """
@@ -102,7 +90,7 @@ class Resource(BaseModel):
 
     name: str
     type_resource: ResourceType
-    variables: List[ResourceVariable] = []
+    variables: List[ResourceVariable] = Field(default_factory=list)
 
     _show_logs: bool = False
 
@@ -584,11 +572,14 @@ class Biomass(Resource):
             if source == "harvest":
                 for key, value in raw_biomass[source].items():
                     variable = [var for var in self.variables if var.name.value == key]
-                    if value > variable[0].data["harvested_area"]:
+                    if not variable:
+                        raise ValueError(f"Biomass variable not found: {key}")
+                    available = variable[0].data["harvested_area"]
+                    usable_value = min(value, available)
+                    if value > available and self._show_logs:
                         print(f"Not enough biomass available for {key} demand")
-                        raw_biomass[source][key] = variable[0].data["harvested_area"]
                     useful_biomass[key] = (
-                        raw_biomass[source][key]
+                        usable_value
                         * variable[0].data["yield_per_ha"]
                         * self.useful_biomass_factor[key]
                         * self._collection_efficiency
@@ -598,11 +589,14 @@ class Biomass(Resource):
             if source == "livestock":
                 for key, value in raw_biomass[source].items():
                     variable = [var for var in self.variables if var.name.value == key]
-                    if value > variable[0].data["population"]:
+                    if not variable:
+                        raise ValueError(f"Biomass variable not found: {key}")
+                    available = variable[0].data["population"]
+                    usable_value = min(value, available)
+                    if value > available and self._show_logs:
                         print(f"Not enough biomass available for {key} demand")
-                        raw_biomass[source][key] = variable[0].data["livestock"]
                     useful_biomass[key] = (
-                        raw_biomass[source][key]
+                        usable_value
                         * self.useful_biomass_factor[key]
                         * self._collection_efficiency
                         * self.biogas_factors[key]
@@ -621,9 +615,10 @@ class Biomass(Resource):
         )
 
         if optimal_q_design > (df["total biogas per day"][0] / 24):
-            logging.warning(
-                f"Biogas demand is higher than the daily rate production \n demand {optimal_q_design:.2f}; available {df['total biogas per day'][0] / 24:.2f} "
-            )
+            if self._show_logs:
+                logging.warning(
+                    f"Biogas demand is higher than the daily rate production \n demand {optimal_q_design:.2f}; available {df['total biogas per day'][0] / 24:.2f} "
+                )
             q_design = df["total biogas per day"][0] / 24
         else:
             q_design = optimal_q_design

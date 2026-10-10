@@ -2,7 +2,7 @@ import yaml
 import json
 from datetime import datetime
 from tqdm import tqdm
-from synergy import alternative
+from synergy.enums import ResourceEnum
 from synergy.resources import Solar, Wind, Hydro, Biomass, ResourceVariable
 from synergy.alternative import Alternatives
 from synergy.indicator import Indicators, Indicator
@@ -17,6 +17,7 @@ CASE_STUDY = config["CASE_STUDY"]
 INSTALLED_CAPACITY = config["INSTALLED_CAPACITY"]
 BIOMASS_REQUIREMENTS = config["BIOMASS_REQUIREMENTS"]
 RESOURCES_INCLUDE = {}
+RESOURCE_MODELS = {}
 
 RESOURCES_INCLUDE["solar"] = "solar" in config["RESOURCES"]
 if RESOURCES_INCLUDE["solar"]:
@@ -24,6 +25,7 @@ if RESOURCES_INCLUDE["solar"]:
     solar = Solar(name=solar_config["name"])
     solar.add_variable(ResourceVariable(file_name=solar_config["file_name"]))
     solar.evaluate(installed_capacity=INSTALLED_CAPACITY, show_logs=True)
+    RESOURCE_MODELS["solar"] = solar
 
 RESOURCES_INCLUDE["wind"] = "wind" in config["RESOURCES"]
 if RESOURCES_INCLUDE["wind"]:
@@ -31,6 +33,7 @@ if RESOURCES_INCLUDE["wind"]:
     wind = Wind(name=wind_config["name"])
     wind.add_variable(ResourceVariable(file_name=wind_config["file_name"]))
     wind.evaluate(installed_capacity=INSTALLED_CAPACITY, show_logs=True)
+    RESOURCE_MODELS["wind"] = wind
 
 RESOURCES_INCLUDE["hydro"] = "hydro" in config["RESOURCES"]
 if RESOURCES_INCLUDE["hydro"]:
@@ -38,6 +41,7 @@ if RESOURCES_INCLUDE["hydro"]:
     hydro = Hydro(name=hydro_config["name"])
     hydro.add_variable(ResourceVariable(file_name=hydro_config["file_name"]))
     hydro.evaluate(installed_capacity=INSTALLED_CAPACITY, show_logs=True)
+    RESOURCE_MODELS["hydro"] = hydro
 
 RESOURCES_INCLUDE["biomass"] = "biomass" in config["RESOURCES"]
 if RESOURCES_INCLUDE["biomass"]:
@@ -45,10 +49,14 @@ if RESOURCES_INCLUDE["biomass"]:
     biomass = Biomass(name=biomass_config["name"])
     biomass.add_variables(file_name=biomass_config["file_name"])
     biomass.evaluate(INSTALLED_CAPACITY, BIOMASS_REQUIREMENTS, show_logs=True)
+    RESOURCE_MODELS["biomass"] = biomass
 
 
 alternatives = Alternatives(
-    resources_included=RESOURCES_INCLUDE,
+    resources_included={
+        ResourceEnum(resource): included
+        for resource, included in RESOURCES_INCLUDE.items()
+    },
     seed=[
         1.0,
         0.96,
@@ -90,22 +98,16 @@ alternatives = Alternatives(
 alternatives_df = alternatives.result_dataframe * INSTALLED_CAPACITY
 save_as_a = alternatives_df.shape[0]
 
-# ISSUE: The array initialization is not dynamic
-solar_array = []
-hydro_array = []
-wind_array = []
-biomass_array = []
-
-for index, alternative in alternatives_df.iterrows():
-    solar_array.append(solar.evaluate(alternative["solar"]))
-    hydro_array.append(hydro.evaluate(alternative["hydro"]))
-    wind_array.append(wind.evaluate(alternative["wind"]))
-    biomass_array.append(biomass.evaluate(alternative["biomass"], BIOMASS_REQUIREMENTS))
-
-alternatives_df["solar_generation"] = solar_array
-alternatives_df["hydro_generation"] = hydro_array
-alternatives_df["wind_generation"] = wind_array
-alternatives_df["biomass_generation"] = biomass_array
+for resource_name, resource_model in RESOURCE_MODELS.items():
+    generation = []
+    for _, alternative_row in alternatives_df.iterrows():
+        capacity = alternative_row[resource_name]
+        if resource_name == "biomass":
+            value = resource_model.evaluate(capacity, BIOMASS_REQUIREMENTS)
+        else:
+            value = resource_model.evaluate(capacity)
+        generation.append(value)
+    alternatives_df[f"{resource_name}_generation"] = generation
 
 # print(alternatives_df)
 if "INDICATORS" in config:
@@ -117,6 +119,9 @@ with open(indicators, "r") as f:
     data = json.load(f)
 
 indicators_list = [Indicator(**item) for item in tqdm(data, desc="Loading Indicators")]
+type_indicators = [
+    int(indicator.type_indicator == "benefit") for indicator in indicators_list
+]
 
 my_indicators = Indicators(indicators=indicators_list)
 
@@ -146,4 +151,5 @@ Topsis(
     alt_info=alternatives_df,
     save_as=f"ranking_of_{save_as_a}_alternatives",
     case_study=CASE_STUDY,
+    type_indicators=type_indicators,
 )

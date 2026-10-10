@@ -144,12 +144,11 @@ class Criteria:
             np.array: 1xn array with weighting values
         """
         if self.fuzzy_treatment:
-            criteria = self.fuzzy_weight_criteria
+            criteria = self.fuzzy_weight_criteria.copy()
         else:
-            criteria = self.weight_criteria
-        weights = criteria["weights"]
+            criteria = self.weight_criteria.copy()
+        weights = criteria.pop("weights")
         array_criteria = list()
-        del criteria["weights"]
         for index, item in enumerate(criteria):
             array_criteria += list(weights[index] * np.array(criteria[item]))
         return np.array(array_criteria)

@@ -76,6 +76,11 @@ target/
 
 # Jupyter Notebook
 .ipynb_checkpoints
+analysis_result/df_full.xlsx
+
+# Generated case-study and article results
+case_studies/*/results/*.xlsx
+Repo/Articulo1/output/*.xlsx
 
 # IPython
 profile_default/

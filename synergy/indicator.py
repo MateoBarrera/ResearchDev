@@ -1,6 +1,6 @@
 import pandas as pd
-from pydantic import BaseModel
-from typing import Dict, List
+from pydantic import BaseModel, Field
+from typing import Dict, List, Literal
 from .enums import ResourceEnum, DimensionEnum
 import numexpr as ne
 
@@ -41,7 +41,7 @@ class Indicator(BaseModel):
     data: Dict[ResourceEnum, float]
     year: str
     unit: str
-    type_indicator: str
+    type_indicator: Literal["cost", "benefit"]
     formula: str
 
     def __init__(self, **data):
@@ -58,7 +58,7 @@ class Indicator(BaseModel):
         :rtype: float
         :raises: None
         """
-        return ne.evaluate(self.formula, local_dict=resources)
+        return float(ne.evaluate(self.formula, local_dict=resources))
 
 
 class Evaluation(BaseModel):
@@ -126,7 +126,7 @@ class Indicators(BaseModel):
 
     indicators: List[Indicator]
     single_evaluation: Evaluation = None
-    evaluation_matrix: Dict[str, Evaluation] = {}
+    evaluation_matrix: Dict[str, Evaluation] = Field(default_factory=dict)
     multiple_alternatives: bool = False
 
     def __init__(self, **data):
@@ -151,25 +151,27 @@ class Indicators(BaseModel):
 
         :raises ValueError: If the resources are not a dictionary or a list.
         """
-        if resources.__class__ == list:
+        self._evaluation_result = None
+        self.evaluation_matrix.clear()
+        self.single_evaluation = None
+
+        if isinstance(resources, list):
             self.multiple_alternatives = True
             for index, resource in enumerate(resources):
                 evaluation_values = {}
                 for indicator in self.indicators:
-                    evaluation_values[indicator.name] = format(
-                        indicator.calculate_for_resource(resource), f"{5}g"
+                    evaluation_values[indicator.name] = indicator.calculate_for_resource(
+                        resource
                     )
                     self.evaluation_matrix[str(index)] = evaluation_values
 
-        elif resources.__class__ == dict:
+        elif isinstance(resources, dict):
             self.multiple_alternatives = False
             evaluation_values = {}
             for indicator in self.indicators:
-                evaluation_values[indicator.name] = format(
-                    indicator.calculate_for_resource(resources), f"{5}g"
+                evaluation_values[indicator.name] = indicator.calculate_for_resource(
+                    resources
                 )
-            print("200" * 10)
-            print(evaluation_values)
             self.single_evaluation = Evaluation(evaluation=evaluation_values)
         else:
             raise ValueError("Resources must be a dictionary or a list")

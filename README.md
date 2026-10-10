@@ -14,6 +14,7 @@ El objetivo de la propuesta es responder una pregunta de planificación: **dada 
 - [Estructura del repositorio](#estructura-del-repositorio)
 - [Instalación](#instalación)
 - [Ejecutar un caso de estudio](#ejecutar-un-caso-de-estudio)
+- [Referencia técnica de instalación y ejecución](docs/REFERENCIA_TECNICA.md)
 - [Configurar datos e indicadores](#configurar-datos-e-indicadores)
 - [API Django](#api-django)
 - [Notebook y exploración](#notebook-y-exploración)
@@ -80,7 +81,15 @@ El flujo moderno de `main_2.py` es:
 
 ### Aplicación de investigación: `main_2.py`
 
-Es el punto de entrada recomendado para reproducir un caso de estudio. Está configurado actualmente para `santa_rosalia`; la ruta del YAML debe cambiarse para ejecutar otro caso.
+Es el punto de entrada histórico del flujo de investigación. Para nuevas ejecuciones se recomienda usar `run_analysis.py`, que permite seleccionar el caso sin editar código.
+
+```bash
+python run_analysis.py --case santa_rosalia
+python run_analysis.py --case jamundi
+python run_analysis.py --config case_studies/santa_rosalia/definition.yaml --seed 1 0.5 0
+```
+
+El runner reutilizable está en `synergy/runner.py`. `main_2.py` se conserva como referencia compatible con ejecuciones anteriores.
 
 ### API: `resource_synergy/`
 
@@ -114,6 +123,8 @@ Aplicación Django + Django Ninja que persiste sitios, variables de recurso, fue
 
 Se recomienda Python 3.10 o superior y un entorno virtual.
 
+La guía detallada para preparar el entorno, validar dependencias, ejecutar Jamundí y Santa Rosalía, levantar la API y resolver errores frecuentes está en [docs/REFERENCIA_TECNICA.md](docs/REFERENCIA_TECNICA.md). Esta sección resume el camino rápido.
+
 ```bash
 git clone <URL_DEL_REPOSITORIO>
 cd ResearchDev
@@ -134,21 +145,29 @@ python -m pip install pywaffle
 Desde la raíz del repositorio:
 
 ```bash
-python main_2.py
+python run_analysis.py --case santa_rosalia
 ```
 
-El script usa por defecto:
+Los casos incluidos son:
 
 ```text
-case_studies/santa_rosalia/definition.yaml
+python run_analysis.py --case santa_rosalia
+python run_analysis.py --case jamundi
 ```
 
-Para cambiar de caso, modificar la ruta de configuración al inicio de `main_2.py`, por ejemplo:
+También se puede pasar una definición YAML propia:
 
-```python
-with open("case_studies/jamundi/definition.yaml", "r") as file:
-		config = yaml.safe_load(file)
+```bash
+python run_analysis.py --config case_studies/santa_rosalia/definition.yaml
 ```
+
+El seed de participaciones puede sustituirse desde la línea de comandos:
+
+```bash
+python run_analysis.py --case santa_rosalia --seed 1 0.5 0
+```
+
+Esto es útil para una corrida rápida o una prueba controlada.
 
 La definición debe proporcionar `CASE_STUDY`, `INSTALLED_CAPACITY`, `BIOMASS_REQUIREMENTS` y `RESOURCES`. Los recursos soportados son `solar`, `wind`, `hydro` y `biomass`. Cada bloque de recurso incluye un nombre y la ruta del archivo de entrada; el caso hidráulico puede incluir además la estación como metadato.
 

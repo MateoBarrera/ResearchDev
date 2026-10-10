@@ -115,12 +115,14 @@ def ahp(
 
 
 def __topsis_normalize(alternatives):
-    alternatives_norm = np.zeros(alternatives.shape)
-    mean_array = np.sqrt(np.sum(alternatives**2, 1))
-    np.seterr(all="ignore")
-    alternatives_norm = alternatives / np.transpose([mean_array])
-    np.seterr()
-    return alternatives_norm
+    norm = np.sqrt(np.sum(alternatives**2, axis=1))
+    normalized = np.zeros_like(alternatives, dtype=float)
+    nonzero_norm = norm != 0
+    normalized[nonzero_norm] = (
+        alternatives[nonzero_norm]
+        / np.transpose([norm[nonzero_norm]])
+    )
+    return normalized
 
 
 def __topsis_print_norm(alternatives, info):
@@ -131,6 +133,14 @@ def __topsis_print_norm(alternatives, info):
 
 
 def __topsis_ideal_solution(alternatives_array, type_indicator=TYPE_INDICATORS):
+    if alternatives_array.shape[0] != len(type_indicator):
+        raise ValueError(
+            "The number of criterion types must match the alternatives matrix"
+        )
+
+    if not all(item in (0, 1) for item in type_indicator):
+        raise ValueError("Criterion types must be 0 (cost) or 1 (benefit)")
+
     ideal_positive = np.zeros(len(type_indicator))
     ideal_negative = np.zeros(len(type_indicator))
 
@@ -167,6 +177,7 @@ def topsis(
     save_as=None,
     alt_info=None,
     case_study="default",
+    type_indicators=None,
 ):
     """
     The topsis function takes in a matrix of alternatives and criteria,
@@ -187,6 +198,12 @@ def topsis(
     :doc-author: Trelent
     """
     print("\n:: TOPSIS ::")
+    if type_indicators is None:
+        type_indicators = TYPE_INDICATORS
+    if len(type_indicators) != alternative_matrix.shape[1]:
+        raise ValueError(
+            "The number of criterion types must match the alternative matrix"
+        )
     topsis_criteria_obj = Criteria()
     topsis_criteria_obj.show_result_matrix = show_criteria_matrix
     topsis_criteria_obj.show_all = show_expert_matrix
@@ -207,6 +224,12 @@ def topsis(
     CI_result = {}
     index = 1
     for criteria_array in tqdm(topsis_criteria_aggregation, "Scenario Evaluation"):
+        if len(criteria_array) != alternative_matrix.shape[1]:
+            raise ValueError(
+                "The number of weights must match the alternative matrix"
+            )
+        if not np.all(np.isfinite(criteria_array)):
+            raise ValueError("Criterion weights must be finite")
         topsis_alternatives_array = __topsis_normalize(
             np.transpose(alternative_matrix.to_numpy())
         )
@@ -222,7 +245,7 @@ def topsis(
         )
 
         ideal_positive, ideal_negative = __topsis_ideal_solution(
-            topsis_weighted_alternatives
+            topsis_weighted_alternatives, type_indicator=type_indicators
         )
 
         positive_distance, negative_distance, similarity_index = __topsis_distance(

@@ -1,6 +1,5 @@
 from itertools import product
 from typing import List, Dict, Any
-from ast import literal_eval
 import numpy as np
 import pandas as pd
 from pydantic import BaseModel, validator
@@ -34,6 +33,10 @@ class Alternatives(BaseModel):
         """
         if not all(isinstance(item, ResourceEnum) for item in v.keys()):
             raise ValueError("All resources must be of type ResourceEnum")
+        if not v:
+            raise ValueError("At least one resource must be configured")
+        if not all(isinstance(item, bool) for item in v.values()):
+            raise ValueError("Resource inclusion values must be boolean")
         return v
 
     @validator("seed")
@@ -49,8 +52,12 @@ class Alternatives(BaseModel):
         :return: A list of floats
         :doc-author: Trelent
         """
-        if not all(isinstance(item, float) for item in v):
-            raise ValueError("All seed values must be of type float")
+        if not v:
+            raise ValueError("At least one seed value must be configured")
+        if not all(isinstance(item, (float, int)) for item in v):
+            raise ValueError("All seed values must be numeric")
+        if not all(np.isfinite(item) for item in v):
+            raise ValueError("Seed values must be finite")
         return v
 
     def __init__(self, resources_included=None, seed=None):
@@ -72,11 +79,12 @@ class Alternatives(BaseModel):
         scenario_matrix = weight_scenarios * y_resources
         scenario_array = list()
         for items in scenario_matrix:
-            if sum(items) == 1:
-                scenario_array.append(str(list(items)))
+            if np.isclose(sum(items), 1.0):
+                scenario_array.append(list(items))
 
-        scenario_array = list(dict.fromkeys(scenario_array))
-        scenario_array = [literal_eval(i) for i in scenario_array]
+        scenario_array = list(
+            dict.fromkeys(tuple(items) for items in scenario_array)
+        )
 
         alternatives_df = pd.DataFrame(
             columns=[resource.value for resource in self.resources_included],
